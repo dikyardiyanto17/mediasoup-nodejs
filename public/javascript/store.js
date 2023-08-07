@@ -1,5 +1,6 @@
 let state = {
-    localStream: null
+    localStream: null,
+    room: ''
 }
 
 const setLocalStream = (localStream) => {
@@ -9,8 +10,15 @@ const setLocalStream = (localStream) => {
     }
 }
 
+const setRoom = (room) => {
+    state = {
+        ...state,
+        room
+    }
+}
+
 const getState = () => {
     return state
 }
 
-module.exports = {setLocalStream, getState}
+module.exports = { setLocalStream, getState, setRoom }

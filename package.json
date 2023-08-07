@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "watchify public/javascript/room.js -o public/msbundle.js -v"
+    "watch": "watchify public/javascript/room.js -o public/msbundle.js -v",
+    "watch2": "watchify public/javascript/home.js -o public/homebundle.js -v",
+    "watch3": "watchify public/javascript/lobby.js -o public/lobbybundle.js -v"
   },
   "keywords": [],
   "author": "",

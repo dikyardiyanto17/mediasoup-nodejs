@@ -22218,7 +22218,8 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
 })
 },{"./store":84,"mediasoup-client":62,"socket.io-client":74}],84:[function(require,module,exports){
 let state = {
-    localStream: null
+    localStream: null,
+    room: ''
 }
 
 const setLocalStream = (localStream) => {
@@ -22228,9 +22229,16 @@ const setLocalStream = (localStream) => {
     }
 }
 
+const setRoom = (room) => {
+    state = {
+        ...state,
+        room
+    }
+}
+
 const getState = () => {
     return state
 }
 
-module.exports = {setLocalStream, getState}
+module.exports = { setLocalStream, getState, setRoom }
 },{}]},{},[83]);
