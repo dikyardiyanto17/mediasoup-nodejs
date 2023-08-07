@@ -5,12 +5,108 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="assets/css/rooom.css" /> 
+    <!-- <link rel="stylesheet" href="assets/css/room.css" type="text/css" /> -->
     <title>ROOM</title>
+    <style>
+        button {
+            margin: 2;
+        }
+
+        tr {
+            vertical-align: top;
+        }
+
+        video {
+            width: 360px;
+            background-color: black;
+            padding: 10;
+            margin: 1px 1px;
+        }
+
+        .main-table {
+            width: 100%;
+        }
+
+        .local-column {
+            width: 246px;
+        }
+
+        .remote-column {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        #local-video {
+            width: 240;
+        }
+
+        .remote-video {
+            float: left;
+        }
+
+        .video-wrap {
+            margin: 3;
+            /* padding: 5; */
+            /* background-color: papayawhip; */
+            display: flex;
+            justify-content: center;
+        }
+
+        @media only screen and (max-width: 1060px) {
+            .video {
+                width: 300px;
+            }
+        }
+
+        @media only screen and (max-width: 940px) {
+            .video {
+                width: 240px;
+            }
+        }
+    </style>
 </head>
-Hello World
+
 <body>
 
+    <body>
+        <div id="video">
+            <table class="main-table">
+                <tbody>
+                    <tr>
+                        <td class="local-column">
+                            <video id="local-video" autoplay class="video" muted></video>
+                        </td>
+                        <td class="remote-column">
+                            <div id="video-container"></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+    <!-- <script type="module">
+        console.log("- Media Soup",mediasoupClient)
+    </script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/mediasoup-client@3.6.98/lib/index.min.js"></script> -->
+    <script src="/bundle.js"></script>
+    <!-- <script src="/javascript/mediasoup.js"></script> -->
+    <!-- <script src="/javascript/ms.js"></script> -->
+    <!-- <script type="module">
+        import mediasoupClient from 'https://cdn.jsdelivr.net/npm/mediasoup-client@3.6.98/+esm'
+        console.log(mediasoupClient)
+    </script> -->
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/javascript/room.js" type="module"></script>
 </body>
 
 </html>
