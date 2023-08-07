@@ -338,4 +338,38 @@ io.on('connection', async socket => {
     })
 })
 
-app.use('/', router)
+const createWebRtcTransport = async (router) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const webRtcTransport_options = {
+                listenIps: [
+                    {
+                        ip: '127.0.0.1',
+                    }
+                ],
+                enableUdp: true,
+                enableTcp: true,
+                preferUdp: true,
+            }
+
+            let transport = await router.createWebRtcTransport(webRtcTransport_options)
+
+            transport.on('dtlsstatechange', dtlsState => {
+                if (dtlsState === 'closed') {
+                    transport.close()
+                }
+            })
+
+            transport.on('close', () => {
+                console.log('transport closed')
+            })
+
+            resolve(transport)
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+app.use(router)

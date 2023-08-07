@@ -1,23 +1,30 @@
-// const mediasoupClient = require('/bundle.js')
 // import * as mediasoupClient from '/bundle.js'
 
-// import * as store from "./store.js";
+const mediasoupClient = require("mediasoup-client")
+const io = require('socket.io-client')
+const socket = io('/')
+const store = require('./store')
+// Get the current pathname from the URL
+const url = window.location.pathname;
+
+// Remove the leading slash to get just the parameter
+const roomName = url.slice(1); // Removes the first character (slash)
+
+
 let localVideo = document.getElementById('local-video')
 let videoContainer = document.getElementById('video-container')
-const socket = io('/')
-// const init = () => {
-//     const socket = io('/')
-//     getMyStream()
-// }
+const init = () => {
+    getMyStream()
+}
 
-// const getMyStream = () => {
-//     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
-//         localVideo.srcObject = stream;
-//         store.setLocalStream(stream)
-//     })
-// }
-// init()
-console.log(detectDevice())
+const getMyStream = () => {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
+        localVideo.srcObject = stream;
+        store.setLocalStream(stream)
+    })
+}
+init()
+
 
 socket.on('connection-success', ({ socketId }) => {
     console.log(socketId)
@@ -70,7 +77,6 @@ const streamSuccess = (stream) => {
 }
 
 const joinRoom = () => {
-    const roomName = window.location.href
     socket.emit('joinRoom', { roomName }, (data) => {
         console.log(`Router RTP Capabilities... ${data.rtpCapabilities}`)
         rtpCapabilities = data.rtpCapabilities
