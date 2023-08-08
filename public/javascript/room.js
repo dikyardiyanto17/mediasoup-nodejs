@@ -1,19 +1,16 @@
-// import * as mediasoupClient from '/bundle.js'
-
 const mediasoupClient = require("mediasoup-client")
 const io = require('socket.io-client')
 const socket = io('/')
 const store = require('./store')
-// Get the current pathname from the URL
 const url = window.location.pathname;
-
-// Remove the leading slash to get just the parameter
-const roomName = url.slice(1); // Removes the first character (slash)
+const parts = url.split('/');
+const roomName = parts[2];
 
 
 let localVideo = document.getElementById('local-video')
 let videoContainer = document.getElementById('video-container')
 const init = () => {
+    localStorage.setItem("room_id", roomName)
     getMyStream()
 }
 
@@ -23,6 +20,7 @@ const getMyStream = () => {
         store.setLocalStream(stream)
     })
 }
+
 init()
 
 
@@ -39,6 +37,7 @@ let audioProducer
 let videoProducer
 let consumer
 let isProducer = false
+
 
 let params = {
     encodings: [
@@ -77,7 +76,13 @@ const streamSuccess = (stream) => {
 }
 
 const joinRoom = () => {
-    socket.emit('joinRoom', { roomName }, (data) => {
+    let myUsername
+    if (!localStorage.getItem("username")) {
+        myUsername = "Unknown"
+    } else {
+        myUsername = localStorage.getItem("username")
+    }
+    socket.emit('joinRoom', { roomName, username: myUsername }, (data) => {
         console.log(`Router RTP Capabilities... ${data.rtpCapabilities}`)
         rtpCapabilities = data.rtpCapabilities
         createDevice()
@@ -112,7 +117,7 @@ const createDevice = async () => {
             routerRtpCapabilities: rtpCapabilities
         })
 
-        console.log('Device RTP Capabilities', device.rtpCapabilities)
+        console.log('- Device RTP Capabilities', device.rtpCapabilities)
 
         createSendTransport()
 
@@ -130,7 +135,7 @@ const createSendTransport = () => {
             return
         }
 
-        console.log(params)
+        console.log("- Create Send Transport : ", params)
 
         producerTransport = device.createSendTransport(params)
 
@@ -148,7 +153,7 @@ const createSendTransport = () => {
         })
 
         producerTransport.on('produce', async (parameters, callback, errback) => {
-            console.log(parameters)
+            console.log("- Create Web RTC Transport / Produce : ", parameters)
 
             try {
                 await socket.emit('transport-produce', {
@@ -203,7 +208,7 @@ const signalNewConsumerTransport = async (remoteProducerId) => {
             console.log(params.error)
             return
         }
-        console.log(`PARAMS... ${params}`)
+        console.log("- New User Entering : ", params.id)
 
         let consumerTransport
         try {
@@ -230,11 +235,13 @@ const signalNewConsumerTransport = async (remoteProducerId) => {
     })
 }
 
-socket.on('new-producer', ({ producerId }) => signalNewConsumerTransport(producerId))
+socket.on('new-producer', ({ producerId }) => {
+    signalNewConsumerTransport(producerId)
+})
 
 const getProducers = () => {
     socket.emit('getProducers', producerIds => {
-        console.log(producerIds)
+        console.log("- Get Product Id : ", producerIds)
         producerIds.forEach(signalNewConsumerTransport)
     })
 }
@@ -250,7 +257,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
             return
         }
 
-        console.log(`Consumer Params ${params}`)
+        console.log(`- Connect Receive Transport : ${params.kind}`)
         const consumer = await consumerTransport.consume({
             id: params.id,
             producerId: params.producerId,
@@ -268,14 +275,16 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
             },
         ]
 
+        console.log("- Customer Transports : ", consumerTransports, " - Remote Producer Id : ", remoteProducerId, " - My Socket Id : ", socket.id, " - Username : ", params?.username)
+
         const newElem = document.createElement('div')
         newElem.setAttribute('id', `td-${remoteProducerId}`)
 
         if (params.kind == 'audio') {
             newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
         } else {
-            newElem.setAttribute('class', 'remoteVideo')
-            newElem.innerHTML = '<video id="' + remoteProducerId + '" autoplay class="video" ></video>'
+            newElem.setAttribute('class', 'user-video-container')
+            newElem.innerHTML = '<video id="' + remoteProducerId + '" autoplay class="user-video" ></video><div class="username">' + params?.username + '</div>'
         }
 
         videoContainer.appendChild(newElem)
@@ -294,6 +303,8 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
     producerToClose.consumer.close()
 
     consumerTransports = consumerTransports.filter(transportData => transportData.producerId !== remoteProducerId)
+
+    console.log('- Remove Producer : ', remoteProducerId)
 
     videoContainer.removeChild(document.getElementById(`td-${remoteProducerId}`))
 })

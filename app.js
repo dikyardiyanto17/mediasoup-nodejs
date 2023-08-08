@@ -38,6 +38,7 @@ let peers = {}
 let transports = []
 let producers = []
 let consumers = []
+let roomsSocketCollection = {}
 
 const createWorker = async () => {
     worker = await mediasoup.createWorker({
@@ -98,14 +99,15 @@ io.on('connection', async socket => {
         const { roomName } = peers[socket.id]
         delete peers[socket.id]
 
+        roomsSocketCollection[roomName] = roomsSocketCollection[roomName].filter(item => item.socketId !== socket.id)
         rooms[roomName] = {
             router: rooms[roomName].router,
             peers: rooms[roomName].peers.filter(socketId => socketId !== socket.id)
         }
+        // console.log("- Room Participant : ", roomsSocketCollection)
     })
 
     socket.on('joinRoom', async (data, callback) => {
-        console.log("- Join Room : ", data)
         const router1 = await createRoom(data.roomName, socket.id)
 
         peers[socket.id] = {
@@ -115,10 +117,20 @@ io.on('connection', async socket => {
             producers: [],
             consumers: [],
             peerDetails: {
-                name: '',
+                name: data.username,
                 isAdmin: false,
             }
         }
+
+        if (!roomsSocketCollection[data.roomName]) {
+            const newRoom = [{ socketId: socket.id, name: data.username }]
+            roomsSocketCollection[data.roomName] = [...newRoom]
+        } else {
+            const newUser = { socketId: socket.id, name: data.username }
+            roomsSocketCollection[data.roomName] = [...roomsSocketCollection[data.roomName], newUser]
+        }
+
+        // console.log("- Room Participant : ", roomsSocketCollection)
 
         const rtpCapabilities = router1.rtpCapabilities
 
@@ -132,11 +144,11 @@ io.on('connection', async socket => {
             router1 = rooms[roomName].router
             peers = rooms[roomName].peers || []
         } else {
+            if (!worker) {
+                worker = createWorker()
+            }
             router1 = await worker.createRouter({ mediaCodecs, })
         }
-
-        console.log("- ROOM : ", rooms)
-        console.log(`Router ID: ${router1.id}`, peers.length)
 
         rooms[roomName] = {
             router: router1,
@@ -233,7 +245,7 @@ io.on('connection', async socket => {
         producers.forEach(producerData => {
             if (producerData.socketId !== socketId && producerData.roomName === roomName) {
                 const producerSocket = peers[producerData.socketId].socket
-                producerSocket.emit('new-producer', { producerId: id })
+                producerSocket.emit('new-producer', { producerId: id, socketId })
             }
         })
     }
@@ -265,6 +277,18 @@ io.on('connection', async socket => {
             producer.close()
         })
 
+        roomsSocketCollection[roomName].map(data => {
+            if(data.socketId == socket.id && kind == 'video'){
+                if (!data.producerId){
+                    data.producerId = producer.id
+                }
+            }
+            return data
+        })
+        // let updatingRoom = roomsSocketCollection[roomName].find(data => data.socketId == socket.id)
+        // console.log('- My Socket Id : ', socket.id, " - Producer Id : ", producer.id, " - Updated : ", updatingRoom)
+
+
         callback({
             id: producer.id,
             producersExist: producers.length > 1 ? true : false
@@ -279,6 +303,8 @@ io.on('connection', async socket => {
     })
 
     socket.on('consume', async ({ rtpCapabilities, remoteProducerId, serverConsumerTransportId }, callback) => {
+        // console.log("- My Socket Id : ", socket.id, " - Peers", peers)
+        // console.log('- Room Collection : ', roomsSocketCollection)
         try {
 
             const { roomName } = peers[socket.id]
@@ -286,6 +312,11 @@ io.on('connection', async socket => {
             let consumerTransport = transports.find(transportData => (
                 transportData.consumer && transportData.transport.id == serverConsumerTransportId
             )).transport
+
+            const userData = transports.find(transportData => transportData.consumer && transportData.transport.id == serverConsumerTransportId)
+            // console.log("- User Data : ", userData.transport)
+            // console.log("- getProducerById() : ", userData.transport.getProducerById(), " - getDataProducedById() : ", userData.transport.getDataProducedById())
+
 
             if (router.canConsume({
                 producerId: remoteProducerId,
@@ -312,12 +343,21 @@ io.on('connection', async socket => {
 
                 addConsumer(consumer, roomName)
 
-                const params = {
+                let params = {
                     id: consumer.id,
                     producerId: remoteProducerId,
                     kind: consumer.kind,
                     rtpParameters: consumer.rtpParameters,
                     serverConsumerId: consumer.id,
+                }
+
+                if (consumer.kind == 'video'){
+                    const { roomName } = peers[socket.id]
+                    let getUserData = roomsSocketCollection[roomName].find((data) => data.producerId == remoteProducerId)
+                    // console.log("- Get User Data : ",getUserData)
+                    if (!params.username){
+                        params.username = getUserData.name
+                    }
                 }
 
                 callback({ params })
