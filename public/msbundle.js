@@ -21944,6 +21944,7 @@ let videoProducer
 let consumer
 let isProducer = false
 let producersDetails = {}
+let deviceId = 0
 
 // Params for MediaSoup
 let params = {
@@ -21976,6 +21977,7 @@ let consumingTransports = [];
 // Starting Video Local
 const streamSuccess = (stream) => {
 
+    store.setLocalStream(stream)
     localVideo.srcObject = stream
 
     audioParams = { track: stream.getAudioTracks()[0], ...audioParams };
@@ -22077,10 +22079,12 @@ const createSendTransport = () => {
             }
         })
 
+        // Connecting Send Transport
         connectSendTransport()
     })
 }
 
+// Connecting Send Transport and Producing Audio and Video Producer
 const connectSendTransport = async () => {
     audioProducer = await producerTransport.produce(audioParams);
     videoProducer = await producerTransport.produce(videoParams);
@@ -22106,17 +22110,20 @@ const connectSendTransport = async () => {
     })
 }
 
+// Signaling New Consumer Transport
 const signalNewConsumerTransport = async (remoteProducerId) => {
     if (consumingTransports.includes(remoteProducerId)) return;
     consumingTransports.push(remoteProducerId);
 
+    // Creating WebRtc Transport
     await socket.emit('createWebRtcTransport', { consumer: true }, ({ params }) => {
         if (params.error) {
             console.log(params.error)
             return
         }
-        console.log("- New User Entering : ", params.id)
+        console.log("- New User Entering With Consumer Id: ", params.id)
 
+        // Creating Receive Transport
         let consumerTransport
         try {
             consumerTransport = device.createRecvTransport(params)
@@ -22125,6 +22132,7 @@ const signalNewConsumerTransport = async (remoteProducerId) => {
             return
         }
 
+        // Connecting Consumer Transport
         consumerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
                 await socket.emit('transport-recv-connect', {
@@ -22144,24 +22152,27 @@ const signalNewConsumerTransport = async (remoteProducerId) => {
 
 // Socket Collection
 
+// Initiating When Socket is Estabilished
 socket.on('connection-success', ({ socketId }) => {
     console.log(socketId)
     getLocalStream()
 })
 
-
+// Signaling New Producer
 socket.on('new-producer', ({ producerId }) => {
     signalNewConsumerTransport(producerId)
 })
 
+// Cleaning When User Is Disconnected
 socket.on('producer-closed', ({ remoteProducerId }) => {
     const producerToClose = consumerTransports.find(transportData => transportData.producerId === remoteProducerId)
     producerToClose.consumerTransport.close()
     producerToClose.consumer.close()
 
-    for (const firstKey in producersDetails){
-        for (const secondKey in producersDetails[firstKey]){
-            if (producersDetails[firstKey][secondKey] == remoteProducerId){
+    // Creating Other Variables For other Purposes
+    for (const firstKey in producersDetails) {
+        for (const secondKey in producersDetails[firstKey]) {
+            if (producersDetails[firstKey][secondKey] == remoteProducerId) {
                 delete producersDetails[firstKey]
                 break
             }
@@ -22175,6 +22186,7 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
     videoContainer.removeChild(document.getElementById(`td-${remoteProducerId}`))
 })
 
+// Get Producers
 const getProducers = () => {
     socket.emit('getProducers', producerIds => {
         console.log("- Get Product Id : ", producerIds)
@@ -22182,6 +22194,7 @@ const getProducers = () => {
     })
 }
 
+// Connecting Receive Transport
 const connectRecvTransport = async (consumerTransport, remoteProducerId, serverConsumerTransportId) => {
     await socket.emit('consume', {
         rtpCapabilities: device.rtpCapabilities,
@@ -22215,16 +22228,16 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 
         // console.log("- Producer Socket : ", params.producerOwnerSocket, " - Producer Name : ", params.producerName, " - Kind : ", params.kind, " - Producer Id : ", params.id)
 
-        if (!producersDetails[params.producerOwnerSocket]){
+        if (!producersDetails[params.producerOwnerSocket]) {
             producersDetails[params.producerOwnerSocket] = {}
-            if (!producersDetails[params.producerOwnerSocket][params.kind]){
+            if (!producersDetails[params.producerOwnerSocket][params.kind]) {
                 producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
             }
-            if (!producersDetails[params.producerOwnerSocket].name){
+            if (!producersDetails[params.producerOwnerSocket].name) {
                 producersDetails[params.producerOwnerSocket].name = params.producerName
             }
         } else {
-            if (!producersDetails[params.producerOwnerSocket][params.kind]){
+            if (!producersDetails[params.producerOwnerSocket][params.kind]) {
                 producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
             }
         }
@@ -22240,7 +22253,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
             newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
         } else {
             newElem.setAttribute('class', 'user-video-container')
-            newElem.innerHTML = '<video id="' + remoteProducerId + '" autoplay class="user-video" ></video><div class="username">' + params?.username + '</div>'
+            newElem.innerHTML = '<img src="/assets/pictures/micOn.png" class="icons-mic" /><video id="' + remoteProducerId + '" autoplay class="user-video" ></video><div class="username">' + params?.username + '</div>'
         }
 
         videoContainer.appendChild(newElem)
@@ -22254,21 +22267,61 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 }
 
 
+// Event Listener Collection
 
+// Mic Button
 const micButton = document.getElementById("user-mic-button");
 const micImage = document.getElementById("mic-image");
 micButton.addEventListener("click", () => {
+    let stream = store.getState()
+    console.log("- Stream : ", stream.localStream.getAudioTracks()[0].enabled)
     if (micImage.src.endsWith("micOn.png")) {
+        stream.localStream.getAudioTracks()[0].enabled = false
         micImage.src = "/assets/pictures/micOff.png";
     } else {
+        stream.localStream.getAudioTracks()[0].enabled = true
         micImage.src = "/assets/pictures/micOn.png";
     }
 });
 
+// Switching Camera Button
+const switchCamera = document.getElementById('user-switch-camera-button')
+switchCamera.addEventListener("click", () => {
+    SwitchingCamera()
+})
+const SwitchingCamera = async () => {
+    let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter(
+        (device) => device.kind === "videoinput"
+    );
+
+    deviceId++
+    if (deviceId >= videoDevices?.length) deviceId = 0
+
+    let config = {
+        audio: { deviceId: { exact: localStorage.getItem("selectedAudioDevices") } },
+        video: {
+            deviceId: { exact: videoDevices[deviceId].deviceId },
+            video: { facingMode: "environment" },
+        },
+    }
+
+    let newStream = await navigator.mediaDevices.getUserMedia(config);
+    store.setLocalStream(newStream)
+    localVideo.srcObject = newStream
+
+    await videoProducer.replaceTrack({ track: newStream.getVideoTracks()[0] });
+};
+
+// Console Log Button
 const consoleLogButton = document.getElementById('console-log-button')
 consoleLogButton.addEventListener('click', () => {
-    console.log('- Consumer Tranport : ', consumingTransports)
-    socket.emit('get-peers', (consumerTransports))
+    // console.log('- Consumer Tranport : ', consumingTransports)
+    // socket.emit('get-peers', (consumerTransports))
+    // console.log("- Producer : ", producerTransport)
+    console.log("- Video Producer : ", videoProducer)
+    // producerTransport.getStats().then((data) => {
+    //     console.log(data)
+    // })
 })
 },{"./store":84,"mediasoup-client":62,"socket.io-client":74}],84:[function(require,module,exports){
 let state = {

@@ -48,7 +48,7 @@ let roomsSocketCollection = {}
 const createWorker = async () => {
     worker = await mediasoup.createWorker({
         rtcMinPort: 2000,
-        rtcMaxPort: 2020,
+        rtcMaxPort: 10000,
     })
 
     worker.on('died', error => {
