@@ -21921,33 +21921,20 @@ const mediasoupClient = require("mediasoup-client")
 const io = require('socket.io-client')
 const socket = io('/')
 const store = require('./store')
+
+// Get Room Id
 const url = window.location.pathname;
 const parts = url.split('/');
 const roomName = parts[2];
 
 
+// Local Video
 let localVideo = document.getElementById('local-video')
+
+// Video Container
 let videoContainer = document.getElementById('video-container')
-const init = () => {
-    localStorage.setItem("room_id", roomName)
-    getMyStream()
-}
 
-const getMyStream = () => {
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
-        localVideo.srcObject = stream;
-        store.setLocalStream(stream)
-    })
-}
-
-init()
-
-
-socket.on('connection-success', ({ socketId }) => {
-    console.log(socketId)
-    getLocalStream()
-})
-
+// Variable Collection
 let device
 let rtpCapabilities
 let producerTransport
@@ -21956,8 +21943,9 @@ let audioProducer
 let videoProducer
 let consumer
 let isProducer = false
+let producersDetails = {}
 
-
+// Params for MediaSoup
 let params = {
     encodings: [
         {
@@ -21985,7 +21973,9 @@ let audioParams;
 let videoParams = { params };
 let consumingTransports = [];
 
+// Starting Video Local
 const streamSuccess = (stream) => {
+
     localVideo.srcObject = stream
 
     audioParams = { track: stream.getAudioTracks()[0], ...audioParams };
@@ -21994,8 +21984,11 @@ const streamSuccess = (stream) => {
     joinRoom()
 }
 
+// Emitting Join Room and Getting RTP Capabilities From Server and Creating Media Devices
 const joinRoom = () => {
     let myUsername
+    localStorage.setItem("room_id", roomName)
+
     if (!localStorage.getItem("username")) {
         myUsername = "Unknown"
     } else {
@@ -22008,26 +22001,20 @@ const joinRoom = () => {
     })
 }
 
+// Get Local Stream
 const getLocalStream = () => {
-    navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: {
-            width: {
-                min: 640,
-                max: 1920,
-            },
-            height: {
-                min: 400,
-                max: 1080,
-            }
-        }
-    })
+    let config = {
+        video: { deviceId: { exact: localStorage.getItem('selectedVideoDevices') } },
+        audio: { deviceId: { exact: localStorage.getItem('selectedAudioDevices') } }
+    }
+    navigator.mediaDevices.getUserMedia(config)
         .then(streamSuccess)
         .catch(error => {
             console.log(error.message)
         })
 }
 
+// Creating Media Devices and load RTPCapabilities to MediaSoup Client and Create Send Transport
 const createDevice = async () => {
     try {
         device = new mediasoupClient.Device()
@@ -22047,6 +22034,7 @@ const createDevice = async () => {
     }
 }
 
+// Create Send Transport
 const createSendTransport = () => {
     socket.emit('createWebRtcTransport', { consumer: false }, ({ params }) => {
         if (params.error) {
@@ -22154,8 +22142,37 @@ const signalNewConsumerTransport = async (remoteProducerId) => {
     })
 }
 
+// Socket Collection
+
+socket.on('connection-success', ({ socketId }) => {
+    console.log(socketId)
+    getLocalStream()
+})
+
+
 socket.on('new-producer', ({ producerId }) => {
     signalNewConsumerTransport(producerId)
+})
+
+socket.on('producer-closed', ({ remoteProducerId }) => {
+    const producerToClose = consumerTransports.find(transportData => transportData.producerId === remoteProducerId)
+    producerToClose.consumerTransport.close()
+    producerToClose.consumer.close()
+
+    for (const firstKey in producersDetails){
+        for (const secondKey in producersDetails[firstKey]){
+            if (producersDetails[firstKey][secondKey] == remoteProducerId){
+                delete producersDetails[firstKey]
+                break
+            }
+        }
+    }
+
+    consumerTransports = consumerTransports.filter(transportData => transportData.producerId !== remoteProducerId)
+
+    console.log('- Remove Producer : ', remoteProducerId, " - Producer Details : ", producersDetails)
+
+    videoContainer.removeChild(document.getElementById(`td-${remoteProducerId}`))
 })
 
 const getProducers = () => {
@@ -22194,7 +22211,27 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
             },
         ]
 
-        console.log("- Customer Transports : ", consumerTransports, " - Remote Producer Id : ", remoteProducerId, " - My Socket Id : ", socket.id, " - Username : ", params?.username)
+
+
+        // console.log("- Producer Socket : ", params.producerOwnerSocket, " - Producer Name : ", params.producerName, " - Kind : ", params.kind, " - Producer Id : ", params.id)
+
+        if (!producersDetails[params.producerOwnerSocket]){
+            producersDetails[params.producerOwnerSocket] = {}
+            if (!producersDetails[params.producerOwnerSocket][params.kind]){
+                producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
+            }
+            if (!producersDetails[params.producerOwnerSocket].name){
+                producersDetails[params.producerOwnerSocket].name = params.producerName
+            }
+        } else {
+            if (!producersDetails[params.producerOwnerSocket][params.kind]){
+                producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
+            }
+        }
+
+        console.log("- Producers Details : ", producersDetails)
+
+        // console.log("- Customer Transports : ", consumerTransports, " - Remote Producer Id : ", remoteProducerId, " - My Socket Id : ", socket.id, " - Username : ", params?.username)
 
         const newElem = document.createElement('div')
         newElem.setAttribute('id', `td-${remoteProducerId}`)
@@ -22216,16 +22253,22 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
     })
 }
 
-socket.on('producer-closed', ({ remoteProducerId }) => {
-    const producerToClose = consumerTransports.find(transportData => transportData.producerId === remoteProducerId)
-    producerToClose.consumerTransport.close()
-    producerToClose.consumer.close()
 
-    consumerTransports = consumerTransports.filter(transportData => transportData.producerId !== remoteProducerId)
 
-    console.log('- Remove Producer : ', remoteProducerId)
+const micButton = document.getElementById("user-mic-button");
+const micImage = document.getElementById("mic-image");
+micButton.addEventListener("click", () => {
+    if (micImage.src.endsWith("micOn.png")) {
+        micImage.src = "/assets/pictures/micOff.png";
+    } else {
+        micImage.src = "/assets/pictures/micOn.png";
+    }
+});
 
-    videoContainer.removeChild(document.getElementById(`td-${remoteProducerId}`))
+const consoleLogButton = document.getElementById('console-log-button')
+consoleLogButton.addEventListener('click', () => {
+    console.log('- Consumer Tranport : ', consumingTransports)
+    socket.emit('get-peers', (consumerTransports))
 })
 },{"./store":84,"mediasoup-client":62,"socket.io-client":74}],84:[function(require,module,exports){
 let state = {

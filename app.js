@@ -17,6 +17,11 @@ const credentials = {
     cert: fs.readFileSync(certificatePath),
 };
 
+const options = {
+    key: fs.readFileSync("key.pem"),
+    cert: fs.readFileSync("cert.pem"),
+  };
+
 app.use(cors())
 app.set('view engine', 'ejs')
 app.use(express.static(path.join(__dirname, 'views')));
@@ -25,7 +30,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
-const httpsServer = https.createServer(credentials, app)
+const httpsServer = https.createServer(options, app)
 httpsServer.listen(port, () => {
     console.log('App On : ' + port)
 })
@@ -166,6 +171,7 @@ io.on('connection', async socket => {
 
         createWebRtcTransport(router).then(
             transport => {
+                // console.log("- Transport Id : ", transport.id, ' - My Socket Id: ', socket.id)
                 callback({
                     params: {
                         id: transport.id,
@@ -351,10 +357,25 @@ io.on('connection', async socket => {
                     serverConsumerId: consumer.id,
                 }
 
+                for (const key in peers){
+                    peers[key].producers.forEach((producer) => {
+                        if (producer == remoteProducerId){
+                            // console.log("HELLO WORLD")
+                            // console.log("- Key : ", key, " - Peers : ", peers[key].producers, " - My Socket ID : ", socket.id, " - Owner : ", peers[key].socket.id, " - Name : ", peers[key].peerDetails.name)
+                            if (!params.producerOwnerSocket){
+                                params.producerOwnerSocket = peers[key].socket.id
+                            }
+                            if (!params.producerName){
+                                params.producerName = peers[key].peerDetails.name
+                            }
+                        }
+                    })
+                }
+
                 if (consumer.kind == 'video'){
                     const { roomName } = peers[socket.id]
                     let getUserData = roomsSocketCollection[roomName].find((data) => data.producerId == remoteProducerId)
-                    // console.log("- Get User Data : ",getUserData)
+                    // console.log("- Get User Data : ", getUserData, " - Peers : ", peers)
                     if (!params.username){
                         params.username = getUserData.name
                     }
@@ -370,6 +391,10 @@ io.on('connection', async socket => {
                 }
             })
         }
+    })
+
+    socket.on('get-peers', (data) => {
+        console.log('- Peers : ', peers)
     })
 
     socket.on('consumer-resume', async ({ serverConsumerId }) => {

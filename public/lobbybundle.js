@@ -43,6 +43,7 @@ micOptions.addEventListener("click", (e) => {
             audio: { deviceId: { exact: clickedValue } },
             video: { deviceId: { exact: selectedVideoDevices } }
         }
+        localStorage.setItem("selectedAudioDevices", clickedValue)
         navigator.mediaDevices.getUserMedia(config).then((stream) => {
             localVideo.srcObject = null;
             store.setLocalStream(stream)
@@ -79,7 +80,6 @@ videoOptions.addEventListener("click", (e) => {
             audio: { deviceId: { exact: selectedAudioDevices } }
         }
 
-        console.log('- Config : ', config)
         localStorage.setItem('selectedVideoDevices', clickedValue)
         navigator.mediaDevices.getUserMedia(config).then((stream) => {
             store.setLocalStream(stream)
