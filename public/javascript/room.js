@@ -26,6 +26,8 @@ let consumer
 let isProducer = false
 let producersDetails = {}
 let deviceId = 0
+let totalUsers = 0
+let currentTemplate
 
 // Params for MediaSoup
 let params = {
@@ -239,6 +241,20 @@ socket.on('connection-success', ({ socketId }) => {
     getLocalStream()
 })
 
+// Mic Configuration
+socket.on('mic-config', (data) => {
+    let videoId = document.querySelector('#td-' + data.videoProducerId);
+    let micPicture = videoId.querySelector('img');
+    let audioId = document.getElementById(data.audioProducerId);
+    audioId.srcObject.getAudioTracks()[0].enabled = data.isMicActive
+    if (!data.isMicActive) {
+        micPicture.src = "/assets/pictures/micOff.png";
+    } else {
+        micPicture.src = "/assets/pictures/micOn.png";
+    }
+
+})
+
 // Signaling New Producer
 socket.on('new-producer', ({ producerId }) => {
     signalNewConsumerTransport(producerId)
@@ -255,10 +271,50 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
         for (const secondKey in producersDetails[firstKey]) {
             if (producersDetails[firstKey][secondKey] == remoteProducerId) {
                 delete producersDetails[firstKey]
+                totalUsers--
                 break
             }
         }
     }
+
+    if (totalUsers < 2) {
+        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+
+        userVideoContainers.forEach((container, index) => {
+            container.classList.remove(currentTemplate);
+            container.classList.add('user-video-container');
+        });
+        currentTemplate = 'user-video-container'
+    } else if (totalUsers == 2) {
+        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+        userVideoContainers.forEach((container, index) => {
+            container.classList.remove(currentTemplate);
+            container.classList.add('user-video-container-3');
+        });
+        currentTemplate = 'user-video-container-3'
+    } else if (totalUsers >= 3 && totalUsers <= 5) {
+        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+        userVideoContainers.forEach((container, index) => {
+            container.classList.remove(currentTemplate);
+            container.classList.add('user-video-container-6');
+        });
+        currentTemplate = 'user-video-container-6'
+    } else if (totalUsers >= 6 && totalUsers <= 7) {
+        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+        userVideoContainers.forEach((container, index) => {
+            container.classList.remove(currentTemplate);
+            container.classList.add('user-video-container-8');
+        });
+        currentTemplate = 'user-video-container-8'
+    } else {
+        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+        userVideoContainers.forEach((container, index) => {
+            container.classList.remove(currentTemplate);
+            container.classList.add('user-video-container-12');
+        });
+        currentTemplate = 'user-video-container-12'
+    }
+
 
     consumerTransports = consumerTransports.filter(transportData => transportData.producerId !== remoteProducerId)
 
@@ -309,18 +365,10 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 
         // console.log("- Producer Socket : ", params.producerOwnerSocket, " - Producer Name : ", params.producerName, " - Kind : ", params.kind, " - Producer Id : ", params.id)
 
-        if (!producersDetails[params.producerOwnerSocket]) {
-            producersDetails[params.producerOwnerSocket] = {}
-            if (!producersDetails[params.producerOwnerSocket][params.kind]) {
-                producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
-            }
-            if (!producersDetails[params.producerOwnerSocket].name) {
-                producersDetails[params.producerOwnerSocket].name = params.producerName
-            }
-        } else {
-            if (!producersDetails[params.producerOwnerSocket][params.kind]) {
-                producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
-            }
+
+
+        if (!currentTemplate) {
+            currentTemplate = 'user-video-container'
         }
 
         console.log("- Producers Details : ", producersDetails)
@@ -333,7 +381,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
         if (params.kind == 'audio') {
             newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
         } else {
-            newElem.setAttribute('class', 'user-video-container')
+            newElem.setAttribute('class', currentTemplate)
             newElem.innerHTML = '<img src="/assets/pictures/micOn.png" class="icons-mic" /><video id="' + remoteProducerId + '" autoplay class="user-video" ></video><div class="username">' + params?.username + '</div>'
         }
 
@@ -342,6 +390,54 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
         const { track } = consumer
 
         document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
+
+
+
+        if (totalUsers > 1 && totalUsers < 3) {
+            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+            userVideoContainers.forEach((container, index) => {
+                container.classList.remove(currentTemplate);
+                container.classList.add('user-video-container-3');
+            });
+            currentTemplate = 'user-video-container-3'
+        } else if (totalUsers >= 3 && totalUsers <= 5) {
+            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+            userVideoContainers.forEach((container, index) => {
+                container.classList.remove(currentTemplate);
+                container.classList.add('user-video-container-6');
+            });
+            currentTemplate = 'user-video-container-6'
+        } else if (totalUsers >= 6 && totalUsers <= 7) {
+            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+            userVideoContainers.forEach((container, index) => {
+                container.classList.remove(currentTemplate);
+                container.classList.add('user-video-container-8');
+            });
+            currentTemplate = 'user-video-container-8'
+        }
+
+
+        let stream = store.getState()
+
+        if (!producersDetails[params.producerOwnerSocket]) {
+            producersDetails[params.producerOwnerSocket] = {}
+            if (!producersDetails[params.producerOwnerSocket][params.kind]) {
+                producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
+            }
+            if (!producersDetails[params.producerOwnerSocket].name) {
+                producersDetails[params.producerOwnerSocket].name = params.producerName
+            }
+        } else {
+            if (!producersDetails[params.producerOwnerSocket][params.kind]) {
+                producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
+                totalUsers++
+                if (!stream.localStream.getAudioTracks()[0].enabled) {
+                    for (const key in producersDetails) {
+                        socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
+                    }
+                }
+            }
+        }
 
         socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
     })
@@ -353,19 +449,27 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 // Mic Button
 const micButton = document.getElementById("user-mic-button");
 const micImage = document.getElementById("mic-image");
+const localMic = document.getElementById('local-mic')
 micButton.addEventListener("click", () => {
     let stream = store.getState()
-    console.log("- Stream : ", stream.localStream.getAudioTracks()[0].enabled)
+
     if (micImage.src.endsWith("micOn.png")) {
+        for (const key in producersDetails) {
+            socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
+        }
         stream.localStream.getAudioTracks()[0].enabled = false
+        localMic.src = "/assets/pictures/micOff.png";
         micImage.src = "/assets/pictures/micOff.png";
     } else {
+        for (const key in producersDetails) {
+            socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: true }))
+        }
         stream.localStream.getAudioTracks()[0].enabled = true
+        localMic.src = "/assets/pictures/micOn.png";
         micImage.src = "/assets/pictures/micOn.png";
     }
 });
 
-// Switching Camera Button
 const switchCamera = document.getElementById('user-switch-camera-button')
 switchCamera.addEventListener("click", () => {
     SwitchingCamera()
@@ -385,7 +489,7 @@ const SwitchingCamera = async () => {
             video: { facingMode: "environment" },
         },
     }
-
+    localStorage.setItem('selectedVideoDevices', videoDevices[deviceId].deviceId)
     let newStream = await navigator.mediaDevices.getUserMedia(config);
     store.setLocalStream(newStream)
     localVideo.srcObject = newStream
@@ -399,8 +503,11 @@ consoleLogButton.addEventListener('click', () => {
     // console.log('- Consumer Tranport : ', consumingTransports)
     // socket.emit('get-peers', (consumerTransports))
     // console.log("- Producer : ", producerTransport)
-    console.log("- Video Producer : ", videoProducer)
+    // console.log("- Video Producer : ", videoProducer)
     // producerTransport.getStats().then((data) => {
     //     console.log(data)
     // })
+    // console.log("- Producer Details : ", videoProducer, audioProducer)
+    console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
+
 })

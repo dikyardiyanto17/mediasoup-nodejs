@@ -1,5 +1,4 @@
 const store = require('./store')
-const url = window.location
 let localVideo = document.getElementById('local-video')
 
 const joinRoom = document.getElementById('join-room')
@@ -93,13 +92,21 @@ videoOptions.addEventListener("click", (e) => {
 
 joinRoom.addEventListener('submit', (e) => {
     e.preventDefault();
-    const userName = document.getElementById('username').value
-    localStorage.setItem('username', userName)
-    // const goTo = url+'room/'+
-    // store.setRoom(roomId)
-    const data = store.getState()
-    console.log("- Data : ", data, " - Username : ", userName)
-    // window.location.href = goTo;
+    
+    const userName = document.getElementById('username').value;
+    localStorage.setItem('username', userName);
+    
+    const url = window.location.pathname;
+    const parts = url.split('/');
+    const roomName = parts[2];
+    const goTo = 'room/' + roomName;
+    
+    const newURL = window.location.origin + "/" + goTo;
+    
+    console.log("- New URL : ", newURL);
+    
+    window.location.href = newURL;
 });
+
 
 init()

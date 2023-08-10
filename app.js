@@ -247,6 +247,10 @@ io.on('connection', async socket => {
         callback(producerList)
     })
 
+    socket.on('mic-config', ({videoProducerId, audioProducerId, socketId, isMicActive}) => {
+        socket.to(socketId).emit('mic-config', ({videoProducerId, audioProducerId, isMicActive}))
+    })
+
     const informConsumers = (roomName, socketId, id) => {
         producers.forEach(producerData => {
             if (producerData.socketId !== socketId && producerData.roomName === roomName) {

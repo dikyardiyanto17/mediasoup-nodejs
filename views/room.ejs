@@ -26,12 +26,41 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .user-video-container {
             margin: 10px;
             height: 80%;
             width: 45%;
+            position: relative;
+        }
+
+        .user-video-container-3 {
+            margin: 10px;
+            height: 70%;
+            width: 30%;
+            position: relative;
+        }
+
+        .user-video-container-6 {
+            margin: 10px;
+            height: 45%;
+            width: 30%;
+            position: relative;
+        }
+
+        .user-video-container-8 {
+            margin: 10px;
+            height: 40%;
+            width: 23%;
+            position: relative;
+        }
+
+        .user-video-container-12 {
+            margin: 10px;
+            height: 30%;
+            width: 20%;
             position: relative;
         }
 
@@ -99,7 +128,7 @@
     <div class="full-container">
         <div id="video-container">
             <div class="user-video-container">
-                <img src="/assets/pictures/micOn.png" class="icons-mic" />
+                <img src="/assets/pictures/micOn.png" class="icons-mic" id="local-mic"/>
                 <video id="local-video" autoplay class="user-video" muted></video>
                 <div class="username">My Name</div>
             </div>
