@@ -20,7 +20,7 @@ const credentials = {
 const options = {
     key: fs.readFileSync("key.pem"),
     cert: fs.readFileSync("cert.pem"),
-  };
+};
 
 app.use(cors())
 app.set('view engine', 'ejs')
@@ -123,7 +123,6 @@ io.on('connection', async socket => {
             consumers: [],
             peerDetails: {
                 name: data.username,
-                isAdmin: false,
             }
         }
 
@@ -150,7 +149,7 @@ io.on('connection', async socket => {
             peers = rooms[roomName].peers || []
         } else {
             if (!worker) {
-                worker = createWorker()
+                worker = await createWorker()
             }
             router1 = await worker.createRouter({ mediaCodecs, })
         }
@@ -247,8 +246,8 @@ io.on('connection', async socket => {
         callback(producerList)
     })
 
-    socket.on('mic-config', ({videoProducerId, audioProducerId, socketId, isMicActive}) => {
-        socket.to(socketId).emit('mic-config', ({videoProducerId, audioProducerId, isMicActive}))
+    socket.on('mic-config', ({ videoProducerId, audioProducerId, socketId, isMicActive }) => {
+        socket.to(socketId).emit('mic-config', ({ videoProducerId, audioProducerId, isMicActive }))
     })
 
     const informConsumers = (roomName, socketId, id) => {
@@ -262,11 +261,11 @@ io.on('connection', async socket => {
 
     const getTransport = (socketId) => {
         const [producerTransport] = transports.filter(transport => transport.socketId === socketId && !transport.consumer)
+        // console.log("- Get Transport : ", producerTransport.socketId, " - My Socket : ", socket.id, " - Is Consumer : ", producerTransport.consumer)
         return producerTransport.transport
     }
 
     socket.on('transport-connect', ({ dtlsParameters }) => {
-
         getTransport(socket.id).connect({ dtlsParameters })
     })
 
@@ -287,14 +286,25 @@ io.on('connection', async socket => {
             producer.close()
         })
 
+
         roomsSocketCollection[roomName].map(data => {
-            if(data.socketId == socket.id && kind == 'video'){
-                if (!data.producerId){
+            if (data.socketId == socket.id && kind == 'video') {
+                console.log("Hello World")
+                if (data.producerId) {
+                    data.screenSharingProducerId = producer.id
+                }
+                if (!data.producerId) {
                     data.producerId = producer.id
+                }
+                if (!data.screenSharingProducerId) {
+                    data.screenSharingProducerId = null
                 }
             }
             return data
         })
+
+        console.log("- Room Socket Collection : ", roomsSocketCollection)
+
         // let updatingRoom = roomsSocketCollection[roomName].find(data => data.socketId == socket.id)
         // console.log('- My Socket Id : ', socket.id, " - Producer Id : ", producer.id, " - Updated : ", updatingRoom)
 
@@ -326,7 +336,6 @@ io.on('connection', async socket => {
             const userData = transports.find(transportData => transportData.consumer && transportData.transport.id == serverConsumerTransportId)
             // console.log("- User Data : ", userData.transport)
             // console.log("- getProducerById() : ", userData.transport.getProducerById(), " - getDataProducedById() : ", userData.transport.getDataProducedById())
-
 
             if (router.canConsume({
                 producerId: remoteProducerId,
@@ -361,33 +370,43 @@ io.on('connection', async socket => {
                     serverConsumerId: consumer.id,
                 }
 
-                for (const key in peers){
+                for (const key in peers) {
                     peers[key].producers.forEach((producer) => {
-                        if (producer == remoteProducerId){
+                        if (producer == remoteProducerId) {
                             // console.log("HELLO WORLD")
                             // console.log("- Key : ", key, " - Peers : ", peers[key].producers, " - My Socket ID : ", socket.id, " - Owner : ", peers[key].socket.id, " - Name : ", peers[key].peerDetails.name)
-                            if (!params.producerOwnerSocket){
+                            if (!params.producerOwnerSocket) {
                                 params.producerOwnerSocket = peers[key].socket.id
                             }
-                            if (!params.producerName){
+                            if (!params.producerName) {
                                 params.producerName = peers[key].peerDetails.name
                             }
                         }
                     })
                 }
 
-                if (consumer.kind == 'video'){
+                if (consumer.kind == 'video') {
                     const { roomName } = peers[socket.id]
+                    let screenSharing = false
                     let getUserData = roomsSocketCollection[roomName].find((data) => data.producerId == remoteProducerId)
-                    // console.log("- Get User Data : ", getUserData, " - Peers : ", peers)
-                    if (!params.username){
+                    // console.log("- Get User Data : ", getUserData, " - Socket Id : ", socket.id)
+                    if (!getUserData) {
+                        getUserData = roomsSocketCollection[roomName].find((data) => data.screenSharingProducerId == remoteProducerId)
+                        screenSharing = true
+                    }
+                    if (!params.username) {
                         params.username = getUserData.name
+                        if (screenSharing) {
+                            params.username = getUserData.name + " is Sharing Screen"
+
+                        }
                     }
                 }
 
                 callback({ params })
             }
         } catch (error) {
+            console.log(error)
             console.log(error.message)
             callback({
                 params: {

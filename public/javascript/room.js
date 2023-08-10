@@ -22,6 +22,7 @@ let producerTransport
 let consumerTransports = []
 let audioProducer
 let videoProducer
+let screenSharingProducer
 let consumer
 let isProducer = false
 let producersDetails = {}
@@ -55,7 +56,9 @@ let params = {
 
 let audioParams;
 let videoParams = { params };
+let screenSharingParams = { params }
 let consumingTransports = [];
+let isScreenSharing = false
 
 // Starting Video Local
 const streamSuccess = (stream) => {
@@ -67,6 +70,70 @@ const streamSuccess = (stream) => {
     videoParams = { track: stream.getVideoTracks()[0], ...videoParams };
 
     joinRoom()
+}
+
+// On Development
+const getScreenSharing = async () => {
+    isScreenSharing = true
+    const screenSharingStream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+            cursor: "always",
+            displaySurface: "window",
+            chromeMediaSource: "desktop",
+        },
+    });
+
+    screenSharingParams = { track: screenSharingStream.getVideoTracks()[0], ...screenSharingParams }
+
+    screenSharingProducer = await producerTransport.produce(screenSharingParams);
+
+    screenSharingProducer.on('trackended', () => {
+        console.log('video track ended')
+
+    })
+
+    screenSharingProducer.on('transportclose', () => {
+        console.log('video transport ended')
+    })
+
+    if (!currentTemplate) {
+        currentTemplate = 'user-video-container'
+    }
+
+    const newElem = document.createElement('div')
+    newElem.setAttribute('id', `td-screensharing`)
+
+    newElem.setAttribute('class', currentTemplate)
+    newElem.innerHTML = '<video id="' + 'screensharing' + '" autoplay class="user-video" ></video><div class="username">' + "Screen Sharing" + '</div>'
+
+    videoContainer.appendChild(newElem)
+
+    document.getElementById('screensharing').srcObject = screenSharingStream
+
+    totalUsers++
+
+    if (totalUsers > 1 && totalUsers < 3) {
+        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+        userVideoContainers.forEach((container, index) => {
+            container.classList.remove(currentTemplate);
+            container.classList.add('user-video-container-3');
+        });
+        currentTemplate = 'user-video-container-3'
+    } else if (totalUsers >= 3 && totalUsers <= 5) {
+        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+        userVideoContainers.forEach((container, index) => {
+            container.classList.remove(currentTemplate);
+            container.classList.add('user-video-container-6');
+        });
+        currentTemplate = 'user-video-container-6'
+    } else if (totalUsers >= 6 && totalUsers <= 7) {
+        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+        userVideoContainers.forEach((container, index) => {
+            container.classList.remove(currentTemplate);
+            container.classList.add('user-video-container-8');
+        });
+        currentTemplate = 'user-video-container-8'
+    }
 }
 
 // Emitting Join Room and Getting RTP Capabilities From Server and Creating Media Devices
@@ -133,6 +200,7 @@ const createSendTransport = () => {
 
         producerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
+                console.log("- Producer Transport Connecting")
                 await socket.emit('transport-connect', {
                     dtlsParameters,
                 })
@@ -148,6 +216,7 @@ const createSendTransport = () => {
             console.log("- Create Web RTC Transport / Produce : ", parameters)
 
             try {
+                console.log("- Producer Transport Producing")
                 await socket.emit('transport-produce', {
                     kind: parameters.kind,
                     rtpParameters: parameters.rtpParameters,
@@ -270,6 +339,9 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
     for (const firstKey in producersDetails) {
         for (const secondKey in producersDetails[firstKey]) {
             if (producersDetails[firstKey][secondKey] == remoteProducerId) {
+                if (producersDetails[firstKey].screenSharing) {
+                    totalUsers--
+                }
                 delete producersDetails[firstKey]
                 totalUsers--
                 break
@@ -430,14 +502,21 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
         } else {
             if (!producersDetails[params.producerOwnerSocket][params.kind]) {
                 producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
-                totalUsers++
                 if (!stream.localStream.getAudioTracks()[0].enabled) {
                     for (const key in producersDetails) {
                         socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
                     }
                 }
             }
+            if (producersDetails[params.producerOwnerSocket].video) {
+                if (!producersDetails[params.producerOwnerSocket].screenSharing) {
+                    totalUsers++
+                    producersDetails[params.producerOwnerSocket].screenSharing = params.producerId
+                }
+            }
         }
+
+        if (params.kind == 'video') totalUsers++
 
         socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
     })
@@ -497,6 +576,12 @@ const SwitchingCamera = async () => {
     await videoProducer.replaceTrack({ track: newStream.getVideoTracks()[0] });
 };
 
+// Screen Sharing Button
+const screenSharingButton = document.getElementById('user-screen-share-button')
+screenSharingButton.addEventListener('click', () => {
+    getScreenSharing()
+})
+
 // Console Log Button
 const consoleLogButton = document.getElementById('console-log-button')
 consoleLogButton.addEventListener('click', () => {
@@ -507,7 +592,7 @@ consoleLogButton.addEventListener('click', () => {
     // producerTransport.getStats().then((data) => {
     //     console.log(data)
     // })
-    // console.log("- Producer Details : ", videoProducer, audioProducer)
-    console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
+    console.log("- Producer Details : ", producersDetails)
+    // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
 
 })
