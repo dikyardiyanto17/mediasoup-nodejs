@@ -100,16 +100,6 @@ const getScreenSharing = async () => {
         currentTemplate = 'user-video-container'
     }
 
-    const newElem = document.createElement('div')
-    newElem.setAttribute('id', `td-screensharing`)
-
-    newElem.setAttribute('class', currentTemplate)
-    newElem.innerHTML = '<video id="' + 'screensharing' + '" autoplay class="user-video" ></video><div class="username">' + "Screen Sharing" + '</div>'
-
-    videoContainer.appendChild(newElem)
-
-    document.getElementById('screensharing').srcObject = screenSharingStream
-
     totalUsers++
 
     if (totalUsers > 1 && totalUsers < 3) {
@@ -134,6 +124,16 @@ const getScreenSharing = async () => {
         });
         currentTemplate = 'user-video-container-8'
     }
+
+    const newElem = document.createElement('div')
+    newElem.setAttribute('id', `td-screensharing`)
+
+    newElem.setAttribute('class', currentTemplate)
+    newElem.innerHTML = '<video id="' + 'screensharing' + '" autoplay class="user-video" ></video><div class="username">' + "Screen Sharing" + '</div>'
+
+    videoContainer.appendChild(newElem)
+
+    document.getElementById('screensharing').srcObject = screenSharingStream
 }
 
 // Emitting Join Room and Getting RTP Capabilities From Server and Creating Media Devices
