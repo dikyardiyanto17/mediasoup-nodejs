@@ -1,0 +1,30 @@
+{
+  "name": "mediasoup-nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "watchify public/javascript/room.js -o public/msbundle.js -v",
+    "watch2": "watchify public/javascript/home.js -o public/homebundle.js -v",
+    "watch3": "watchify public/javascript/lobby.js -o public/lobbybundle.js -v"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "httpolyglot": "^0.1.2",
+    "lodash": "^4.17.21",
+    "mediasoup": "^3.12.8",
+    "mediasoup-client": "^3.6.98",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2"
+  },
+  "devDependencies": {
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
+  }
+}
