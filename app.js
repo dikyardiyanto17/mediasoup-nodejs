@@ -12,15 +12,15 @@ const { Server } = require('socket.io')
 const mediasoup = require('mediasoup')
 
 
-const credentials = {
-    key: fs.readFileSync(privateKeyPath),
-    cert: fs.readFileSync(certificatePath),
-};
+// const credentials = {
+//     key: fs.readFileSync(privateKeyPath),
+//     cert: fs.readFileSync(certificatePath),
+// };
 
-const options = {
-    key: fs.readFileSync("key.pem"),
-    cert: fs.readFileSync("cert.pem"),
-};
+// const options = {
+//     key: fs.readFileSync("key.pem"),
+//     cert: fs.readFileSync("cert.pem"),
+// };
 
 app.use(cors())
 app.set('view engine', 'ejs')
@@ -30,7 +30,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
-const httpsServer = https.createServer(options, app)
+const httpsServer = https.createServer(app)
+// const httpsServer = https.createServer(options, app)
 httpsServer.listen(port, () => {
     console.log('App On : ' + port)
 })
@@ -435,8 +436,8 @@ const createWebRtcTransport = async (router) => {
             const webRtcTransport_options = {
                 listenIps: [
                     {
-                        // ip: '127.0.0.1',
-                        ip: '192.168.206.123'
+                        ip: '127.0.0.1',
+                        // ip: '192.168.206.123'
                     }
                 ],
                 enableUdp: true,
