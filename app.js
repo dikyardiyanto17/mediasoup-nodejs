@@ -250,6 +250,10 @@ io.on('connection', async socket => {
         socket.to(socketId).emit('mic-config', ({ videoProducerId, audioProducerId, isMicActive }))
     })
 
+    socket.on('screen-sharing', ({ videoProducerId, audioProducerId, socketId, isSharing }) => {
+        socket.to(socketId).emit('screen-sharing', ({ videoProducerId, audioProducerId, isSharing }))
+    })
+
     const informConsumers = (roomName, socketId, id) => {
         producers.forEach(producerData => {
             if (producerData.socketId !== socketId && producerData.roomName === roomName) {
@@ -289,7 +293,6 @@ io.on('connection', async socket => {
 
         roomsSocketCollection[roomName].map(data => {
             if (data.socketId == socket.id && kind == 'video') {
-                console.log("Hello World")
                 if (data.producerId) {
                     data.screenSharingProducerId = producer.id
                 }
@@ -303,7 +306,7 @@ io.on('connection', async socket => {
             return data
         })
 
-        console.log("- Room Socket Collection : ", roomsSocketCollection)
+        // console.log("- Room Socket Collection : ", roomsSocketCollection)
 
         // let updatingRoom = roomsSocketCollection[roomName].find(data => data.socketId == socket.id)
         // console.log('- My Socket Id : ', socket.id, " - Producer Id : ", producer.id, " - Updated : ", updatingRoom)

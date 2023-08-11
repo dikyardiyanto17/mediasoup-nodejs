@@ -18,6 +18,7 @@
             width: 100vw;
             height: 100vh;
             position: relative;
+            display: flex;
         }
 
         #video-container {
@@ -27,6 +28,36 @@
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
+            column-gap: 10px;
+        }
+
+        #video-container-screen-sharing {
+            width: 25%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            align-content: center;
+        }
+
+        .user-video-container-screen-sharing {
+            margin: 10px;
+            height: 20%;
+            width: 40%;
+            position: relative;
+        }
+
+        #screen-sharing-container {
+            width: 75%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #screen-sharing {
+            width: 75%;
+            height: 56%;
         }
 
         .user-video-container {
@@ -125,10 +156,10 @@
 </head>
 
 <body>
-    <div class="full-container">
+    <div class="full-container" id="full-container-id">
         <div id="video-container">
             <div class="user-video-container">
-                <img src="/assets/pictures/micOn.png" class="icons-mic" id="local-mic"/>
+                <img src="/assets/pictures/micOn.png" class="icons-mic" id="local-mic" />
                 <video id="local-video" autoplay class="user-video" muted></video>
                 <div class="username">My Name</div>
             </div>
@@ -136,7 +167,7 @@
         </div>
         <div class="controller">
             <button class="button-small-custom" id="user-record-button">
-                <img src="/assets/pictures/record.png" class="button-image"/>
+                <img src="/assets/pictures/record.png" class="button-image" />
             </button>
             <button class="button-small-custom" id="user-mic-button">
                 <img src="/assets/pictures/micOn.png" id="mic-image" />
