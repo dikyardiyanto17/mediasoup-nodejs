@@ -102,14 +102,17 @@ io.on('connection', async socket => {
         producers = removeItems(producers, socket.id, 'producer')
         transports = removeItems(transports, socket.id, 'transport')
 
-        const { roomName } = peers[socket.id]
-        delete peers[socket.id]
+        if (peers[socket.id].roomName) {
+            const { roomName } = peers[socket.id]
+            delete peers[socket.id]
 
-        roomsSocketCollection[roomName] = roomsSocketCollection[roomName].filter(item => item.socketId !== socket.id)
-        rooms[roomName] = {
-            router: rooms[roomName].router,
-            peers: rooms[roomName].peers.filter(socketId => socketId !== socket.id)
+            roomsSocketCollection[roomName] = roomsSocketCollection[roomName].filter(item => item.socketId !== socket.id)
+            rooms[roomName] = {
+                router: rooms[roomName].router,
+                peers: rooms[roomName].peers.filter(socketId => socketId !== socket.id)
+            }
         }
+
         // console.log("- Room Participant : ", roomsSocketCollection)
     })
 
@@ -152,7 +155,7 @@ io.on('connection', async socket => {
             if (!worker) {
                 worker = await createWorker()
             }
-            router1 = await worker.createRouter({ mediaCodecs, })
+            router1 = await worker.createRouter({ mediaCodecs })
         }
 
         rooms[roomName] = {
@@ -436,8 +439,8 @@ const createWebRtcTransport = async (router) => {
             const webRtcTransport_options = {
                 listenIps: [
                     {
-                        ip: '127.0.0.1',
-                        // ip: '192.168.206.123'
+                        // ip: '127.0.0.1',
+                        ip: '192.168.206.123'
                     }
                 ],
                 enableUdp: true,

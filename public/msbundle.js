@@ -28213,6 +28213,13 @@ const streamSuccess = (stream) => {
 
     audioParams = { track: stream.getAudioTracks()[0], ...audioParams };
     videoParams = { track: stream.getVideoTracks()[0], ...videoParams };
+    
+    const setUsername = document.getElementById('my-username')
+    if(localStorage.getItem('username')){
+        setUsername.textContent = localStorage.getItem('username')
+    } else {
+        setUsername.textContent = 'Unknown'
+    }
 
     joinRoom()
 }
@@ -28285,7 +28292,6 @@ const changeLayout = (isSharing) => {
 const getScreenSharing = async () => {
     try {
         if (!isScreenSharing) {
-            isScreenSharing = true
 
             changeLayout(true)
 
@@ -28333,6 +28339,7 @@ const getScreenSharing = async () => {
             if (!currentTemplate) {
                 currentTemplate = 'user-video-container'
             }
+            isScreenSharing = true
         } else {
             screenSharingStreamsGlobal.getTracks().forEach((track) => track.stop());
             isScreenSharing = false
@@ -28346,69 +28353,9 @@ const getScreenSharing = async () => {
             screenSharingStreamsGlobal = null
         }
     } catch (error) {
+        changeLayout(false)
         console.log(error)
     }
-
-    // isScreenSharing = true
-    // const screenSharingStream = await navigator.mediaDevices.getDisplayMedia({
-    //     video: {
-    //         cursor: "always",
-    //         displaySurface: "window",
-    //         chromeMediaSource: "desktop",
-    //     },
-    // });
-
-    // screenSharingParams = { track: screenSharingStream.getVideoTracks()[0], ...screenSharingParams }
-
-    // screenSharingProducer = await producerTransport.produce(screenSharingParams);
-
-    // screenSharingProducer.on('trackended', () => {
-    //     console.log('video track ended')
-
-    // })
-
-    // screenSharingProducer.on('transportclose', () => {
-    //     console.log('video transport ended')
-    // })
-
-    // if (!currentTemplate) {
-    //     currentTemplate = 'user-video-container'
-    // }
-
-    // // totalUsers++
-
-    // if (totalUsers > 1 && totalUsers < 3) {
-    //     const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-    //     userVideoContainers.forEach((container, index) => {
-    //         container.classList.remove(currentTemplate);
-    //         container.classList.add('user-video-container-3');
-    //     });
-    //     currentTemplate = 'user-video-container-3'
-    // } else if (totalUsers >= 3 && totalUsers <= 5) {
-    //     const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-    //     userVideoContainers.forEach((container, index) => {
-    //         container.classList.remove(currentTemplate);
-    //         container.classList.add('user-video-container-6');
-    //     });
-    //     currentTemplate = 'user-video-container-6'
-    // } else if (totalUsers >= 6 && totalUsers <= 7) {
-    //     const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-    //     userVideoContainers.forEach((container, index) => {
-    //         container.classList.remove(currentTemplate);
-    //         container.classList.add('user-video-container-8');
-    //     });
-    //     currentTemplate = 'user-video-container-8'
-    // }
-
-    // const newElem = document.createElement('div')
-    // newElem.setAttribute('id', `td-screensharing`)
-
-    // newElem.setAttribute('class', currentTemplate)
-    // newElem.innerHTML = '<video id="' + 'screensharing' + '" autoplay class="user-video" ></video><div class="username">' + "Screen Sharing" + '</div>'
-
-    // videoContainer.appendChild(newElem)
-
-    // document.getElementById('screensharing').srcObject = screenSharingStream
 }
 
 // Emitting Join Room and Getting RTP Capabilities From Server and Creating Media Devices
@@ -28830,6 +28777,12 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 
         }
 
+        if (isRecording && params.kind == 'audio') {
+            const audioSource = audioContext.createMediaStreamSource(new MediaStream([track]));
+            audioSource.connect(audioDestination);
+            // recordedStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
+        }
+
 
         if (!isScreenSharing) {
             if (totalUsers < 2) {
@@ -28936,6 +28889,49 @@ screenSharingButton.addEventListener('click', () => {
 
 // Recording Button
 const recordButton = document.getElementById('user-record-button')
+const startTimer = () => {
+    let startTime = Date.now();
+    let timerElement = document.getElementById("realtime-timer");
+
+    // Update the timer every second
+    let intervalId = setInterval(function () {
+        let currentTime = Date.now();
+        let elapsedTime = currentTime - startTime;
+        let hours = Math.floor(elapsedTime / 3600000);
+        let minutes = Math.floor((elapsedTime % 3600000) / 60000);
+        let seconds = Math.floor((elapsedTime % 60000) / 1000);
+
+        timerElement.textContent =
+            (hours < 10 ? "0" : "") + hours + ":" +
+            (minutes < 10 ? "0" : "") + minutes + ":" +
+            (seconds < 10 ? "0" : "") + seconds;
+    }, 1000);
+}
+
+const timerLayout = (trigger) => {
+    const fullContainer = document.getElementById('full-container-id')
+    const timerImage = document.getElementById('record-image')
+    if (trigger) {
+        timerImage.src = '/assets/pictures/recording.webp'
+        let container = document.createElement("div");
+        container.setAttribute('class', 'record-timer')
+        container.id = "timer";
+        let timerParagraph = document.createElement("p");
+        timerParagraph.textContent = "On Recording : ";
+        let span = document.createElement("span");
+        span.id = "realtime-timer";
+        span.textContent = '00:00:00'
+        timerParagraph.appendChild(span);
+        container.appendChild(timerParagraph)
+        fullContainer.appendChild(container);
+        isRecording = true
+        startTimer()
+    } else {
+        timerImage.src = '/assets/pictures/record.png'
+        fullContainer.removeChild(document.getElementById('timer'))
+        isRecording = false
+    }
+}
 const recordingVideo = async () => {
     try {
         if (!isRecording) {
@@ -28974,6 +28970,7 @@ const recordingVideo = async () => {
 
             recordedStream.getVideoTracks()[0].onended = () => {
                 recordedMedia.stopRecording(() => {
+                    timerLayout(false)
                     isRecording = false
                     let blob = recordedMedia.getBlob();
                     // require('recordrtc').getSeekableBlob(recordedMediaRef.current.getBlob(), (seekable) => {
@@ -28981,8 +28978,15 @@ const recordingVideo = async () => {
                     //     downloadRTC(seekable)
                     // })
                     // downloadRTC(blob)
-                    let file = new File([blob], "recorded", {
-                        type: 'video/mp4'
+                    const currentDate = new Date();
+                    const formattedDate = currentDate.toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    }).replace(/\//g, ''); // Remove slashes from the formatted date
+
+                    const file = new File([blob], formattedDate, {
+                        type: "video/mp4"
                     });
                     require('recordrtc').invokeSaveAsDialog(file, file.name)
                     recordedStream.getTracks().forEach((track) => track.stop());
@@ -28992,9 +28996,11 @@ const recordingVideo = async () => {
                 })
             }
 
-            isRecording = false
+            isRecording = true
+            timerLayout(true)
         } else {
             recordedMedia.stopRecording(() => {
+                timerLayout(false)
                 isRecording = false
                 let blob = recordedMedia.getBlob();
                 // require('recordrtc').getSeekableBlob(recordedMedia.getBlob(), (seekable) => {
@@ -29002,9 +29008,17 @@ const recordingVideo = async () => {
                 //     downloadRTC(seekable)
                 // })
                 // downloadRTC(blob)
-                let file = new File([blob], "fileName", {
+                const currentDate = new Date();
+                const formattedDate = currentDate.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                }).replace(/\//g, ''); // Remove slashes from the formatted date
+
+                const file = new File([blob], formattedDate, {
                     type: "video/mp4"
                 });
+
                 require('recordrtc').invokeSaveAsDialog(file, file.name)
                 recordedStream.getTracks().forEach((track) => track.stop());
                 recordedStream = null
@@ -29013,11 +29027,47 @@ const recordingVideo = async () => {
             })
         }
     } catch (error) {
+        isRecording = false
+        timerLayout(false)
+        if (recordedStream) {
+            recordedStream.getTracks().forEach((track) => track.stop());
+            recordedStream = null
+        }
+        if (recordedMedia) {
+            recordedMedia.stopRecording(() => {
+                let blob = recordedMedia.getBlob();
+                const currentDate = new Date();
+                const formattedDate = currentDate.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                }).replace(/\//g, ''); // Remove slashes from the formatted date
+
+                const file = new File([blob], formattedDate, {
+                    type: "video/mp4"
+                });
+                require('recordrtc').invokeSaveAsDialog(file, file.name)
+                recordedMedia.reset()
+                recordedMedia = null
+            })
+        }
         console.log(error)
     }
 }
 recordButton.addEventListener('click', () => {
     recordingVideo()
+})
+
+// Share Link Button
+const shareButton = document.getElementById('share-link-button')
+shareButton.addEventListener('click', () => {
+    navigator.clipboard.writeText(window.location.href);
+})
+
+// Hang Up Button
+const hangUpButton = document.getElementById('user-hang-up-button')
+hangUpButton.addEventListener('click', () => {
+    window.location.href = window.location.origin
 })
 
 // Console Log Button
