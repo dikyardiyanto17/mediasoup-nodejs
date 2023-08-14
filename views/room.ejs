@@ -56,8 +56,8 @@
         }
 
         #screen-sharing {
-            width: 75%;
-            height: 56%;
+            width: 90%;
+            height: 80%;
         }
 
         .user-video-container {
@@ -106,6 +106,10 @@
             position: absolute;
             bottom: 0;
             left: 0;
+            color: white;
+            font-size: 11px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2px;
         }
 
         .icons-mic {
@@ -153,8 +157,14 @@
             height: 40px;
         }
 
-        .recording-time {
+        .record-timer {
             position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(255, 0, 0, 0.4);
+            border-radius: 10px;
+            font-size: 20px;
+            padding: 10px;
         }
     </style>
 </head>
@@ -165,13 +175,13 @@
             <div class="user-video-container">
                 <img src="/assets/pictures/micOn.png" class="icons-mic" id="local-mic" />
                 <video id="local-video" autoplay class="user-video" muted></video>
-                <div class="username">My Name</div>
+                <div class="username" id="my-username"></div>
             </div>
             <div class="screen-sharing-container"></div>
         </div>
         <div class="controller">
             <button class="button-small-custom" id="user-record-button">
-                <img src="/assets/pictures/record.png" class="button-image" />
+                <img src="/assets/pictures/record.png" class="button-image" id="record-image"/>
             </button>
             <button class="button-small-custom" id="user-mic-button">
                 <img src="/assets/pictures/micOn.png" id="mic-image" />
@@ -188,8 +198,8 @@
             <button class="button-small-custom" id="user-chat-button">
                 <i class="fas fa-comment-dots" style="color: white;"></i>
             </button>
-            <button class="button-small-custom" id="console-log-button">
-                Log
+            <button class="button-small-custom" id="share-link-button">
+                <i class="far fa-share-square" style="color: white;"></i>
             </button>
         </div>
     </div>
