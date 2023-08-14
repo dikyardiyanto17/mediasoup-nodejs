@@ -17,10 +17,10 @@ const mediasoup = require('mediasoup')
 //     cert: fs.readFileSync(certificatePath),
 // };
 
-// const options = {
-//     key: fs.readFileSync("key.pem"),
-//     cert: fs.readFileSync("cert.pem"),
-// };
+const options = {
+    key: fs.readFileSync("key.pem"),
+    cert: fs.readFileSync("cert.pem"),
+};
 
 app.use(cors())
 app.set('view engine', 'ejs')
@@ -30,8 +30,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
-const httpsServer = https.createServer(app)
-// const httpsServer = https.createServer(options, app)
+// const httpsServer = https.createServer(app)
+const httpsServer = https.createServer(options, app)
 httpsServer.listen(port, () => {
     console.log('App On : ' + port)
 })
