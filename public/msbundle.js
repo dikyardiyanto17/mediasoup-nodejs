@@ -28213,9 +28213,9 @@ const streamSuccess = (stream) => {
 
     audioParams = { track: stream.getAudioTracks()[0], ...audioParams };
     videoParams = { track: stream.getVideoTracks()[0], ...videoParams };
-    
+
     const setUsername = document.getElementById('my-username')
-    if(localStorage.getItem('username')){
+    if (localStorage.getItem('username')) {
         setUsername.textContent = localStorage.getItem('username')
     } else {
         setUsername.textContent = 'Unknown'
@@ -28360,6 +28360,10 @@ const getScreenSharing = async () => {
 
 // Emitting Join Room and Getting RTP Capabilities From Server and Creating Media Devices
 const joinRoom = () => {
+    const originUrl = window.location.pathname;
+    const findUrl = originUrl.split('/');
+    const findoomName = findUrl[2];
+
     let myUsername
     localStorage.setItem("room_id", roomName)
 
@@ -28368,7 +28372,7 @@ const joinRoom = () => {
     } else {
         myUsername = localStorage.getItem("username")
     }
-    socket.emit('joinRoom', { roomName, username: myUsername }, (data) => {
+    socket.emit('joinRoom', { roomName: findoomName, username: myUsername }, (data) => {
         console.log(`Router RTP Capabilities... ${data.rtpCapabilities}`)
         rtpCapabilities = data.rtpCapabilities
         createDevice()
