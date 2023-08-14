@@ -1,4 +1,5 @@
 const mediasoupClient = require("mediasoup-client")
+const RecordRTC = require('recordrtc')
 const io = require('socket.io-client')
 const socket = io('/')
 const store = require('./store')
@@ -30,6 +31,14 @@ let deviceId = 0
 let totalUsers = 0
 let currentTemplate
 let screenSharingStreamsGlobal
+let isRecording = false
+let recordedStream
+let recordedMedia
+let recordedBlob = []
+let allStream = {}
+let audioContext
+let audioDestination
+
 
 // Params for MediaSoup
 let params = {
@@ -66,6 +75,7 @@ const streamSuccess = (stream) => {
 
     store.setLocalStream(stream)
     localVideo.srcObject = stream
+    allStream[socket.id] = { video: stream.getVideoTracks()[0], audio: stream.getAudioTracks()[0] }
 
     audioParams = { track: stream.getAudioTracks()[0], ...audioParams };
     videoParams = { track: stream.getVideoTracks()[0], ...videoParams };
@@ -168,6 +178,7 @@ const getScreenSharing = async () => {
                 isScreenSharing = false
                 changeLayout(false)
                 screenSharingStreamsGlobal = null
+                screenSharingParams = { params }
             };
 
             // for (const key in producersDetails) {
@@ -457,7 +468,9 @@ socket.on('mic-config', (data) => {
 // Screen Sharing Socket
 socket.on('screen-sharing', ({ videoProducerId, audioProducerId, isSharing }) => {
     if (!isSharing) {
+        screenSharingParams = { params }
         isScreenSharing = false
+        screenSharingStreamsGlobal = null
         changeLayout(false)
         for (const firstKey in producersDetails) {
             for (const secondKey in producersDetails[firstKey]) {
@@ -644,6 +657,12 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
         // document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
 
         let stream = store.getState()
+        if (!allStream[params.producerOwnerSocket]) {
+            allStream[params.producerOwnerSocket] = {}
+        }
+        if (!allStream[params.producerOwnerSocket][params.kind]) {
+            allStream[params.producerOwnerSocket][params.kind] = track
+        }
 
         if (!producersDetails[params.producerOwnerSocket]) {
             producersDetails[params.producerOwnerSocket] = {}
@@ -781,13 +800,99 @@ screenSharingButton.addEventListener('click', () => {
     getScreenSharing()
 })
 
+// Recording Button
+const recordButton = document.getElementById('user-record-button')
+const recordingVideo = async () => {
+    try {
+        if (!isRecording) {
+            const videoStream = await navigator.mediaDevices.getDisplayMedia({
+                audio: true,
+                video: {
+                    cursor: "always",
+                    displaySurface: "monitor",
+                    chromeMediaSource: "desktop",
+                },
+            });
+
+            const screenSharingStream = new MediaStream();
+            videoStream.getVideoTracks().forEach(track => screenSharingStream.addTrack(track));
+
+            let allAudio = []
+
+            for (const key in allStream) {
+                allAudio.push(allStream[key].audio)
+            }
+
+            let allAudioFlat = allAudio.flatMap(stream => stream);
+
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            audioDestination = audioContext.createMediaStreamDestination();
+
+            allAudioFlat.forEach(stream => {
+                const audioSource = audioContext.createMediaStreamSource(new MediaStream([stream]));
+                audioSource.connect(audioDestination);
+            });
+
+            screenSharingStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
+            recordedStream = screenSharingStream
+            recordedMedia = new RecordRTC(recordedStream, { type: 'video', getNativeBlob: true });
+            recordedMedia.startRecording()
+
+            recordedStream.getVideoTracks()[0].onended = () => {
+                recordedMedia.stopRecording(() => {
+                    isRecording = false
+                    let blob = recordedMedia.getBlob();
+                    // require('recordrtc').getSeekableBlob(recordedMediaRef.current.getBlob(), (seekable) => {
+                    //     console.log("- SeekableBlob : ", seekable)
+                    //     downloadRTC(seekable)
+                    // })
+                    // downloadRTC(blob)
+                    let file = new File([blob], "recorded", {
+                        type: 'video/mp4'
+                    });
+                    require('recordrtc').invokeSaveAsDialog(file, file.name)
+                    recordedStream.getTracks().forEach((track) => track.stop());
+                    recordedStream = null
+                    recordedMedia.reset()
+                    recordedMedia = null
+                })
+            }
+
+            isRecording = false
+        } else {
+            recordedMedia.stopRecording(() => {
+                isRecording = false
+                let blob = recordedMedia.getBlob();
+                // require('recordrtc').getSeekableBlob(recordedMedia.getBlob(), (seekable) => {
+                //     console.log("- SeekableBlob : ", seekable)
+                //     downloadRTC(seekable)
+                // })
+                // downloadRTC(blob)
+                let file = new File([blob], "fileName", {
+                    type: "video/mp4"
+                });
+                require('recordrtc').invokeSaveAsDialog(file, file.name)
+                recordedStream.getTracks().forEach((track) => track.stop());
+                recordedStream = null
+                recordedMedia.reset()
+                recordedMedia = null
+            })
+        }
+    } catch (error) {
+        console.log(error)
+    }
+}
+recordButton.addEventListener('click', () => {
+    recordingVideo()
+})
+
 // Console Log Button
 const consoleLogButton = document.getElementById('console-log-button')
 consoleLogButton.addEventListener('click', () => {
     // console.log('- Consumer Tranport : ', consumingTransports)
     // console.log("- Consumer Transports : ", consumerTransports)
     // socket.emit('get-peers', (consumerTransports))
-    console.log("- Producer : ", producerTransport)
+    // console.log("- Producer : ", producerTransport)
     // console.log("- Video Producer : ", videoProducer)
     // producerTransport.getStats().then((data) => {
     //     console.log(data)
@@ -796,5 +901,15 @@ consoleLogButton.addEventListener('click', () => {
     // console.log("- Producer Details : ", producersDetails)
     // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
     // console.log("- Screen Sharing Producers : ", screenSharingProducer)
+    // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
+
+    // let allAudio = []
+
+    // for (const key in allStream){
+    //     allAudio.push(allStream[key].audio) 
+    // }
+
+    // let allAudioFlat = allAudio.flatMap(stream => stream);
+    // console.log('- All Audio Flat : ', allAudioFlat)
 
 })
