@@ -931,6 +931,11 @@ recordButton.addEventListener('click', () => {
 // Share Link Button
 const shareButton = document.getElementById('share-link-button')
 shareButton.addEventListener('click', () => {
+    let sb = document.getElementById("snackbar");
+
+    sb.className = "show";
+  
+    setTimeout(()=>{ sb.className = sb.className.replace("show", ""); }, 3000);
     navigator.clipboard.writeText(window.location.href);
 })
 
@@ -941,29 +946,29 @@ hangUpButton.addEventListener('click', () => {
 })
 
 // Console Log Button
-const consoleLogButton = document.getElementById('console-log-button')
-consoleLogButton.addEventListener('click', () => {
-    // console.log('- Consumer Tranport : ', consumingTransports)
-    // console.log("- Consumer Transports : ", consumerTransports)
-    // socket.emit('get-peers', (consumerTransports))
-    // console.log("- Producer : ", producerTransport)
-    // console.log("- Video Producer : ", videoProducer)
-    // producerTransport.getStats().then((data) => {
-    //     console.log(data)
+    // const consoleLogButton = document.getElementById('console-log-button')
+    // consoleLogButton.addEventListener('click', () => {
+    //     console.log('- Consumer Tranport : ', consumingTransports)
+    //     console.log("- Consumer Transports : ", consumerTransports)
+    //     socket.emit('get-peers', (consumerTransports))
+    //     console.log("- Producer : ", producerTransport)
+    //     console.log("- Video Producer : ", videoProducer)
+    //     producerTransport.getStats().then((data) => {
+    //         console.log(data)
+    //     })
+    //     console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
+    //     console.log("- Producer Details : ", producersDetails)
+    //     console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
+    //     console.log("- Screen Sharing Producers : ", screenSharingProducer)
+    //     console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
+
+    //     let allAudio = []
+
+    //     for (const key in allStream){
+    //         allAudio.push(allStream[key].audio) 
+    //     }
+
+    //     let allAudioFlat = allAudio.flatMap(stream => stream);
+    //     console.log('- All Audio Flat : ', allAudioFlat)
+
     // })
-    // console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
-    // console.log("- Producer Details : ", producersDetails)
-    // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
-    // console.log("- Screen Sharing Producers : ", screenSharingProducer)
-    // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
-
-    // let allAudio = []
-
-    // for (const key in allStream){
-    //     allAudio.push(allStream[key].audio) 
-    // }
-
-    // let allAudioFlat = allAudio.flatMap(stream => stream);
-    // console.log('- All Audio Flat : ', allAudioFlat)
-
-})
