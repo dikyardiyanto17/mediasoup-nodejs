@@ -102,7 +102,7 @@ io.on('connection', async socket => {
         producers = removeItems(producers, socket.id, 'producer')
         transports = removeItems(transports, socket.id, 'transport')
 
-        if (peers[socket.id].roomName) {
+        if (peers[socket.id]) {
             const { roomName } = peers[socket.id]
             delete peers[socket.id]
 
@@ -113,7 +113,7 @@ io.on('connection', async socket => {
             }
         }
 
-        // console.log("- Room Participant : ", roomsSocketCollection)
+        console.log("- Room Participant : ", roomsSocketCollection)
     })
 
     socket.on('joinRoom', async (data, callback) => {
@@ -138,7 +138,7 @@ io.on('connection', async socket => {
             roomsSocketCollection[data.roomName] = [...roomsSocketCollection[data.roomName], newUser]
         }
 
-        // console.log("- Room Participant : ", roomsSocketCollection)
+        console.log("- Room Participant : ", roomsSocketCollection)
 
         const rtpCapabilities = router1.rtpCapabilities
 
