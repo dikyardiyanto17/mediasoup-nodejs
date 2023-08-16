@@ -26,8 +26,9 @@ const mediasoup = require('mediasoup')
 const webRtcTransport_options = {
     listenIps: [
         {
-            ip: '127.0.0.1',
+            // ip: '127.0.0.1',
             // ip: '192.168.206.123'
+            ip: '203.194.113.166'
         }
     ],
     enableUdp: true,
