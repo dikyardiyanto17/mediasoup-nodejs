@@ -113,7 +113,7 @@ io.on('connection', async socket => {
             }
         }
 
-        console.log("- Room Participant : ", roomsSocketCollection)
+        // console.log("- Room Participant : ", roomsSocketCollection)
     })
 
     socket.on('joinRoom', async (data, callback) => {
@@ -138,7 +138,7 @@ io.on('connection', async socket => {
             roomsSocketCollection[data.roomName] = [...roomsSocketCollection[data.roomName], newUser]
         }
 
-        console.log("- Room Participant : ", roomsSocketCollection)
+        // console.log("- Room Participant : ", roomsSocketCollection)
 
         const rtpCapabilities = router1.rtpCapabilities
 
@@ -269,7 +269,7 @@ io.on('connection', async socket => {
 
     const getTransport = (socketId) => {
         const [producerTransport] = transports.filter(transport => transport.socketId === socketId && !transport.consumer)
-        // console.log("- Get Transport : ", producerTransport.socketId, " - My Socket : ", socket.id, " - Is Consumer : ", producerTransport.consumer)
+        // console.log("- Get Transport : ", producerTransport.transport)
         return producerTransport.transport
     }
 
@@ -322,6 +322,15 @@ io.on('connection', async socket => {
         })
     })
 
+    // socket.on('transport-producedata', async ({ sctpStreamParameters, label, protocol }, callback) => {
+    //     const producerDataChannel = await getTransport(socket.id).produceData({
+    //         sctpStreamParameters,
+    //         label,
+    //         protocol
+    //     })
+
+    // })
+
     socket.on('transport-recv-connect', async ({ dtlsParameters, serverConsumerTransportId }) => {
         const consumerTransport = transports.find(transportData => (
             transportData.consumer && transportData.transport.id == serverConsumerTransportId
@@ -368,6 +377,9 @@ io.on('connection', async socket => {
                 })
 
                 addConsumer(consumer, roomName)
+                // producers.forEach((producer) => {
+                //     console.log("- Producer : ", producer.producer.id)
+                // })
 
                 let params = {
                     id: consumer.id,
@@ -446,6 +458,7 @@ const createWebRtcTransport = async (router) => {
                 enableUdp: true,
                 enableTcp: true,
                 preferUdp: true,
+                // enableSctp: true
             }
 
             let transport = await router.createWebRtcTransport(webRtcTransport_options)

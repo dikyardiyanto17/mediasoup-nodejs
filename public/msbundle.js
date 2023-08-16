@@ -28172,6 +28172,7 @@ let recordedBlob = []
 let allStream = {}
 let audioContext
 let audioDestination
+// let dataChannelProducer
 
 
 // Params for MediaSoup
@@ -28223,6 +28224,20 @@ const streamSuccess = (stream) => {
 
     joinRoom()
 }
+
+
+const checkLocalStorage = () => {
+    if (!localStorage.getItem('audioDevices') || !localStorage.getItem('room_id') || !localStorage.getItem('selectedVideoDevices') || !localStorage.getItem('videoDevices') || !localStorage.getItem('username') || !localStorage.getItem('selectedAudioDevices')){
+        const url = window.location.pathname;
+        const parts = url.split('/');
+        const roomName = parts[2];
+        const goTo = 'lobby/' + roomName;
+        const newURL = window.location.origin + "/" + goTo;
+        window.location.href = newURL;
+    }
+
+}
+checkLocalStorage()
 
 // On Development
 const changeLayout = (isSharing) => {
@@ -28457,6 +28472,24 @@ const createSendTransport = () => {
             }
         })
 
+        // producerTransport.on("producedata", async (parameters, callback, errback) => {
+        //     try {
+        //         console.log('- Data Channel : ', parameters)
+        //         await socket.emit("transport-producedata", {
+        //             sctpStreamParameters : parameters.sctpStreamParameters,
+        //             label                : parameters.label,
+        //             protocol             : parameters.protocol
+        //         }, ({data}) => {
+        //             console.log(data)
+        //             const { id } = data;
+        //             callback({ id });
+        //         });
+        //     }
+        //     catch (error) {
+        //         errback(error);
+        //     }
+        // });
+
         // Connecting Send Transport
         connectSendTransport()
     })
@@ -28466,6 +28499,8 @@ const createSendTransport = () => {
 const connectSendTransport = async () => {
     audioProducer = await producerTransport.produce(audioParams);
     videoProducer = await producerTransport.produce(videoParams);
+    // console.log('- Transport : ', producerTransport)
+    // dataChannelProducer = await producerTransport.produceData()
 
     audioProducer.on('trackended', () => {
         console.log('audio track ended')
@@ -28710,6 +28745,10 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                 consumer,
             },
         ]
+
+        // const consumerDataChannel = await consumerTransport.consumeData({
+
+        // })
 
 
 
@@ -29078,6 +29117,50 @@ const hangUpButton = document.getElementById('user-hang-up-button')
 hangUpButton.addEventListener('click', () => {
     window.location.href = window.location.origin
 })
+
+// Chat Button
+const chatButton = document.getElementById('user-chat-button')
+chatButton.addEventListener('click', () => {
+    const chatContainer = document.getElementById('chat-container')
+    if (chatContainer.className == 'invisible') chatContainer.className = 'visible'
+    else chatContainer.className = 'invisible'
+})
+
+dragElement(document.getElementById("chat-bar"));
+
+function dragElement(elmnt) {
+  let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  if (document.getElementById(elmnt.id + "-header")) {
+    document.getElementById(elmnt.id + "-header").onmousedown = dragMouseDown;
+  } else {
+    elmnt.onmousedown = dragMouseDown;
+  }
+
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+  }
+
+  function closeDragElement() {
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}
 
 // Console Log Button
     // const consoleLogButton = document.getElementById('console-log-button')
