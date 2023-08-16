@@ -3,6 +3,7 @@ const cors = require('cors')
 const router = require('./routes/index.js')
 const app = express()
 const port = 3000
+const http = require('http')
 const path = require('path');
 const https = require('httpolyglot')
 const privateKeyPath = './server.key';
@@ -17,10 +18,22 @@ const mediasoup = require('mediasoup')
 //     cert: fs.readFileSync(certificatePath),
 // };
 
-const options = {
-    key: fs.readFileSync("key.pem"),
-    cert: fs.readFileSync("cert.pem"),
-};
+// const options = {
+//     key: fs.readFileSync("key.pem"),
+//     cert: fs.readFileSync("cert.pem"),
+// };
+
+const webRtcTransport_options = {
+    listenIps: [
+        {
+            ip: '127.0.0.1',
+            // ip: '192.168.206.123'
+        }
+    ],
+    enableUdp: true,
+    enableTcp: true,
+    preferUdp: true,
+}
 
 app.use(cors())
 app.set('view engine', 'ejs')
@@ -31,8 +44,8 @@ app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
 // const httpsServer = https.createServer(app)
-const httpsServer = https.createServer(options, app)
-httpsServer.listen(port, () => {
+const httpServer = http.createServer(app)
+httpServer.listen(port, () => {
     console.log('App On : ' + port)
 })
 
@@ -436,17 +449,7 @@ io.on('connection', async socket => {
 const createWebRtcTransport = async (router) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const webRtcTransport_options = {
-                listenIps: [
-                    {
-                        // ip: '127.0.0.1',
-                        ip: '192.168.206.123'
-                    }
-                ],
-                enableUdp: true,
-                enableTcp: true,
-                preferUdp: true,
-            }
+
 
             let transport = await router.createWebRtcTransport(webRtcTransport_options)
 
