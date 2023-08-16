@@ -49,7 +49,7 @@ httpServer.listen(port, () => {
     console.log('App On : ' + port)
 })
 
-const io = new Server(httpsServer)
+const io = new Server(httpServer)
 
 let worker
 let rooms = {}
