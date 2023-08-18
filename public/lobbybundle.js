@@ -101,6 +101,7 @@ joinRoom.addEventListener('submit', (e) => {
     const parts = url.split('/');
     const roomName = parts[2];
     const goTo = 'room/' + roomName;
+    localStorage.setItem('room_id', roomName)
     
     const newURL = window.location.origin + "/" + goTo;
     

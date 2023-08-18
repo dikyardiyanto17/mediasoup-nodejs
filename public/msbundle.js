@@ -28225,7 +28225,20 @@ const streamSuccess = (stream) => {
     joinRoom()
 }
 
-// On Development
+const checkLocalStorage = () => {
+    if (!localStorage.getItem('audioDevices') || !localStorage.getItem('room_id') || !localStorage.getItem('selectedVideoDevices') || !localStorage.getItem('videoDevices') || !localStorage.getItem('username') || !localStorage.getItem('selectedAudioDevices')){
+        const url = window.location.pathname;
+        const parts = url.split('/');
+        const roomName = parts[2];
+        const goTo = 'lobby/' + roomName;
+        const newURL = window.location.origin + "/" + goTo;
+        window.location.href = newURL;
+    }
+
+}
+checkLocalStorage()
+
+// Changing Layout User Video
 const changeLayout = (isSharing) => {
     if (isSharing) {
         videoContainer.id = 'video-container-screen-sharing'
@@ -29096,32 +29109,45 @@ hangUpButton.addEventListener('click', () => {
 })
 
 // Console Log Button
-// const consoleLogButton = document.getElementById('console-log-button')
-// consoleLogButton.addEventListener('click', () => {
-//     console.log('- Consumer Tranport : ', consumingTransports)
-//     console.log("- Consumer Transports : ", consumerTransports)
-//     socket.emit('get-peers', (consumerTransports))
-//     console.log("- Producer : ", producerTransport)
-//     console.log("- Video Producer : ", videoProducer)
-//     producerTransport.getStats().then((data) => {
-//         console.log(data)
-//     })
-//     console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
-//     console.log("- Producer Details : ", producersDetails)
-//     console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
-//     console.log("- Screen Sharing Producers : ", screenSharingProducer)
-//     console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
+const consoleLogButton = document.getElementById('console-log-button')
+consoleLogButton.addEventListener('click', () => {
+    consumerTransports.forEach((transport) => {
+        transport.consumer.getStats().then((stat) => {
+            [...stat.entries()].forEach((data, index) => {
+                if (index == [...stat.entries()].length - 1){
+                    console.log('- Data : ',data)
+                }
+            })
+            // console.log('- Stat : ', [...stat.entries()].length)
+            // stat.entries()
+        })
+        // console.log("- Consumer Transports : ", transport.consumer)
+        // transport.consumerTransport.getStats().then((stat) => {
+        //     console.log("- Stat : ", stat)
+        // })
+    })
+    // socket.emit('get-peers', (consumerTransports))
+    // console.log("- Producer : ", producerTransport)
+    // console.log("- Video Producer : ", videoProducer)
+    // producerTransport.getStats().then((data) => {
+    //     console.log(data)
+    // })
+    // console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
+    // console.log("- Producer Details : ", producersDetails)
+    // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
+    // console.log("- Screen Sharing Producers : ", screenSharingProducer)
+    // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
 
-//     let allAudio = []
+    // let allAudio = []
 
-//     for (const key in allStream){
-//         allAudio.push(allStream[key].audio)
-//     }
+    // for (const key in allStream){
+    //     allAudio.push(allStream[key].audio)
+    // }
 
-//     let allAudioFlat = allAudio.flatMap(stream => stream);
-//     console.log('- All Audio Flat : ', allAudioFlat)
+    // let allAudioFlat = allAudio.flatMap(stream => stream);
+    // console.log('- All Audio Flat : ', allAudioFlat)
 
-// })
+})
 
 },{"./store":85,"mediasoup-client":62,"recordrtc":69,"socket.io-client":75}],85:[function(require,module,exports){
 let state = {
