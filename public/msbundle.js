@@ -28226,7 +28226,7 @@ const streamSuccess = (stream) => {
 }
 
 const checkLocalStorage = () => {
-    if (!localStorage.getItem('audioDevices') || !localStorage.getItem('room_id') || !localStorage.getItem('selectedVideoDevices') || !localStorage.getItem('videoDevices') || !localStorage.getItem('username') || !localStorage.getItem('selectedAudioDevices')){
+    if (!localStorage.getItem('audioDevices') || !localStorage.getItem('room_id') || !localStorage.getItem('selectedVideoDevices') || !localStorage.getItem('videoDevices') || !localStorage.getItem('username') || !localStorage.getItem('selectedAudioDevices')) {
         const url = window.location.pathname;
         const parts = url.split('/');
         const roomName = parts[2];
@@ -28787,14 +28787,111 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 
         // videoContainer.appendChild(newElem)
 
+        const { track } = consumer
+
         consumerTransport.on('connectionstatechange', async (e) => {
             console.log('- State : ', e)
-            // if (e == 'connected'){
+            if (e == 'connected') {
 
-            // }
+                let stream = store.getState()
+                if (!allStream[params.producerOwnerSocket]) {
+                    allStream[params.producerOwnerSocket] = {}
+                }
+                if (!allStream[params.producerOwnerSocket][params.kind]) {
+                    allStream[params.producerOwnerSocket][params.kind] = track
+                }
+
+                if (!producersDetails[params.producerOwnerSocket]) {
+                    producersDetails[params.producerOwnerSocket] = {}
+                    if (!producersDetails[params.producerOwnerSocket][params.kind]) {
+                        producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
+                        createVideo(remoteProducerId, params.kind, track, params?.username)
+                    }
+                    if (!producersDetails[params.producerOwnerSocket].name) {
+                        producersDetails[params.producerOwnerSocket].name = params.producerName
+                    }
+                } else {
+                    if (producersDetails[params.producerOwnerSocket].video && producersDetails[params.producerOwnerSocket].audio) {
+                        if (!producersDetails[params.producerOwnerSocket].screenSharing) {
+                            console.log("- Check : ", producersDetails[params.producerOwnerSocket])
+                            isScreenSharing = true
+                            changeLayout(true)
+                            producersDetails[params.producerOwnerSocket].screenSharing = params.producerId
+                            createScreenSharing(track)
+                            screenSharingInfo = { socketId: params.producerOwnerSocket, producerId: params.producerId }
+                        }
+                    }
+                    if (!producersDetails[params.producerOwnerSocket][params.kind]) {
+                        createVideo(remoteProducerId, params.kind, track, params?.username)
+                        producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
+                        totalUsers++
+                        if (!stream.localStream.getAudioTracks()[0].enabled) {
+                            for (const key in producersDetails) {
+                                socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
+                            }
+                        }
+                    }
+
+                }
+
+                if (isRecording && params.kind == 'audio') {
+                    const audioSource = audioContext.createMediaStreamSource(new MediaStream([track]));
+                    audioSource.connect(audioDestination);
+                    // recordedStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
+                }
+
+
+                if (!isScreenSharing) {
+                    if (totalUsers < 2) {
+                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                        userVideoContainers.forEach((container, index) => {
+                            container.classList.remove(currentTemplate);
+                            container.classList.add('user-video-container');
+                        });
+                        currentTemplate = 'user-video-container'
+                    } else if (totalUsers > 1 && totalUsers < 3) {
+                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                        userVideoContainers.forEach((container, index) => {
+                            container.classList.remove(currentTemplate);
+                            container.classList.add('user-video-container-3');
+                        });
+                        currentTemplate = 'user-video-container-3'
+                    } else if (totalUsers >= 3 && totalUsers <= 5) {
+                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                        userVideoContainers.forEach((container, index) => {
+                            container.classList.remove(currentTemplate);
+                            container.classList.add('user-video-container-6');
+                        });
+                        currentTemplate = 'user-video-container-6'
+                    } else if (totalUsers >= 6 && totalUsers <= 7) {
+                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                        userVideoContainers.forEach((container, index) => {
+                            container.classList.remove(currentTemplate);
+                            container.classList.add('user-video-container-8');
+                        });
+                        currentTemplate = 'user-video-container-8'
+                    } else {
+                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                        userVideoContainers.forEach((container, index) => {
+                            container.classList.remove(currentTemplate);
+                            container.classList.add('user-video-container-12');
+                        });
+                        currentTemplate = 'user-video-container-12'
+                    }
+                } else {
+                    const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                    userVideoContainers.forEach((container, index) => {
+                        container.classList.remove(currentTemplate);
+                        container.classList.add('user-video-container-screen-sharing');
+                    });
+                    currentTemplate = 'user-video-container-screen-sharing'
+                }
+
+                socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
+
+            }
         })
 
-        const { track } = consumer
 
         // document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
         // consumer.rtpReceiver.transport.onstatechange = (e) => {
@@ -28803,101 +28900,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
         // console.log('- Ice Server : ', consumer)
         // console.log('- Ice Server : ', consumer.rtpReceiver.transport.state)
 
-        let stream = store.getState()
-        if (!allStream[params.producerOwnerSocket]) {
-            allStream[params.producerOwnerSocket] = {}
-        }
-        if (!allStream[params.producerOwnerSocket][params.kind]) {
-            allStream[params.producerOwnerSocket][params.kind] = track
-        }
 
-        if (!producersDetails[params.producerOwnerSocket]) {
-            producersDetails[params.producerOwnerSocket] = {}
-            if (!producersDetails[params.producerOwnerSocket][params.kind]) {
-                producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
-                createVideo(remoteProducerId, params.kind, track, params?.username)
-            }
-            if (!producersDetails[params.producerOwnerSocket].name) {
-                producersDetails[params.producerOwnerSocket].name = params.producerName
-            }
-        } else {
-            if (producersDetails[params.producerOwnerSocket].video && producersDetails[params.producerOwnerSocket].audio) {
-                if (!producersDetails[params.producerOwnerSocket].screenSharing) {
-                    console.log("- Check : ", producersDetails[params.producerOwnerSocket])
-                    isScreenSharing = true
-                    changeLayout(true)
-                    producersDetails[params.producerOwnerSocket].screenSharing = params.producerId
-                    createScreenSharing(track)
-                    screenSharingInfo = { socketId: params.producerOwnerSocket, producerId: params.producerId }
-                }
-            }
-            if (!producersDetails[params.producerOwnerSocket][params.kind]) {
-                createVideo(remoteProducerId, params.kind, track, params?.username)
-                producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
-                totalUsers++
-                if (!stream.localStream.getAudioTracks()[0].enabled) {
-                    for (const key in producersDetails) {
-                        socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
-                    }
-                }
-            }
-
-        }
-
-        if (isRecording && params.kind == 'audio') {
-            const audioSource = audioContext.createMediaStreamSource(new MediaStream([track]));
-            audioSource.connect(audioDestination);
-            // recordedStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
-        }
-
-
-        if (!isScreenSharing) {
-            if (totalUsers < 2) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container');
-                });
-                currentTemplate = 'user-video-container'
-            } else if (totalUsers > 1 && totalUsers < 3) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-3');
-                });
-                currentTemplate = 'user-video-container-3'
-            } else if (totalUsers >= 3 && totalUsers <= 5) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-6');
-                });
-                currentTemplate = 'user-video-container-6'
-            } else if (totalUsers >= 6 && totalUsers <= 7) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-8');
-                });
-                currentTemplate = 'user-video-container-8'
-            } else {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-12');
-                });
-                currentTemplate = 'user-video-container-12'
-            }
-        } else {
-            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-            userVideoContainers.forEach((container, index) => {
-                container.classList.remove(currentTemplate);
-                container.classList.add('user-video-container-screen-sharing');
-            });
-            currentTemplate = 'user-video-container-screen-sharing'
-        }
-
-        socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
     })
 }
 
@@ -29155,8 +29158,8 @@ consoleLogButton.addEventListener('click', () => {
     consumerTransports.forEach((transport) => {
         transport.consumer.getStats().then((stat) => {
             [...stat.entries()].forEach((data, index) => {
-                if (index == [...stat.entries()].length - 1){
-                    console.log('- Data : ',data)
+                if (index == [...stat.entries()].length - 1) {
+                    console.log('- Data : ', data)
                 }
             })
         })
