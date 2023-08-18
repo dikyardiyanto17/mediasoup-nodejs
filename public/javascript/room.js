@@ -163,6 +163,13 @@ const changeLayout = (isSharing) => {
                 container.classList.add('user-video-container-8');
             });
             currentTemplate = 'user-video-container-8'
+        } else {
+            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+            userVideoContainers.forEach((container, index) => {
+                container.classList.remove(currentTemplate);
+                container.classList.add('user-video-container-12');
+            });
+            currentTemplate = 'user-video-container-12'
         }
 
         videoContainer = document.getElementById('video-container')
@@ -347,6 +354,10 @@ const createSendTransport = () => {
             }
         })
 
+        producerTransport.on('connectionstatechange', async (e) => {
+            console.log('- State Change : ', e)
+        })
+
         // Connecting Send Transport
         connectSendTransport()
     })
@@ -413,6 +424,10 @@ const signalNewConsumerTransport = async (remoteProducerId) => {
                 errback(error)
             }
         })
+
+
+
+        // console.log('- Cunsomer Transport : ', consumerTransport)
 
         connectRecvTransport(consumerTransport, remoteProducerId, params.id)
     })
@@ -513,6 +528,13 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
                     container.classList.add('user-video-container-8');
                 });
                 currentTemplate = 'user-video-container-8'
+            } else {
+                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                userVideoContainers.forEach((container, index) => {
+                    container.classList.remove(currentTemplate);
+                    container.classList.add('user-video-container-12');
+                });
+                currentTemplate = 'user-video-container-12'
             }
         } else {
             const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
@@ -631,9 +653,21 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 
         // videoContainer.appendChild(newElem)
 
+        consumerTransport.on('connectionstatechange', async (e) => {
+            console.log('- State : ', e)
+            // if (e == 'connected'){
+
+            // }
+        })
+
         const { track } = consumer
 
         // document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
+        // consumer.rtpReceiver.transport.onstatechange = (e) => {
+        //     console.log('- On State Change : ', e)
+        // }
+        // console.log('- Ice Server : ', consumer)
+        // console.log('- Ice Server : ', consumer.rtpReceiver.transport.state)
 
         let stream = store.getState()
         if (!allStream[params.producerOwnerSocket]) {
@@ -712,6 +746,13 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     container.classList.add('user-video-container-8');
                 });
                 currentTemplate = 'user-video-container-8'
+            } else {
+                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                userVideoContainers.forEach((container, index) => {
+                    container.classList.remove(currentTemplate);
+                    container.classList.add('user-video-container-12');
+                });
+                currentTemplate = 'user-video-container-12'
             }
         } else {
             const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
@@ -984,10 +1025,8 @@ consoleLogButton.addEventListener('click', () => {
                     console.log('- Data : ',data)
                 }
             })
-            // console.log('- Stat : ', [...stat.entries()].length)
-            // stat.entries()
         })
-        // console.log("- Consumer Transports : ", transport.consumer)
+        console.log("- Ice Paramaters : ", transport.consumer.rtpReceiver.transport.state)
         // transport.consumerTransport.getStats().then((stat) => {
         //     console.log("- Stat : ", stat)
         // })
