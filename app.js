@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const router = require('./routes/index.js')
 const app = express()
-const port = 3001
+const port = 3000
 const http = require('http')
 const path = require('path');
 const https = require('httpolyglot')
@@ -18,18 +18,19 @@ const mediasoup = require('mediasoup')
 //     cert: fs.readFileSync(certificatePath),
 // };
 
-// const options = {
-//     key: fs.readFileSync("key.pem"),
-//     cert: fs.readFileSync("cert.pem"),
-// };
+const options = {
+    key: fs.readFileSync("key.pem"),
+    cert: fs.readFileSync("cert.pem"),
+};
 
 const webRtcTransport_options = {
     listenIps: [
         {
             // ip: '127.0.0.1',
-            // ip: '192.168.206.123'
+            ip: '192.168.206.123'
             // ip: '203.194.113.166'
-            ip: '203.194.113.166'
+            // ip: '203.194.113.166',
+            // announcedIp: "88.12.10.41"
         }
     ],
     enableUdp: true,
@@ -46,12 +47,19 @@ app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
 // const httpsServer = https.createServer(app)
-const httpServer = http.createServer(app)
-httpServer.listen(port, () => {
+const httpsServer = https.createServer(options, app)
+httpsServer.listen(port, () => {
     console.log('App On : ' + port)
 })
 
-const io = new Server(httpServer)
+const io = new Server(httpsServer)
+
+// const httpServer = http.createServer(app)
+// httpServer.listen(port, () => {
+//     console.log('App On : ' + port)
+// })
+
+// const io = new Server(httpServer)
 
 let worker
 let rooms = {}
@@ -119,6 +127,10 @@ io.on('connection', async socket => {
 
         if (peers[socket.id]) {
             const { roomName } = peers[socket.id]
+            console.log('- Peers : ', peers[socket.id].producers)
+            peers[socket.id].producers.forEach((producerId) => {
+                socket.emit('producer-closed', { remoteProducerId: producerId })
+            })
             delete peers[socket.id]
 
             roomsSocketCollection[roomName] = roomsSocketCollection[roomName].filter(item => item.socketId !== socket.id)
@@ -128,7 +140,7 @@ io.on('connection', async socket => {
             }
         }
 
-        console.log("- Room Participant : ", roomsSocketCollection)
+        // console.log("- Room Participant : ", roomsSocketCollection)
     })
 
     socket.on('joinRoom', async (data, callback) => {
@@ -153,7 +165,7 @@ io.on('connection', async socket => {
             roomsSocketCollection[data.roomName] = [...roomsSocketCollection[data.roomName], newUser]
         }
 
-        console.log("- Room Participant : ", roomsSocketCollection)
+        // console.log("- Room Participant : ", roomsSocketCollection)
 
         const rtpCapabilities = router1.rtpCapabilities
 

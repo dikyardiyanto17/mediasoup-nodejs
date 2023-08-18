@@ -1,3 +1,6 @@
 # mediasoup-nodejs
 ## Needs Improvement
-- Layout Lebih Dari 6 user di lokal berjalan dengan normal, di komputer lain tembus
+- Kamera belakang tidak mau (handphone)
+- Jika user lebih dari 12 (saat tidak screensharing, di geser)
+- Jika user lebih dari 6 (saat screensharing, di geser)
+- Check koneksi

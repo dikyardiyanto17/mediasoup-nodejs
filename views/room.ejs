@@ -165,11 +165,150 @@
             font-size: 20px;
             padding: 10px;
         }
+
+        #snackbar {
+            visibility: hidden;
+            color: #fff;
+            background-color: #333;
+            margin-left: -125px;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            bottom: 30px;
+            right: -50px;
+            z-index: 1;
+            position: absolute;
+        }
+
+        #snackbar.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        /* Animations for fading in and out */
+        @-webkit-keyframes fadein {
+            from {
+                bottom: 0;
+                opacity: 0;
+            }
+
+            to {
+                bottom: 30px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadein {
+            from {
+                bottom: 0;
+                opacity: 0;
+            }
+
+            to {
+                bottom: 30px;
+                opacity: 1;
+            }
+        }
+
+        @-webkit-keyframes fadeout {
+            from {
+                bottom: 30px;
+                opacity: 1;
+            }
+
+            to {
+                bottom: 0;
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeout {
+            from {
+                bottom: 30px;
+                opacity: 1;
+            }
+
+            to {
+                bottom: 0;
+                opacity: 0;
+            }
+        }
+
+        #alert-screensharing {
+            visibility: hidden;
+            color: #fff;
+            background-color: #333;
+            margin-left: -125px;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            top: 30px;
+            left: 50%;
+            z-index: 1;
+            position: absolute;
+        }
+
+        #alert-screensharing.show {
+            visibility: visible;
+            -webkit-animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+            animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+        }
+
+        /* Animations for fading in and out */
+        @-webkit-keyframes fadein-as {
+            from {
+                top: 0;
+                opacity: 0;
+            }
+
+            to {
+                top: 30px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadein-as {
+            from {
+                top: 0;
+                opacity: 0;
+            }
+
+            to {
+                top: 30px;
+                opacity: 1;
+            }
+        }
+
+        @-webkit-keyframes fadeout-as {
+            from {
+                top: 30px;
+                opacity: 1;
+            }
+
+            to {
+                top: 0;
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeout-as {
+            from {
+                top: 30px;
+                opacity: 1;
+            }
+
+            to {
+                top: 0;
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="full-container" id="full-container-id">
+        <span id="alert-screensharing">Screensharing is ongoing</span>
         <div id="video-container">
             <div class="user-video-container">
                 <img src="/assets/pictures/micOn.png" class="icons-mic" id="local-mic" />
@@ -180,7 +319,7 @@
         </div>
         <div class="controller">
             <button class="button-small-custom" id="user-record-button">
-                <img src="/assets/pictures/record.png" class="button-image" id="record-image"/>
+                <img src="/assets/pictures/record.png" class="button-image" id="record-image" />
             </button>
             <button class="button-small-custom" id="user-mic-button">
                 <img src="/assets/pictures/micOn.png" id="mic-image" />
@@ -199,6 +338,7 @@
             </button>
             <button class="button-small-custom" id="share-link-button">
                 <i class="far fa-share-square" style="color: white;"></i>
+                <span id="snackbar">Successfully Copied</span>
             </button>
         </div>
     </div>

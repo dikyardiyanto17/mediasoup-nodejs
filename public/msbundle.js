@@ -28203,6 +28203,7 @@ let videoParams = { params };
 let screenSharingParams = { params }
 let consumingTransports = [];
 let isScreenSharing = false
+let screenSharingInfo
 
 // Starting Video Local
 const streamSuccess = (stream) => {
@@ -28293,6 +28294,7 @@ const getScreenSharing = async () => {
     try {
         if (!isScreenSharing) {
 
+
             changeLayout(true)
 
             let screenSharingVideo = document.getElementById('screen-sharing')
@@ -28319,6 +28321,7 @@ const getScreenSharing = async () => {
                 changeLayout(false)
                 screenSharingStreamsGlobal = null
                 screenSharingParams = { params }
+                screenSharingInfo = null
             };
 
             // for (const key in producersDetails) {
@@ -28339,9 +28342,16 @@ const getScreenSharing = async () => {
             if (!currentTemplate) {
                 currentTemplate = 'user-video-container'
             }
+            screenSharingInfo = { socketId: socket.id }
             isScreenSharing = true
+        } else if (isScreenSharing && screenSharingInfo.socketId != socket.id) {
+            let as = document.getElementById("alert-screensharing");
+            as.className = "show";
+
+            setTimeout(() => { as.className = as.className.replace("show", ""); }, 3000);
         } else {
             screenSharingStreamsGlobal.getTracks().forEach((track) => track.stop());
+            screenSharingInfo = null
             isScreenSharing = false
             changeLayout(false)
             for (const key in producersDetails) {
@@ -28355,6 +28365,7 @@ const getScreenSharing = async () => {
     } catch (error) {
         changeLayout(false)
         console.log(error)
+        screenSharingInfo = null
     }
 }
 
@@ -28642,9 +28653,13 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
 
         if (document.getElementById(`td-${remoteProducerId}`)) {
             videoContainer.removeChild(document.getElementById(`td-${remoteProducerId}`))
-        } else {
-            isScreenSharing = false
-            changeLayout(false)
+        }
+
+        if (screenSharingInfo) {
+            if (screenSharingInfo.producerId == remoteProducerId) {
+                isScreenSharing = false
+                changeLayout(false)
+            }
         }
     } catch (error) {
         console.log(error)
@@ -28766,6 +28781,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     changeLayout(true)
                     producersDetails[params.producerOwnerSocket].screenSharing = params.producerId
                     createScreenSharing(track)
+                    screenSharingInfo = { socketId: params.producerOwnerSocket, producerId: params.producerId }
                 }
             }
             if (!producersDetails[params.producerOwnerSocket][params.kind]) {
@@ -29065,6 +29081,11 @@ recordButton.addEventListener('click', () => {
 // Share Link Button
 const shareButton = document.getElementById('share-link-button')
 shareButton.addEventListener('click', () => {
+    let sb = document.getElementById("snackbar");
+
+    sb.className = "show";
+
+    setTimeout(() => { sb.className = sb.className.replace("show", ""); }, 3000);
     navigator.clipboard.writeText(window.location.href);
 })
 
@@ -29075,32 +29096,32 @@ hangUpButton.addEventListener('click', () => {
 })
 
 // Console Log Button
-const consoleLogButton = document.getElementById('console-log-button')
-consoleLogButton.addEventListener('click', () => {
-    // console.log('- Consumer Tranport : ', consumingTransports)
-    // console.log("- Consumer Transports : ", consumerTransports)
-    // socket.emit('get-peers', (consumerTransports))
-    // console.log("- Producer : ", producerTransport)
-    // console.log("- Video Producer : ", videoProducer)
-    // producerTransport.getStats().then((data) => {
-    //     console.log(data)
-    // })
-    // console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
-    // console.log("- Producer Details : ", producersDetails)
-    // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
-    // console.log("- Screen Sharing Producers : ", screenSharingProducer)
-    // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
+// const consoleLogButton = document.getElementById('console-log-button')
+// consoleLogButton.addEventListener('click', () => {
+//     console.log('- Consumer Tranport : ', consumingTransports)
+//     console.log("- Consumer Transports : ", consumerTransports)
+//     socket.emit('get-peers', (consumerTransports))
+//     console.log("- Producer : ", producerTransport)
+//     console.log("- Video Producer : ", videoProducer)
+//     producerTransport.getStats().then((data) => {
+//         console.log(data)
+//     })
+//     console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
+//     console.log("- Producer Details : ", producersDetails)
+//     console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
+//     console.log("- Screen Sharing Producers : ", screenSharingProducer)
+//     console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
 
-    // let allAudio = []
+//     let allAudio = []
 
-    // for (const key in allStream){
-    //     allAudio.push(allStream[key].audio) 
-    // }
+//     for (const key in allStream){
+//         allAudio.push(allStream[key].audio)
+//     }
 
-    // let allAudioFlat = allAudio.flatMap(stream => stream);
-    // console.log('- All Audio Flat : ', allAudioFlat)
+//     let allAudioFlat = allAudio.flatMap(stream => stream);
+//     console.log('- All Audio Flat : ', allAudioFlat)
 
-})
+// })
 
 },{"./store":85,"mediasoup-client":62,"recordrtc":69,"socket.io-client":75}],85:[function(require,module,exports){
 let state = {
