@@ -7,6 +7,7 @@
 - Tambahkan Turn Off Camera
 - Membuat UI yang lebih baik
 - Case jika 1000 user online bersamaan
+- Button Controller dibuat block (bukan absolute)
 
 ## Critical Information
 - 1 worker untuk 1 core CPU

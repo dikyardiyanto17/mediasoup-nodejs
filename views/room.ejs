@@ -41,6 +41,7 @@
             justify-content: center;
             flex-wrap: wrap;
             align-content: center;
+            position: relative;
         }
 
         .user-video-container-screen-sharing {
@@ -415,11 +416,44 @@
             border-radius: 20px;
             width: 40px;
         }
+
+        .pagination-button {
+            height: 50px;
+            width: 50px;
+            background-color: transparent;
+            background-repeat: no-repeat;
+            border: none;
+            overflow: hidden;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .pagination-left {
+            position: absolute;
+            top: 50%;
+            left: 0;
+        }
+
+        .pagination-right {
+            position: absolute;
+            top: 50%;
+            right: 0;
+        }
     </style>
 </head>
 
 <body>
     <div class="full-container" id="full-container-id">
+        <!-- <div class="pagination-left">
+            <button class="pagination-button" id="slide-left">
+                <i class="fas fa-arrow-circle-left fa-lg" style="cursor: pointer;"></i>
+            </button>
+        </div>
+        <div class="pagination-right">
+            <button class="pagination-button" id="slide-right">
+                <i class="fas fa-arrow-circle-right fa-lg" style="cursor: pointer;"></i>
+            </button>
+        </div> -->
         <div class="invisible" id="chat-container">
             <div class="chat-bar" id="chat-bar">
                 <div id="chat-bar-header">In Call Message</div>
@@ -509,7 +543,6 @@
             <button class="button-small-custom" id="console-log-button" style="color: white;">
                 Log
             </button>
-            <button>Helo</button>
         </div>
     </div>
 

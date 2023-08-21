@@ -277,7 +277,7 @@ io.on('connection', async socket => {
     })
 
     socket.on('mic-config', ({ videoProducerId, audioProducerId, socketId, isMicActive }) => {
-        socket.to(socketId).emit('mic-config', ({ videoProducerId, audioProducerId, isMicActive }))
+        socket.to(socketId).emit('mic-config', ({ videoProducerId, audioProducerId, isMicActive, socketId: socket.id }))
     })
 
     socket.on('screen-sharing', ({ videoProducerId, audioProducerId, socketId, isSharing }) => {
