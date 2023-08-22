@@ -118,6 +118,33 @@ io.on('connection', async socket => {
         return items
     }
 
+    const removeScreenSharingProducer = (items, socketId, type, producerId) => {
+        items.forEach(item => {
+            if (item.socketId == socket.id && item[type].id == producerId){
+                item[type].close()
+            }
+        })
+        items = items.filter(item => item.producer.id !== producerId)
+        return items
+    }
+
+    
+    socket.on('console-log-server', (data) => {
+        // console.log('- Consumers : ', consumers)
+        consumers.forEach(consumer => {
+            console.log(consumer.consumer.id)
+        })
+        // console.log('- Producers : ', producers)
+    })
+
+    socket.on('screen-sharing', ({ videoProducerId, audioProducerId, socketId, isSharing, producerId }) => {
+        socket.to(socketId).emit('screen-sharing', ({ videoProducerId, audioProducerId, isSharing, remoteProducerId: producerId }))
+    })
+
+    socket.on('screen-sharing-producer', ({ videoProducerId, audioProducerId, socketId, isSharing, producerId }) => {
+        producers = removeScreenSharingProducer(producers, socketId, 'producer', producerId)
+    })
+
     socket.on('disconnect', () => {
         console.log('peer disconnected')
         consumers = removeItems(consumers, socket.id, 'consumer')
@@ -280,9 +307,8 @@ io.on('connection', async socket => {
         socket.to(socketId).emit('mic-config', ({ videoProducerId, audioProducerId, isMicActive, socketId: socket.id }))
     })
 
-    socket.on('screen-sharing', ({ videoProducerId, audioProducerId, socketId, isSharing }) => {
-        socket.to(socketId).emit('screen-sharing', ({ videoProducerId, audioProducerId, isSharing }))
-    })
+
+
 
     const informConsumers = (roomName, socketId, id) => {
         producers.forEach(producerData => {

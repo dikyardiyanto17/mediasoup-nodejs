@@ -139,7 +139,9 @@ const changeLayout = (isSharing) => {
     } else {
         videoContainer.id = 'video-container'
         let removeDiv = document.getElementById('screen-sharing-container')
-        removeDiv.parentNode.removeChild(removeDiv)
+        if (removeDiv){
+            removeDiv.parentNode.removeChild(removeDiv)
+        }
 
         if (totalUsers < 2) {
             const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
@@ -204,11 +206,13 @@ const getScreenSharing = async () => {
             screenSharingProducer = await producerTransport.produce(screenSharingParams);
             console.log("- Producing : ", screenSharingProducer)
 
+
+
             screenSharingStreamsGlobal.getVideoTracks()[0].onended = function () {
                 for (const key in producersDetails) {
-                    socket.emit('screen-sharing', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: key, isSharing: false }))
+                    socket.emit('screen-sharing', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: key, isSharing: false, producerId: screenSharingProducer.id }))
                 }
-                console.log('- On Ended : ', screenSharingProducer)
+                socket.emit('screen-sharing-producer', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: socket.id, isSharing: false, producerId: screenSharingProducer.id }))
                 isScreenSharing = false
                 changeLayout(false)
                 screenSharingStreamsGlobal = null
@@ -247,9 +251,9 @@ const getScreenSharing = async () => {
             isScreenSharing = false
             changeLayout(false)
             for (const key in producersDetails) {
-                socket.emit('screen-sharing', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: key, isSharing: false }))
+                socket.emit('screen-sharing', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: key, isSharing: false, producerId: screenSharingProducer.id }))
             }
-
+            socket.emit('screen-sharing-producer', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: socket.id, isSharing: false, producerId: screenSharingProducer.id }))
             screenSharingParams = { params }
 
             screenSharingStreamsGlobal = null
@@ -258,6 +262,7 @@ const getScreenSharing = async () => {
         changeLayout(false)
         console.log(error)
         screenSharingInfo = null
+        isScreenSharing = false
     }
 }
 
@@ -451,9 +456,9 @@ socket.on('connection-success', ({ socketId }) => {
 socket.on('mic-config', (data) => {
     let videoId = document.querySelector('#td-' + data.videoProducerId);
     allStream[data.socketId].audio.track.enabled = false
-    for (const firstKey in allStream){
-        for (const secondKey in allStream[firstKey]){
-            if (allStream[firstKey][secondKey].id == data.audioProducerId){
+    for (const firstKey in allStream) {
+        for (const secondKey in allStream[firstKey]) {
+            if (allStream[firstKey][secondKey].id == data.audioProducerId) {
                 allStream[firstKey][secondKey].track.enabled
             }
         }
@@ -472,8 +477,11 @@ socket.on('mic-config', (data) => {
 })
 
 // Screen Sharing Socket
-socket.on('screen-sharing', ({ videoProducerId, audioProducerId, isSharing }) => {
+socket.on('screen-sharing', ({ videoProducerId, audioProducerId, isSharing, remoteProducerId }) => {
     if (!isSharing) {
+        const producerToClose = consumerTransports.find(transportData => transportData.producerId === remoteProducerId)
+        producerToClose.consumerTransport.close()
+        producerToClose.consumer.close()
         screenSharingParams = { params }
         isScreenSharing = false
         screenSharingStreamsGlobal = null
@@ -512,21 +520,6 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
         if (isExistLeft) isExistLeft.remove()
         if (isExistRight) isExistRight.remove()
 
-        let counter = 0
-        while (videoContainer.firstChild) {
-            videoContainer.removeChild(videoContainer.firstChild);
-        }
-        for (const firstKey in allStream) {
-            if (counter >= paginationStartIndex && counter <= paginationEndIndex) {
-                for (const secondKey in allStream[firstKey]) {
-                    if (allStream[firstKey][secondKey].kind != 'screen-sharing') {
-                        createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
-                    }
-                }
-            }
-            counter++
-        }
-
         const paginationRightContainer = document.getElementById('pagination-right-container')
         if (paginationRightContainer) {
             paginationRightContainer.remove()
@@ -534,8 +527,12 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
 
         for (const firstkey in allStream) {
             for (const secondkey in allStream[firstkey]) {
-                if (allStream[firstkey][secondkey].id == remoteProducerId) {
+                if (allStream[firstkey][secondkey].id == remoteProducerId && allStream[firstkey][secondkey].kind != 'screen-sharing') {
+                    totalUsers--
                     delete allStream[firstkey]
+                    break
+                } else {
+                    delete allStream[firstkey][secondkey].kind
                     break
                 }
             }
@@ -544,13 +541,16 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
         // Creating Other Variables For other Purposes
         for (const firstKey in producersDetails) {
             for (const secondKey in producersDetails[firstKey]) {
-                if (producersDetails[firstKey][secondKey] == remoteProducerId) {
-                    totalUsers--
+                console.log('- Second Key : ', secondKey)
+                if (producersDetails[firstKey][secondKey] == remoteProducerId && secondKey != 'screenSharing') {
                     delete producersDetails[firstKey]
                     break
+                } else {
+                    delete producersDetails[firstKey][secondKey]
                 }
             }
         }
+
 
         if (currentPage != 0) {
             createPaginationLeft()
@@ -623,6 +623,21 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
                 changeLayout(false)
             }
         }
+
+        let counter = 0
+        while (videoContainer.firstChild) {
+            videoContainer.removeChild(videoContainer.firstChild);
+        }
+        for (const firstKey in allStream) {
+            if (counter >= paginationStartIndex && counter <= paginationEndIndex) {
+                for (const secondKey in allStream[firstKey]) {
+                    if (allStream[firstKey][secondKey].kind != 'screen-sharing') {
+                        createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
+                    }
+                }
+            }
+            counter++
+        }
     } catch (error) {
         console.log(error)
     }
@@ -644,6 +659,8 @@ const createVideo = (remoteId, kind, track, username, micIcon) => {
 
     if (kind == 'audio') {
         if (remoteId == 'current-user-audio') {
+            let stream = store.getState()
+            track = stream.localStream.getAudioTracks()[0]
             newElem.innerHTML = '<audio id="' + remoteId + '" autoplay muted></audio>'
         } else {
             newElem.innerHTML = '<audio id="' + remoteId + '" autoplay></audio>'
@@ -653,6 +670,8 @@ const createVideo = (remoteId, kind, track, username, micIcon) => {
 
 
         if (remoteId == 'current-user-video') {
+            let stream = store.getState()
+            track = stream.localStream.getVideoTracks()[0]
             let isMic
             if (stream.localStream.getAudioTracks()[0].enabled) {
                 isMic = 'micOn.png'
@@ -869,7 +888,6 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                             allStream[params.producerOwnerSocket].screenSharing = { track, id: remoteProducerId, username: params?.username, kind: 'screen-sharing' }
                         }
                         if (!producersDetails[params.producerOwnerSocket].screenSharing) {
-                            console.log("- Check : ", producersDetails[params.producerOwnerSocket])
                             isScreenSharing = true
                             changeLayout(true)
                             producersDetails[params.producerOwnerSocket].screenSharing = params.producerId
@@ -1003,6 +1021,12 @@ const SwitchingCamera = async () => {
         (device) => device.kind === "videoinput"
     );
 
+    let localVideo2 = document.getElementById('local-video')
+
+    if (!localVideo2) {
+        localVideo2 = document.getElementById('current-user-video')
+    }
+
     deviceId++
     if (deviceId >= videoDevices?.length) deviceId = 0
 
@@ -1016,8 +1040,9 @@ const SwitchingCamera = async () => {
     localStorage.setItem('selectedVideoDevices', videoDevices[deviceId].deviceId)
     let newStream = await navigator.mediaDevices.getUserMedia(config);
     store.setLocalStream(newStream)
-    localVideo.srcObject = newStream
-
+    if (localVideo){
+        localVideo2.srcObject = newStream
+    }
     await videoProducer.replaceTrack({ track: newStream.getVideoTracks()[0] });
 };
 
@@ -1342,6 +1367,8 @@ consoleLogButton.addEventListener('click', () => {
     // let allAudioFlat = allAudio.flatMap(stream => stream);
     // console.log('- All Audio Flat : ', allAudioFlat)
 
-    console.log('- All Stream : ', allStream)
+    // console.log('- All Stream : ', allStream)
+    // socket.emit('console-log-server', ({message: 'hello world!'}))
 
+    console.log('- Total User : ', totalUsers)
 })
