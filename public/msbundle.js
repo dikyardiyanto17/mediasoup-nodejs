@@ -28173,9 +28173,9 @@ let allStream = {}
 let audioContext
 let audioDestination
 let paginationStartIndex = 0
-let paginationEndIndex = 1
+let paginationEndIndex = 11
 let currentPage = 0
-let limitedPerPage = 2
+let limitedPerPage = 12
 
 
 // Params for MediaSoup
@@ -28646,7 +28646,7 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
         producerToClose.consumer.close()
 
         paginationStartIndex = 0
-        paginationEndIndex = 1
+        paginationEndIndex = 11
         currentPage = 0
 
         const isExistLeft = document.getElementById('pagination-left-container')
@@ -28852,8 +28852,8 @@ const createPaginationRight = () => {
         newPaginationRightContainer.appendChild(newPaginationRightButton)
 
         newPaginationRightButton.addEventListener('click', () => {
-            paginationStartIndex = paginationStartIndex + 2
-            paginationEndIndex = paginationEndIndex + 2
+            paginationStartIndex = paginationStartIndex + 12
+            paginationEndIndex = paginationEndIndex + 12
             currentPage++
 
             let counter = 0
@@ -28903,8 +28903,8 @@ const createPaginationLeft = () => {
         newPaginationleftContainer.appendChild(newPaginationleftButton)
 
         newPaginationleftButton.addEventListener('click', () => {
-            paginationStartIndex = paginationStartIndex - 2
-            paginationEndIndex = paginationEndIndex - 2
+            paginationStartIndex = paginationStartIndex - 12
+            paginationEndIndex = paginationEndIndex - 12
             currentPage--
 
             let counter = 0
