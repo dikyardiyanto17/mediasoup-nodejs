@@ -39,9 +39,9 @@ let allStream = {}
 let audioContext
 let audioDestination
 let paginationStartIndex = 0
-let paginationEndIndex = 11
+let paginationEndIndex = 1
 let currentPage = 0
-let limitedPerPage = 12
+let limitedPerPage = 2
 
 
 // Params for MediaSoup
