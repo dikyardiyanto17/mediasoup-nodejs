@@ -39,9 +39,9 @@ let allStream = {}
 let audioContext
 let audioDestination
 let paginationStartIndex = 0
-let paginationEndIndex = 1
+let paginationEndIndex = 11
 let currentPage = 0
-let limitedPerPage = 2
+let limitedPerPage = 12
 
 
 // Params for MediaSoup
@@ -143,34 +143,20 @@ const changeLayout = (isSharing) => {
             removeDiv.parentNode.removeChild(removeDiv)
         }
 
-        if (totalUsers < 2) {
+        if (totalUsers <= 4) {
             const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
             userVideoContainers.forEach((container, index) => {
                 container.classList.remove(currentTemplate);
                 container.classList.add('user-video-container');
             });
             currentTemplate = 'user-video-container'
-        } else if (totalUsers > 1 && totalUsers < 3) {
+        } else if (totalUsers <= 9) {
             const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
             userVideoContainers.forEach((container, index) => {
                 container.classList.remove(currentTemplate);
-                container.classList.add('user-video-container-3');
+                container.classList.add('user-video-container-9');
             });
-            currentTemplate = 'user-video-container-3'
-        } else if (totalUsers >= 3 && totalUsers <= 5) {
-            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-            userVideoContainers.forEach((container, index) => {
-                container.classList.remove(currentTemplate);
-                container.classList.add('user-video-container-6');
-            });
-            currentTemplate = 'user-video-container-6'
-        } else if (totalUsers >= 6 && totalUsers <= 7) {
-            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-            userVideoContainers.forEach((container, index) => {
-                container.classList.remove(currentTemplate);
-                container.classList.add('user-video-container-8');
-            });
-            currentTemplate = 'user-video-container-8'
+            currentTemplate = 'user-video-container-9'
         } else {
             const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
             userVideoContainers.forEach((container, index) => {
@@ -512,7 +498,7 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
         producerToClose.consumer.close()
 
         paginationStartIndex = 0
-        paginationEndIndex = 1
+        paginationEndIndex = 11
         currentPage = 0
 
         const isExistLeft = document.getElementById('pagination-left-container')
@@ -561,34 +547,20 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
         }
 
         if (!isScreenSharing) {
-            if (totalUsers <= 1) {
+            if (totalUsers <= 4) {
                 const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
                 userVideoContainers.forEach((container, index) => {
                     container.classList.remove(currentTemplate);
                     container.classList.add('user-video-container');
                 });
                 currentTemplate = 'user-video-container'
-            } else if (totalUsers > 1 && totalUsers < 3) {
+            } else if (totalUsers <= 9) {
                 const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
                 userVideoContainers.forEach((container, index) => {
                     container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-3');
+                    container.classList.add('user-video-container-9');
                 });
-                currentTemplate = 'user-video-container-3'
-            } else if (totalUsers >= 3 && totalUsers <= 5) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-6');
-                });
-                currentTemplate = 'user-video-container-6'
-            } else if (totalUsers >= 6 && totalUsers <= 7) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-8');
-                });
-                currentTemplate = 'user-video-container-8'
+                currentTemplate = 'user-video-container-9'
             } else {
                 const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
                 userVideoContainers.forEach((container, index) => {
@@ -604,8 +576,6 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
                 container.classList.add('user-video-container-screen-sharing');
             });
             currentTemplate = 'user-video-container-screen-sharing'
-
-
         }
 
 
@@ -801,6 +771,10 @@ const createPaginationLeft = () => {
     }
 }
 
+const isScreenSharingType = (input) => {
+    return input.includes("Sharing Screen");
+}
+
 // Connecting Receive Transport
 const connectRecvTransport = async (consumerTransport, remoteProducerId, serverConsumerTransportId) => {
     await socket.emit('consume', {
@@ -809,7 +783,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
         serverConsumerTransportId,
     }, async ({ params }) => {
         if (params.error) {
-            console.log('Cannot Consume')
+            console.log('Cannot Consume : ', params.error)
             return
         }
 
@@ -831,38 +805,22 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
             },
         ]
 
-
-
-        // console.log("- Producer Socket : ", params.producerOwnerSocket, " - Producer Name : ", params.producerName, " - Kind : ", params.kind, " - Producer Id : ", params.id)
-
-
-
         if (!currentTemplate) {
             currentTemplate = 'user-video-container'
         }
 
         console.log("- Producers Details : ", producersDetails)
 
-        // console.log("- Customer Transports : ", consumerTransports, " - Remote Producer Id : ", remoteProducerId, " - My Socket Id : ", socket.id, " - Username : ", params?.username)
-
-        // const newElem = document.createElement('div')
-        // newElem.setAttribute('id', `td-${remoteProducerId}`)
-
-        // if (params.kind == 'audio') {
-        //     newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
-        // } else {
-        //     newElem.setAttribute('class', currentTemplate)
-        //     newElem.innerHTML = '<img src="/assets/pictures/micOn.png" class="icons-mic" /><video id="' + remoteProducerId + '" autoplay class="user-video" ></video><div class="username">' + params?.username + '</div>'
-        // }
-
-        // videoContainer.appendChild(newElem)
-
         const { track } = consumer
+
+        let check = false
+        if (params.username){
+            check = isScreenSharingType(params.username)
+        }
 
         consumerTransport.on('connectionstatechange', async (e) => {
             console.log('- State : ', e)
             if (e == 'connected') {
-
                 let stream = store.getState()
                 if (!allStream[params.producerOwnerSocket]) {
                     allStream[params.producerOwnerSocket] = {}
@@ -871,7 +829,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     allStream[params.producerOwnerSocket][params.kind] = { track, id: remoteProducerId, username: params?.username, kind: params.kind }
                 }
 
-                if (!producersDetails[params.producerOwnerSocket]) {
+                if (!producersDetails[params.producerOwnerSocket] && !check) {
                     producersDetails[params.producerOwnerSocket] = {}
                     if (!producersDetails[params.producerOwnerSocket][params.kind]) {
                         producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
@@ -883,7 +841,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                         producersDetails[params.producerOwnerSocket].name = params.producerName
                     }
                 } else {
-                    if (producersDetails[params.producerOwnerSocket].video && producersDetails[params.producerOwnerSocket].audio) {
+                    if (check) {
                         if (!allStream[params.producerOwnerSocket].screenSharing) {
                             allStream[params.producerOwnerSocket].screenSharing = { track, id: remoteProducerId, username: params?.username, kind: 'screen-sharing' }
                         }
@@ -895,11 +853,13 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                             screenSharingInfo = { socketId: params.producerOwnerSocket, producerId: params.producerId }
                         }
                     }
-                    if (!producersDetails[params.producerOwnerSocket][params.kind]) {
+                    if (producersDetails[params.producerOwnerSocket] && !check && (!producersDetails[params.producerOwnerSocket].video || !producersDetails[params.producerOwnerSocket].audio)){
+                        totalUsers++
+                    }
+                    if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
                         if (totalUsers < limitedPerPage) {
                             createVideo(remoteProducerId, params.kind, track, params?.username, true)
                         }
-                        totalUsers++
                         producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
                         if (!stream.localStream.getAudioTracks()[0].enabled) {
                             for (const key in producersDetails) {
@@ -923,34 +883,20 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 
 
                 if (!isScreenSharing) {
-                    if (totalUsers < 2) {
+                    if (totalUsers <= 4) {
                         const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
                         userVideoContainers.forEach((container, index) => {
                             container.classList.remove(currentTemplate);
                             container.classList.add('user-video-container');
                         });
                         currentTemplate = 'user-video-container'
-                    } else if (totalUsers > 1 && totalUsers < 3) {
+                    } else if (totalUsers <= 9) {
                         const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
                         userVideoContainers.forEach((container, index) => {
                             container.classList.remove(currentTemplate);
-                            container.classList.add('user-video-container-3');
+                            container.classList.add('user-video-container-9');
                         });
-                        currentTemplate = 'user-video-container-3'
-                    } else if (totalUsers >= 3 && totalUsers <= 5) {
-                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                        userVideoContainers.forEach((container, index) => {
-                            container.classList.remove(currentTemplate);
-                            container.classList.add('user-video-container-6');
-                        });
-                        currentTemplate = 'user-video-container-6'
-                    } else if (totalUsers >= 6 && totalUsers <= 7) {
-                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                        userVideoContainers.forEach((container, index) => {
-                            container.classList.remove(currentTemplate);
-                            container.classList.add('user-video-container-8');
-                        });
-                        currentTemplate = 'user-video-container-8'
+                        currentTemplate = 'user-video-container-9'
                     } else {
                         const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
                         userVideoContainers.forEach((container, index) => {
@@ -972,16 +918,6 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 
             }
         })
-
-
-        // document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
-        // consumer.rtpReceiver.transport.onstatechange = (e) => {
-        //     console.log('- On State Change : ', e)
-        // }
-        // console.log('- Ice Server : ', consumer)
-        // console.log('- Ice Server : ', consumer.rtpReceiver.transport.state)
-
-
     })
 }
 

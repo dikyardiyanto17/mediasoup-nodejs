@@ -5,8 +5,6 @@
 - Tambahkan Turn Off Camera
 - Membuat UI yang lebih baik
 - Case jika 1000 user online bersamaan
-- Perlu ngehandle saat user join kadang masuk pagination kadang tidak
-- Mic saat mapping all stream perlu diperbaiki
-
+- Kadang Screen sharing dan video user yang screensharing ketuker saat user baru masuk posisi sedang screen sharing
 ## Critical Information
 - 1 worker untuk 1 core CPU
