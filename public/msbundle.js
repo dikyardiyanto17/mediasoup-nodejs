@@ -28758,6 +28758,11 @@ const getProducers = () => {
 
 const createVideo = (remoteId, kind, track, username, micIcon) => {
 
+    let check = false
+    if (username){
+        check = isScreenSharingType(username)
+    }
+
     const newElem = document.createElement('div')
     newElem.setAttribute('id', `td-${remoteId}`)
 
@@ -28967,7 +28972,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     producersDetails[params.producerOwnerSocket] = {}
                     if (!producersDetails[params.producerOwnerSocket][params.kind]) {
                         producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
-                        if (totalUsers < limitedPerPage) {
+                        if (totalUsers <= limitedPerPage) {
                             createVideo(remoteProducerId, params.kind, track, params?.username, true)
                         }
                     }
@@ -28991,7 +28996,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                         totalUsers++
                     }
                     if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
-                        if (totalUsers < limitedPerPage) {
+                        if (totalUsers <= limitedPerPage) {
                             createVideo(remoteProducerId, params.kind, track, params?.username, true)
                         }
                         producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
