@@ -20,11 +20,13 @@
         .full-container {
             width: 100vw;
             height: 100vh;
+            display: flex;
+            flex-wrap: wrap;
         }
 
         .left-bar {
             background-color: black;
-            width: 100%;
+            width: 30%;
             height: 100%;
             display: flex;
             justify-content: center;
@@ -32,7 +34,7 @@
         }
 
         .right-bar {
-            width: 100%;
+            width: 70%;
             height: 100%;
             display: flex;
             justify-content: center;
@@ -105,12 +107,23 @@
             object-fit: fill;
             border-radius: 10px;
         }
+
+        @media (max-width: 1000px) {
+            .left-bar {
+                width: 100%;
+                height: 50%;
+            }
+
+            .right-bar {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <div class="full-container d-flex justify-content-center align-items-center">
-        <section class="col-3 left-bar">
+    <div class="full-container">
+        <section class="left-bar">
             <form id="join-room">
                 <div class="input-wrap">
                     <input type="text" class="input-custom" placeholder="Enter Your Name..." id="username" style="color: white;" />
@@ -136,7 +149,7 @@
                 <button type="submit" class="button-custom"> Join </button>
             </form>
         </section>
-        <section class="col-9 right-bar">
+        <section class="right-bar">
             <div class=" user-video-container">
                 <video id="local-video" autoplay class="user-video" muted></video>
             </div>

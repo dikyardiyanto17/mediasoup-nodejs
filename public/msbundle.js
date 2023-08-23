@@ -29191,14 +29191,13 @@ const SwitchingCamera = async () => {
             video: { facingMode: "environment" },
         },
     }
-    console.log('- Locak Video : ', )
     localStorage.setItem('selectedVideoDevices', videoDevices[deviceId].deviceId)
     let newStream = await navigator.mediaDevices.getUserMedia(config);
     store.setLocalStream(newStream)
     if (localVideo) {
         localVideo2.srcObject.getTracks().forEach((track) => {
             track.stop();
-          });
+        });
         localVideo2.srcObject = null
         localVideo2.srcObject = newStream
     }

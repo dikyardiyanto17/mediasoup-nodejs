@@ -1,7 +1,7 @@
 # mediasoup-nodejs
 ## Needs Improvement
 ### Primary
-- Kamera belakang tidak mau (handphone)
+- Kamera belakang tidak mau (handphone) (Sudah di diperbaiki, belum ditesting)
 - Responsive Design
 - Membuat UI yang lebih baik
 
