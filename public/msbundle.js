@@ -28214,7 +28214,7 @@ const streamSuccess = (stream) => {
 
     store.setLocalStream(stream)
     localVideo.srcObject = stream
-    allStream[socket.id] = { video: { track: stream.getVideoTracks()[0], id: 'current-user-video', username: localStorage.getItem('username') ? localStorage.getItem('username') : 'unknown' }, audio: { track: stream.getAudioTracks()[0], id: 'current-user-audio', username: localStorage.getItem('username') ? localStorage.getItem('username') : 'unknown' } }
+    allStream[socket.id] = { video: { track: stream.getVideoTracks()[0], id: 'current-user-video', username: localStorage.getItem('username') ? localStorage.getItem('username') : 'unknown', kind: 'video', status: true }, audio: { track: stream.getAudioTracks()[0], id: 'current-user-audio', username: localStorage.getItem('username') ? localStorage.getItem('username') : 'unknown', kind: 'audio', status: true } }
 
     audioParams = { track: stream.getAudioTracks()[0], ...audioParams };
     videoParams = { track: stream.getVideoTracks()[0], ...videoParams };
@@ -28273,7 +28273,7 @@ const changeLayout = (isSharing) => {
     } else {
         videoContainer.id = 'video-container'
         let removeDiv = document.getElementById('screen-sharing-container')
-        if (removeDiv){
+        if (removeDiv) {
             removeDiv.parentNode.removeChild(removeDiv)
         }
 
@@ -28621,13 +28621,20 @@ socket.on('screen-sharing', ({ videoProducerId, audioProducerId, isSharing, remo
         isScreenSharing = false
         screenSharingStreamsGlobal = null
         changeLayout(false)
+        for (const firstKey in allStream) {
+            for (const secondKey in allStream[firstKey]) {
+                if (allStream[firstKey][secondKey].id == remoteProducerId && secondKey == 'screenSharing') {
+                    delete allStream[firstKey][secondKey]
+                    return
+                }
+            }
+        }
         for (const firstKey in producersDetails) {
             for (const secondKey in producersDetails[firstKey]) {
-                if (producersDetails[firstKey][secondKey] == videoProducerId) {
-                    if (producersDetails[firstKey].screenSharing) {
-                        delete producersDetails[firstKey].screenSharing
-                        return
-                    }
+                if (producersDetails[firstKey][secondKey] == videoProducerId && secondKey == 'screenSharing') {
+                    console.log('- Deleting : ', producersDetails[firstKey][secondKey])
+                    delete producersDetails[firstKey][secondKey]
+                    return
                 }
             }
         }
@@ -28676,12 +28683,13 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
         // Creating Other Variables For other Purposes
         for (const firstKey in producersDetails) {
             for (const secondKey in producersDetails[firstKey]) {
-                console.log('- Second Key : ', secondKey)
-                if (producersDetails[firstKey][secondKey] == remoteProducerId && secondKey != 'screenSharing') {
-                    delete producersDetails[firstKey]
-                    break
-                } else {
+                if (producersDetails[firstKey][secondKey] == remoteProducerId && secondKey == 'screenSharing'){
                     delete producersDetails[firstKey][secondKey]
+                    return
+                }
+                if (producersDetails[firstKey][secondKey] == remoteProducerId) {
+                    delete producersDetails[firstKey]
+                    return
                 }
             }
         }
@@ -28996,7 +29004,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
         const { track } = consumer
 
         let check = false
-        if (params.username){
+        if (params.username) {
             check = isScreenSharingType(params.username)
         }
 
@@ -29037,7 +29045,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                             screenSharingInfo = { socketId: params.producerOwnerSocket, producerId: params.producerId }
                         }
                     }
-                    if (producersDetails[params.producerOwnerSocket] && !check && (!producersDetails[params.producerOwnerSocket].video || !producersDetails[params.producerOwnerSocket].audio)){
+                    if (producersDetails[params.producerOwnerSocket] && !check && (!producersDetails[params.producerOwnerSocket].video || !producersDetails[params.producerOwnerSocket].audio)) {
                         totalUsers++
                     }
                     if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
@@ -29186,7 +29194,7 @@ const SwitchingCamera = async () => {
     localStorage.setItem('selectedVideoDevices', videoDevices[deviceId].deviceId)
     let newStream = await navigator.mediaDevices.getUserMedia(config);
     store.setLocalStream(newStream)
-    if (localVideo){
+    if (localVideo) {
         localVideo2.srcObject = newStream
     }
     await videoProducer.replaceTrack({ track: newStream.getVideoTracks()[0] });
@@ -29513,8 +29521,8 @@ consoleLogButton.addEventListener('click', () => {
     // let allAudioFlat = allAudio.flatMap(stream => stream);
     // console.log('- All Audio Flat : ', allAudioFlat)
 
-    // console.log('- All Stream : ', allStream)
-    // socket.emit('console-log-server', ({message: 'hello world!'}))
+    console.log('- All Stream : ', allStream)
+    socket.emit('console-log-server', ({ message: 'hello world!' }))
 
     // console.log('- Total User : ', totalUsers)
 })

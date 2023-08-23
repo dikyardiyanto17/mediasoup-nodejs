@@ -1,9 +1,12 @@
 # mediasoup-nodejs
 ## Needs Improvement
+### Primary
 - Kamera belakang tidak mau (handphone) https://stackoverflow.com/questions/55808286/can-not-change-camera-in-mobile-chrome-or-safari-during-webrtc-call
+- Membuat UI yang lebih baik
+
+### Secondary
 - Tambahkan jika buffering
 - Tambahkan Turn Off Camera
-- Membuat UI yang lebih baik
 - Case jika 1000 user online bersamaan
 
 ## Critical Information
