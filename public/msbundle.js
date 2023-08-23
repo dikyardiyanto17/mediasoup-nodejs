@@ -28589,11 +28589,12 @@ socket.on('connection-success', ({ socketId }) => {
 // Mic Configuration
 socket.on('mic-config', (data) => {
     let videoId = document.querySelector('#td-' + data.videoProducerId);
-    allStream[data.socketId].audio.track.enabled = false
+    allStream[data.socketId].audio.track.enabled = data.isMicActive
     for (const firstKey in allStream) {
         for (const secondKey in allStream[firstKey]) {
             if (allStream[firstKey][secondKey].id == data.audioProducerId) {
-                allStream[firstKey][secondKey].track.enabled
+                allStream[firstKey][secondKey].track.enabled = data.isMicActive
+                allStream[firstKey][secondKey].status = data.isMicActive
             }
         }
 
@@ -29009,7 +29010,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     allStream[params.producerOwnerSocket] = {}
                 }
                 if (!allStream[params.producerOwnerSocket][params.kind]) {
-                    allStream[params.producerOwnerSocket][params.kind] = { track, id: remoteProducerId, username: params?.username, kind: params.kind }
+                    allStream[params.producerOwnerSocket][params.kind] = { track, id: remoteProducerId, username: params?.username, kind: params.kind, status: true }
                 }
 
                 if (!producersDetails[params.producerOwnerSocket]) {
@@ -29042,7 +29043,6 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
                         if (totalUsers <= limitedPerPage) {
                             createVideo(remoteProducerId, params.kind, track, params?.username, true)
-                            console.log('Whats Up')
                         }
                         producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
                         if (!stream.localStream.getAudioTracks()[0].enabled) {
@@ -29141,6 +29141,8 @@ micButton.addEventListener("click", () => {
         for (const key in producersDetails) {
             socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
         }
+        allStream[socket.id].audio.track.enabled = false
+        allStream[socket.id].audio.status = false
         stream.localStream.getAudioTracks()[0].enabled = false
         if (localMic) localMic.src = "/assets/pictures/micOff.png";
         micImage.src = "/assets/pictures/micOff.png";
@@ -29148,6 +29150,8 @@ micButton.addEventListener("click", () => {
         for (const key in producersDetails) {
             socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: true }))
         }
+        allStream[socket.id].audio.track.enabled = true
+        allStream[socket.id].audio.status = true
         stream.localStream.getAudioTracks()[0].enabled = true
         if (localMic) localMic.src = "/assets/pictures/micOn.png";
         micImage.src = "/assets/pictures/micOn.png";
@@ -29495,7 +29499,7 @@ consoleLogButton.addEventListener('click', () => {
     //     console.log(data)
     // })
     // console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
-    // console.log("- Producer Details : ", producersDetails)
+    console.log("- Producer Details : ", producersDetails)
     // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
     // console.log("- Screen Sharing Producers : ", screenSharingProducer)
     // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
@@ -29512,7 +29516,7 @@ consoleLogButton.addEventListener('click', () => {
     // console.log('- All Stream : ', allStream)
     // socket.emit('console-log-server', ({message: 'hello world!'}))
 
-    console.log('- Total User : ', totalUsers)
+    // console.log('- Total User : ', totalUsers)
 })
 
 },{"./store":85,"mediasoup-client":62,"recordrtc":69,"socket.io-client":75}],85:[function(require,module,exports){
