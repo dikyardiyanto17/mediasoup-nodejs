@@ -1,7 +1,8 @@
 # mediasoup-nodejs
 ## Needs Improvement
 ### Primary
-- Kamera belakang tidak mau (handphone) https://stackoverflow.com/questions/55808286/can-not-change-camera-in-mobile-chrome-or-safari-during-webrtc-call
+- Kamera belakang tidak mau (handphone)
+- Responsive Design
 - Membuat UI yang lebih baik
 
 ### Secondary
@@ -21,3 +22,21 @@
 - So your CPU with that capacity can handle around 48000 consumers. But in reality actual number of consumers can be lower than this because of the piping, if you are doing, and some other stuff of your server.
 
 - You can calculate the number of consumers in your call session and see the max number of users your CPU can handle
+
+## Question
+- Is 1 Core have a different port?
+```js
+const createWorker = async () => {
+    worker = await mediasoup.createWorker({
+        rtcMinPort: 2000,
+        rtcMaxPort: 10000,
+    })
+
+    worker.on('died', error => {
+        console.log(error)
+        setTimeout(() => process.exit(1), 2000)
+    })
+
+    return worker
+}
+```

@@ -129,13 +129,18 @@ io.on('connection', async socket => {
     }
 
     
-    socket.on('console-log-server', (data) => {
-        // console.log('- Consumers : ', consumers)
-        // consumers.forEach(consumer => {
-        //     console.log(consumer.consumer.id)
-        // })
+    socket.on('console-log-server', (data, callback) => {
+        consumers.forEach(consumer => {
+            console.log('- Consumer : ', consumer.consumer)
+        })
         // console.log('- Producers : ', producers)
-        console.log('- Media Soup : ', worker)
+
+        // worker.events = (e) => {
+        //     console.log(e)
+        // }
+
+
+        // callback({worker})
     })
 
     socket.on('screen-sharing', ({ videoProducerId, audioProducerId, socketId, isSharing, producerId }) => {

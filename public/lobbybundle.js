@@ -44,6 +44,9 @@ micOptions.addEventListener("click", (e) => {
         }
         localStorage.setItem("selectedAudioDevices", clickedValue)
         navigator.mediaDevices.getUserMedia(config).then((stream) => {
+            localVideo.srcObject.getTracks().forEach((track) => {
+                track.stop();
+            });
             localVideo.srcObject = null;
             store.setLocalStream(stream)
             localVideo.srcObject = stream;
@@ -81,6 +84,10 @@ videoOptions.addEventListener("click", (e) => {
 
         localStorage.setItem('selectedVideoDevices', clickedValue)
         navigator.mediaDevices.getUserMedia(config).then((stream) => {
+            localVideo.srcObject.getTracks().forEach((track) => {
+                track.stop();
+            });
+            localVideo.srcObject = null
             store.setLocalStream(stream)
             localVideo.srcObject = stream;
         })
@@ -93,20 +100,20 @@ videoOptions.addEventListener("click", (e) => {
 
 joinRoom.addEventListener('submit', (e) => {
     e.preventDefault();
-    
+
     const userName = document.getElementById('username').value;
     localStorage.setItem('username', userName);
-    
+
     const url = window.location.pathname;
     const parts = url.split('/');
     const roomName = parts[2];
     const goTo = 'room/' + roomName;
     localStorage.setItem('room_id', roomName)
-    
+
     const newURL = window.location.origin + "/" + goTo;
-    
+
     console.log("- New URL : ", newURL);
-    
+
     window.location.href = newURL;
 });
 

@@ -28683,7 +28683,7 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
         // Creating Other Variables For other Purposes
         for (const firstKey in producersDetails) {
             for (const secondKey in producersDetails[firstKey]) {
-                if (producersDetails[firstKey][secondKey] == remoteProducerId && secondKey == 'screenSharing'){
+                if (producersDetails[firstKey][secondKey] == remoteProducerId && secondKey == 'screenSharing') {
                     delete producersDetails[firstKey][secondKey]
                     return
                 }
@@ -29191,10 +29191,15 @@ const SwitchingCamera = async () => {
             video: { facingMode: "environment" },
         },
     }
+    console.log('- Locak Video : ', )
     localStorage.setItem('selectedVideoDevices', videoDevices[deviceId].deviceId)
     let newStream = await navigator.mediaDevices.getUserMedia(config);
     store.setLocalStream(newStream)
     if (localVideo) {
+        localVideo2.srcObject.getTracks().forEach((track) => {
+            track.stop();
+          });
+        localVideo2.srcObject = null
         localVideo2.srcObject = newStream
     }
     await videoProducer.replaceTrack({ track: newStream.getVideoTracks()[0] });
@@ -29522,7 +29527,8 @@ consoleLogButton.addEventListener('click', () => {
     // console.log('- All Audio Flat : ', allAudioFlat)
 
     console.log('- All Stream : ', allStream)
-    socket.emit('console-log-server', ({ message: 'hello world!' }))
+    socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
+    })
 
     // console.log('- Total User : ', totalUsers)
 })
