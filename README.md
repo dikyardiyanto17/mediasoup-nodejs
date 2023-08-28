@@ -7,6 +7,8 @@
 - Pause consumer jika tidak sedang digunakan (sudah ditambahkan, belum ditesting)
 - Konfigurasi menjalankan consumer yang didisplay saja, dalam kasus ini maksimal 12 user per page. 11 x 2 = 24 consumer per user. 24 x 12 = 288 consumer  (sudah ditambahkan, belum ditesting)
 - Konfigurasi Worker untuk setiap core, maksimal 1 worker terdapat 50 orang. 1 orang menerima 98 consumer dari 49 video dan audio dan total consumer adalah 50 x 98 = 4900 Consumer (skema ada dibawah)
+- Deployment ke dua video putus-putus (Perbedaan dari deployment ke dua dengan pertama adalah cara memasukan videonya)
+- Apply kondisi tidak bisa buka mic jika state change di production bukan connected
 
 ### Secondary
 - Tambahkan Turn Off / On Camera (Masih perlu perbaikan)
@@ -27,7 +29,9 @@
 - You can calculate the number of consumers in your call session and see the max number of users your CPU can handle
 
 ## Question
+- When 100 user hit the join room in the sametime?
 - Is 1 Core have a different port?
+- 4 User have 25% CPU?
 ```js
 const createWorker = async () => {
     worker = await mediasoup.createWorker({

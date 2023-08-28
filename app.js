@@ -27,7 +27,9 @@ const webRtcTransport_options = {
     listenIps: [
         {
             // ip: '127.0.0.1',
-            ip: '192.168.206.123'
+            // ip: '192.168.206.123',
+            // ip: '192.168.205.229',
+            ip: '192.168.18.68',
             // ip: '203.194.113.166'
             // ip: '203.194.113.166',
             // announcedIp: "88.12.10.41"
@@ -67,6 +69,12 @@ let transports = []
 let producers = []
 let consumers = []
 let roomsSocketCollection = {}
+let allWorkers = {
+    worker1: null,
+    worker2: null,
+    worker3: null,
+    worker4: null,
+}
 
 const createWorker = async () => {
     worker = await mediasoup.createWorker({
@@ -81,6 +89,17 @@ const createWorker = async () => {
 
     return worker
 }
+
+
+const initWorker = async () => {
+    allWorkers.worker1 = { worker: await createWorker(), totalUsers: 0 }
+    allWorkers.worker2 = { worker: await createWorker(), totalUsers: 0 }
+    allWorkers.worker3 = { worker: await createWorker(), totalUsers: 0 }
+    allWorkers.worker4 = { worker: await createWorker(), totalUsers: 0 }
+}
+
+initWorker()
+
 
 worker = createWorker()
 
@@ -130,9 +149,11 @@ io.on('connection', async socket => {
 
     
     socket.on('console-log-server', (data, callback) => {
-        consumers.forEach(consumer => {
-            console.log('- Consumer : ', consumer.consumer)
-        })
+        // consumers.forEach(consumer => {
+        //     console.log('- Consumer : ', consumer.consumer)
+        // })
+        // console.log(rooms)
+        console.log('- All Workers : ', allWorkers)
         // console.log('- Producers : ', producers)
 
         // worker.events = (e) => {
@@ -168,7 +189,8 @@ io.on('connection', async socket => {
             roomsSocketCollection[roomName] = roomsSocketCollection[roomName].filter(item => item.socketId !== socket.id)
             rooms[roomName] = {
                 router: rooms[roomName].router,
-                peers: rooms[roomName].peers.filter(socketId => socketId !== socket.id)
+                peers: rooms[roomName].peers.filter(socketId => socketId !== socket.id),
+                worker: rooms[roomName].worker
             }
         }
 
@@ -207,20 +229,37 @@ io.on('connection', async socket => {
     const createRoom = async (roomName, socketId) => {
         let router1
         let peers = []
+        let choosenWorker = 'worker1'
         if (rooms[roomName]) {
             router1 = rooms[roomName].router
             peers = rooms[roomName].peers || []
+            choosenWorker = rooms[roomName].worker
+            console.log('- Choosen Worker : ', choosenWorker)
+            allWorkers[choosenWorker].totalUsers++
         } else {
-            if (!worker) {
-                worker = await createWorker()
+            // Create New Room
+            let compareRoom = allWorkers.worker1.totalUsers
+
+
+            for (const key in allWorkers){
+                if (allWorkers[key].totalUsers == 0){
+                    choosenWorker = key
+                    break
+                } else if (allWorkers[key].totalUsers < compareRoom) {
+                    choosenWorker = key
+                    compareRoom = allWorkers[key].totalUsers
+                }
             }
-            router1 = await worker.createRouter({ mediaCodecs })
+            router1 = await allWorkers[choosenWorker].worker.createRouter({ mediaCodecs })
+            allWorkers[choosenWorker].totalUsers++
         }
 
         rooms[roomName] = {
             router: router1,
             peers: [...peers, socketId],
+            worker: choosenWorker
         }
+
 
         return router1
     }

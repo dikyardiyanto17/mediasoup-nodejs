@@ -29063,139 +29063,138 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
         if (params.username) {
             check = isScreenSharingType(params.username)
         }
+        
+        let stream = store.getState()
+        if (!allStream[params.producerOwnerSocket]) {
+            allStream[params.producerOwnerSocket] = {}
+        }
+        if (!allStream[params.producerOwnerSocket][params.kind]) {
+            allStream[params.producerOwnerSocket][params.kind] = { track, id: remoteProducerId, username: params?.username, kind: params.kind, status: true, serverConsumerId: params.serverConsumerId }
+        }
 
-
-        consumerTransport.on('connectionstatechange', async (e) => {
-            console.log('- State : ', e)
-            if (e == 'connected') {
-
-                let stream = store.getState()
-                if (!allStream[params.producerOwnerSocket]) {
-                    allStream[params.producerOwnerSocket] = {}
+        if (!producersDetails[params.producerOwnerSocket]) {
+            producersDetails[params.producerOwnerSocket] = {}
+            if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
+                producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
+                if (totalUsers <= limitedPerPage) {
+                    createVideo(remoteProducerId, params.kind, track, params?.username, true)
                 }
-                if (!allStream[params.producerOwnerSocket][params.kind]) {
-                    allStream[params.producerOwnerSocket][params.kind] = { track, id: remoteProducerId, username: params?.username, kind: params.kind, status: true, serverConsumerId: params.serverConsumerId }
-                }
-
-                if (!producersDetails[params.producerOwnerSocket]) {
-                    producersDetails[params.producerOwnerSocket] = {}
-                    if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
-                        producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
-                        if (totalUsers <= limitedPerPage) {
-                            createVideo(remoteProducerId, params.kind, track, params?.username, true)
-                        }
-                    }
-                    if (!producersDetails[params.producerOwnerSocket].name) {
-                        producersDetails[params.producerOwnerSocket].name = params.producerName
-                    }
-                } else {
-                    if (check) {
-                        if (!allStream[params.producerOwnerSocket].screenSharing) {
-                            allStream[params.producerOwnerSocket].screenSharing = { track, id: remoteProducerId, username: params?.username, kind: 'screen-sharing' }
-                        }
-                        if (!producersDetails[params.producerOwnerSocket].screenSharing) {
-                            isScreenSharing = true
-                            changeLayout(true)
-                            producersDetails[params.producerOwnerSocket].screenSharing = params.producerId
-                            createScreenSharing(track)
-                            screenSharingInfo = { socketId: params.producerOwnerSocket, producerId: params.producerId }
-                        }
-                    }
-                    if (producersDetails[params.producerOwnerSocket] && !check && (!producersDetails[params.producerOwnerSocket].video || !producersDetails[params.producerOwnerSocket].audio)) {
-                        totalUsers++
-                    }
-                    if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
-                        if (totalUsers <= limitedPerPage) {
-                            createVideo(remoteProducerId, params.kind, track, params?.username, true)
-                        }
-                        producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
-                        if (!stream.localStream.getAudioTracks()[0].enabled) {
-                            for (const key in producersDetails) {
-                                socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
-                            }
-                        }
-                        if (!isCameraOn){
-                            console.log('Off')
-                            replaceVideoToImage()
-                        }
-                    }
-                }
-
-                if (isRecording && params.kind == 'audio') {
-                    const audioSource = audioContext.createMediaStreamSource(new MediaStream([track]));
-                    audioSource.connect(audioDestination);
-                    // recordedStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
-                }
-
-                if (params.kind == 'audio') {
-                    const newElem = document.createElement('div')
-                    newElem.setAttribute('id', `td-${remoteProducerId}`)
-                    if (remoteProducerId == 'current-user-audio') {
-                        let stream = store.getState()
-                        track = stream.localStream.getAudioTracks()[0]
-                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay muted></audio>'
-                    } else {
-                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
-                    }
-                    videoContainer.appendChild(newElem)
-                    document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
-                }
-
-
-                if (!isScreenSharing) {
-                    if (totalUsers <= 2) {
-                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                        userVideoContainers.forEach((container, index) => {
-                            container.classList.remove(currentTemplate);
-                            container.classList.add('user-video-container');
-                        });
-                        currentTemplate = 'user-video-container'
-                    } else if (totalUsers == 3) {
-                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                        userVideoContainers.forEach((container, index) => {
-                            container.classList.remove(currentTemplate);
-                            container.classList.add('user-video-container-3');
-                        });
-                        currentTemplate = 'user-video-container-3'
-                    } else if (totalUsers >= 4 && totalUsers <= 6) {
-                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                        userVideoContainers.forEach((container, index) => {
-                            container.classList.remove(currentTemplate);
-                            container.classList.add('user-video-container-6');
-                        });
-                        currentTemplate = 'user-video-container-6'
-                    } else if (totalUsers >= 7 && totalUsers <= 8) {
-                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                        userVideoContainers.forEach((container, index) => {
-                            container.classList.remove(currentTemplate);
-                            container.classList.add('user-video-container-8');
-                        });
-                        currentTemplate = 'user-video-container-8'
-                    } else {
-                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                        userVideoContainers.forEach((container, index) => {
-                            container.classList.remove(currentTemplate);
-                            container.classList.add('user-video-container-12');
-                        });
-                        currentTemplate = 'user-video-container-12'
-                    }
-                } else {
-                    const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                    userVideoContainers.forEach((container, index) => {
-                        container.classList.remove(currentTemplate);
-                        container.classList.add('user-video-container-screen-sharing');
-                    });
-                    currentTemplate = 'user-video-container-screen-sharing'
-                }
-
-                if (totalUsers > limitedPerPage) {
-                    createPaginationRight()
-                }
-
-                socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
-
             }
-        })
+            if (!producersDetails[params.producerOwnerSocket].name) {
+                producersDetails[params.producerOwnerSocket].name = params.producerName
+            }
+        } else {
+            if (check) {
+                if (!allStream[params.producerOwnerSocket].screenSharing) {
+                    allStream[params.producerOwnerSocket].screenSharing = { track, id: remoteProducerId, username: params?.username, kind: 'screen-sharing' }
+                }
+                if (!producersDetails[params.producerOwnerSocket].screenSharing) {
+                    isScreenSharing = true
+                    changeLayout(true)
+                    producersDetails[params.producerOwnerSocket].screenSharing = params.producerId
+                    createScreenSharing(track)
+                    screenSharingInfo = { socketId: params.producerOwnerSocket, producerId: params.producerId }
+                }
+            }
+            if (producersDetails[params.producerOwnerSocket] && !check && (!producersDetails[params.producerOwnerSocket].video || !producersDetails[params.producerOwnerSocket].audio)) {
+                totalUsers++
+            }
+            if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
+                if (totalUsers <= limitedPerPage) {
+                    createVideo(remoteProducerId, params.kind, track, params?.username, true)
+                }
+                producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
+                if (!stream.localStream.getAudioTracks()[0].enabled) {
+                    for (const key in producersDetails) {
+                        socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
+                    }
+                }
+                if (!isCameraOn){
+                    console.log('Off')
+                    replaceVideoToImage()
+                }
+            }
+        }
+
+        if (isRecording && params.kind == 'audio') {
+            const audioSource = audioContext.createMediaStreamSource(new MediaStream([track]));
+            audioSource.connect(audioDestination);
+            // recordedStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
+        }
+
+        if (params.kind == 'audio') {
+            const newElem = document.createElement('div')
+            newElem.setAttribute('id', `td-${remoteProducerId}`)
+            if (remoteProducerId == 'current-user-audio') {
+                let stream = store.getState()
+                track = stream.localStream.getAudioTracks()[0]
+                newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay muted></audio>'
+            } else {
+                newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
+            }
+            videoContainer.appendChild(newElem)
+            document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
+        }
+
+
+        if (!isScreenSharing) {
+            if (totalUsers <= 2) {
+                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                userVideoContainers.forEach((container, index) => {
+                    container.classList.remove(currentTemplate);
+                    container.classList.add('user-video-container');
+                });
+                currentTemplate = 'user-video-container'
+            } else if (totalUsers == 3) {
+                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                userVideoContainers.forEach((container, index) => {
+                    container.classList.remove(currentTemplate);
+                    container.classList.add('user-video-container-3');
+                });
+                currentTemplate = 'user-video-container-3'
+            } else if (totalUsers >= 4 && totalUsers <= 6) {
+                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                userVideoContainers.forEach((container, index) => {
+                    container.classList.remove(currentTemplate);
+                    container.classList.add('user-video-container-6');
+                });
+                currentTemplate = 'user-video-container-6'
+            } else if (totalUsers >= 7 && totalUsers <= 8) {
+                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                userVideoContainers.forEach((container, index) => {
+                    container.classList.remove(currentTemplate);
+                    container.classList.add('user-video-container-8');
+                });
+                currentTemplate = 'user-video-container-8'
+            } else {
+                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                userVideoContainers.forEach((container, index) => {
+                    container.classList.remove(currentTemplate);
+                    container.classList.add('user-video-container-12');
+                });
+                currentTemplate = 'user-video-container-12'
+            }
+        } else {
+            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+            userVideoContainers.forEach((container, index) => {
+                container.classList.remove(currentTemplate);
+                container.classList.add('user-video-container-screen-sharing');
+            });
+            currentTemplate = 'user-video-container-screen-sharing'
+        }
+
+        if (totalUsers > limitedPerPage) {
+            createPaginationRight()
+        }
+
+        socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
+
+        
+        // consumerTransport.on('connectionstatechange', async (e) => {
+        //     if (e == 'connected') {
+        //         console.log('- State : ', e)
+        //     }
+        // })
 
 
         // document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
@@ -29252,6 +29251,7 @@ const SwitchingCamera = async () => {
 
     let storeData = store.getState()
     let stream = storeData.localStream
+    let audio = stream.getAudioTracks()[0]
 
     let cameraIcons = document.getElementById('turn-on-off-camera-icons')
     cameraIcons.classList.add('fa-video');
@@ -29274,7 +29274,7 @@ const SwitchingCamera = async () => {
     }
     localStorage.setItem('selectedVideoDevices', videoDevices[deviceId].deviceId)
     let newStream = await navigator.mediaDevices.getUserMedia(config);
-    newStream.addTrack(stream.getAudioTracks()[0])
+    newStream.addTrack(audio)
     store.setLocalStream(newStream)
     if (localVideo2) {
         localVideo2.srcObject.getTracks().forEach((track) => {
@@ -29684,12 +29684,12 @@ consoleLogButton.addEventListener('click', () => {
     // console.log('- All Audio Flat : ', allAudioFlat)
 
     // console.log('- All Stream : ', allStream)
-    // socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
-    // })
+    socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
+    })
 
     // console.log('- Total User : ', totalUsers)
-    let stream = store.getState()
-    console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
+    // let stream = store.getState()
+    // console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
 })
 
 },{"./store":85,"mediasoup-client":62,"recordrtc":69,"socket.io-client":75}],85:[function(require,module,exports){
