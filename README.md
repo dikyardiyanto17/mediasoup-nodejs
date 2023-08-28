@@ -2,13 +2,16 @@
 ## Needs Improvement
 ### Primary
 - Kamera belakang tidak mau (handphone) (Sudah di diperbaiki, belum ditesting)
-- Responsive Design
-- Membuat UI yang lebih baik
+- Responsive Design (basic design)
+- Membuat UI yang lebih baik (on Development)
+- Pause consumer jika tidak sedang digunakan (sudah ditambahkan, belum ditesting)
+- Konfigurasi menjalankan consumer yang didisplay saja, dalam kasus ini maksimal 12 user per page. 11 x 2 = 24 consumer per user. 24 x 12 = 288 consumer  (sudah ditambahkan, belum ditesting)
+- Konfigurasi Worker untuk setiap core, maksimal 1 worker terdapat 50 orang. 1 orang menerima 98 consumer dari 49 video dan audio dan total consumer adalah 50 x 98 = 4900 Consumer (skema ada dibawah)
 
 ### Secondary
-- Tambahkan jika buffering
-- Tambahkan Turn Off Camera
+- Tambahkan Turn Off / On Camera (Masih perlu perbaikan)
 - Case jika 1000 user online bersamaan
+- Case jika seseorang sedang merekam, lalu tiba-tiba kepencet exit, harus auto download
 
 ## Critical Information
 - 1 worker untuk 1 core CPU
@@ -39,4 +42,120 @@ const createWorker = async () => {
 
     return worker
 }
+```
+
+- If I loop the stream, will the voice get through?
+
+## Scenario Worker Info
+```js
+let allWorkers = {
+    worker1: createWorker(),
+    worker2: createWorker(),
+    worker3: createWorker(),
+    worker4: createWorker(),
+    worker5: createWorker(),
+    ...
+}
+let workerInfo = {
+    worker1: {
+        roomName: [
+            socketId, socketId, socketId
+        ]
+    },
+    worker2: {
+        roomName: [
+            socketId, socketId, socketId
+        ]
+    },
+    worker3:  {
+        roomName: [
+            socketId, socketId, socketId
+        ]
+    },
+    worker4: {
+        roomName: [
+            socketId, socketId, socketId
+        ]
+    },
+    worker5: {
+        roomName: [
+            socketId, socketId, socketId
+        ]
+    },
+    worker6: {
+        roomName: [
+            socketId, socketId, socketId
+        ]
+    },
+    worker7: {
+        roomName: [
+            socketId, socketId, socketId
+        ]
+    },
+    worker8: {
+        roomName: [
+            socketId, socketId, socketId
+        ]
+    }
+}
+
+let capacity = {
+    wokrer1 = 0
+    wokrer2 = 0
+    wokrer3 = 0
+    wokrer4 = 0
+    wokrer5 = 0
+    ...
+}
+```
+
+## Methods
+```js
+socket.on('joinRoom', (data) => {
+    // Checking Worker Capacity
+    const { roomName } = data
+    let newRoom = true
+    let usedWorker
+    let total = 0
+    // Checking if its new room or not
+    for (const firstKey in workerInfo){
+        for (const secondKey in workerInfo[firstKey]){
+            if (secondKey == roomName){
+                newRoom = false
+                usedWorker = firstKey
+                for (const thirdKey in workerInfo[firstkey]){
+                    total = total + workerInfo[firstKey][thirdKey].length
+                }
+                break
+            }
+        }
+        workerInfo[key]
+    }
+
+    if (total >= 15){
+        // socket bla-bla-bla
+        return
+    }
+
+    if (newRoom){
+        let choosenWorker
+        let theLeastConsumer
+        // Choosing worker with fewer consumer
+        for (const firstKey in capacity)[
+            if (theLeastConsumer < capacity[firstKey]){
+                theLesatConsumer = capacity[firstKey]
+                choosenWorker = firstKey
+            }
+        ]
+        capacity[choosenWorker]++
+        if (!workerInfo[choosenWorker][roomName]){
+            // bla-bla create router
+            workerInfo[choosenWorker][roomName] = []
+            workerInfo[choosenWorker][roomName].push(socket.id)
+        } else {
+            // bla-bla getRouter
+            workerInfo[usedWorker][roomName].push(socket.id)
+        }
+    }
+})
 ```

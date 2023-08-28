@@ -486,12 +486,13 @@
                 position: relative;
             }
         }
-    </style>
+        </style>
 </head>
 
 <body>
     <div class="outside-container">
         <div class="full-container" id="full-container-id">
+            <audio id="audio-collection" autoplay></audio>
             <!-- <div class="pagination-left">
                 <button class="pagination-button" id="slide-left">
                     <i class="fas fa-arrow-circle-left fa-lg" style="cursor: pointer;"></i>
@@ -554,13 +555,12 @@
                         </div>
                     </div>
                 </div>
-
             </div>
             <span id="alert-screensharing">Screensharing is ongoing</span>
             <div id="video-container">
                 <div class="user-video-container">
                     <img src="/assets/pictures/micOn.png" class="icons-mic" id="local-mic" />
-                    <video id="local-video" autoplay class="user-video" muted></video>
+                    <video id="local-video" poster="/assets/pictures/unknown.jpg" preload="auto" autoplay class="user-video" muted></video>
                     <div class="username" id="my-username"></div>
                 </div>
                 <div class="screen-sharing-container"></div>
@@ -578,6 +578,9 @@
             </button>
             <button class="button-small-custom" id="user-switch-camera-button">
                 <img src="/assets/pictures/switchCamera.png" />
+            </button>
+            <button class="button-small-custom" id="user-turn-on-off-camera-button">
+                <i class="fas fa-video" style="color: #ffffff;" id="turn-on-off-camera-icons"></i>
             </button>
             <button class="button-small-custom" id="user-screen-share-button">
                 <img src="/assets/pictures/share.png" />

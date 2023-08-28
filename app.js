@@ -27,9 +27,9 @@ const webRtcTransport_options = {
     listenIps: [
         {
             // ip: '127.0.0.1',
-            // ip: '192.168.206.123'
+            ip: '192.168.206.123'
             // ip: '203.194.113.166'
-            ip: '203.194.113.166',
+            // ip: '203.194.113.166',
             // announcedIp: "88.12.10.41"
         }
     ],
@@ -46,19 +46,19 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// const httpsServer = https.createServer(options, app)
-// httpsServer.listen(port, () => {
-//     console.log('App On : ' + port)
-// })
-
-// const io = new Server(httpsServer)
-
-const httpServer = http.createServer(app)
-httpServer.listen(port, () => {
+const httpsServer = https.createServer(options, app)
+httpsServer.listen(port, () => {
     console.log('App On : ' + port)
 })
 
-const io = new Server(httpServer)
+const io = new Server(httpsServer)
+
+// const httpServer = http.createServer(app)
+// httpServer.listen(port, () => {
+//     console.log('App On : ' + port)
+// })
+
+// const io = new Server(httpServer)
 
 let worker
 let rooms = {}
@@ -488,6 +488,11 @@ io.on('connection', async socket => {
     socket.on('consumer-resume', async ({ serverConsumerId }) => {
         const { consumer } = consumers.find(consumerData => consumerData.consumer.id === serverConsumerId)
         await consumer.resume()
+    })
+
+    socket.on('consumer-pause', async ({ serverConsumerId }) => {
+        const { consumer } = consumers.find(consumerData => consumerData.consumer.id === serverConsumerId)
+        await consumer.pause()
     })
 })
 
