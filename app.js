@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const router = require('./routes/index.js')
 const app = express()
-const port = 80
+const port = 3001
 const http = require('http')
 const path = require('path');
 const https = require('httpolyglot')
@@ -29,10 +29,10 @@ const webRtcTransport_options = {
             // ip: '127.0.0.1',
             // ip: '192.168.206.123',
             // ip: '192.168.205.229',
-            // ip: '192.168.18.68',
+            ip: '192.168.18.68',
             // ip: '203.194.113.166'
             // ip: '203.194.113.166',
-            ip: '203.175.10.29'
+            // ip: '203.175.10.29'
             // announcedIp: "88.12.10.41"
         }
     ],
@@ -49,19 +49,19 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// const httpsServer = https.createServer(options, app)
-// httpsServer.listen(port, () => {
-//     console.log('App On : ' + port)
-// })
-
-// const io = new Server(httpsServer)
-
-const httpServer = http.createServer(app)
-httpServer.listen(port, () => {
+const httpsServer = https.createServer(options, app)
+httpsServer.listen(port, () => {
     console.log('App On : ' + port)
 })
 
-const io = new Server(httpServer)
+const io = new Server(httpsServer)
+
+// const httpServer = http.createServer(app)
+// httpServer.listen(port, () => {
+//     console.log('App On : ' + port)
+// })
+
+// const io = new Server(httpServer)
 
 let worker
 let rooms = {}

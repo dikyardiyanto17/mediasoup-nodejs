@@ -28516,7 +28516,7 @@ const createSendTransport = () => {
             let buttonMic = document.getElementById('user-mic-button')
             let buttonHangUp = document.getElementById('user-hang-up-button')
             let buttonSwitchCamera = document.getElementById('user-switch-camera-button')
-            let buttonTurnOffCamera = document.getElementById('user-turn-on-off-camera-button')
+            // let buttonTurnOffCamera = document.getElementById('user-turn-on-off-camera-button')
             let buttonScreenShare = document.getElementById('user-screen-share-button')
             let buttonChat = document.getElementById('user-chat-button')
             let buttonShare = document.getElementById('share-link-button')
@@ -28530,7 +28530,7 @@ const createSendTransport = () => {
                 buttonMic.removeAttribute('disabled', 'false')
                 buttonHangUp.removeAttribute('disabled', 'false')
                 buttonSwitchCamera.removeAttribute('disabled', 'false')
-                buttonTurnOffCamera.removeAttribute('disabled', 'false')
+                // buttonTurnOffCamera.removeAttribute('disabled', 'false')
                 buttonScreenShare.removeAttribute('disabled', 'false')
                 buttonChat.removeAttribute('disabled', 'false')
                 buttonShare.removeAttribute('disabled', 'false')
@@ -28541,7 +28541,7 @@ const createSendTransport = () => {
                 buttonMic.setAttribute('disabled', 'true')
                 buttonHangUp.setAttribute('disabled', 'true')
                 buttonSwitchCamera.setAttribute('disabled', 'true')
-                buttonTurnOffCamera.setAttribute('disabled', 'true')
+                // buttonTurnOffCamera.setAttribute('disabled', 'true')
                 buttonScreenShare.setAttribute('disabled', 'true')
                 buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
@@ -28551,7 +28551,7 @@ const createSendTransport = () => {
                 buttonMic.setAttribute('disabled', 'true')
                 buttonHangUp.setAttribute('disabled', 'true')
                 buttonSwitchCamera.setAttribute('disabled', 'true')
-                buttonTurnOffCamera.setAttribute('disabled', 'true')
+                // buttonTurnOffCamera.setAttribute('disabled', 'true')
                 buttonScreenShare.setAttribute('disabled', 'true')
                 buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
@@ -29125,6 +29125,9 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                 if (params.username) {
                     check = isScreenSharingType(params.username)
                 }
+                if (params.kind == 'video' && !check){
+                    createUserList(params?.username)
+                }
                 
                 let stream = store.getState()
                 if (!allStream[params.producerOwnerSocket]) {
@@ -29160,7 +29163,6 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     }
                     if (producersDetails[params.producerOwnerSocket] && !check && (!producersDetails[params.producerOwnerSocket].video || !producersDetails[params.producerOwnerSocket].audio)) {
                         totalUsers++
-                        createUserList(params?.username)
                     }
                     if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
                         if (totalUsers <= limitedPerPage) {
@@ -29292,7 +29294,7 @@ switchCamera.addEventListener("click", () => {
     SwitchingCamera()
 })
 const SwitchingCamera = async () => {
-    isCameraOn = true
+    // isCameraOn = true
     let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter(
         (device) => device.kind === "videoinput"
     );
@@ -29301,9 +29303,9 @@ const SwitchingCamera = async () => {
     let stream = storeData.localStream
     let audio = stream.getAudioTracks()[0]
 
-    let cameraIcons = document.getElementById('turn-on-off-camera-icons')
-    cameraIcons.classList.add('fa-video');
-    cameraIcons.classList.remove('fa-video-slash');
+    // let cameraIcons = document.getElementById('turn-on-off-camera-icons')
+    // cameraIcons.classList.add('fa-video');
+    // cameraIcons.classList.remove('fa-video-slash');
 
     let localVideo2 = document.getElementById('local-video')
 
@@ -29334,81 +29336,81 @@ const SwitchingCamera = async () => {
     await videoProducer.replaceTrack({ track: newStream.getVideoTracks()[0] });
 };
 
-const turnOffTheCamera = async () => {
-    let storeData = store.getState()
-    let stream = storeData.localStream
-    isCameraOn = false
-    console.log('- Audio : ', stream)
-    let audioStream = stream.getAudioTracks()[0]
-    let localVideo2 = document.getElementById('local-video')
-    let cameraIcons = document.getElementById('turn-on-off-camera-icons')
-    cameraIcons.classList.remove('fa-video');
-    cameraIcons.classList.add('fa-video-slash');
-    if (!localVideo2) {
-        localVideo2 = document.getElementById('current-user-video')
-    }
-    const turnOffCamera = await createImageTrack('/assets/pictures/unknown.jpg')
-    const videoTrack = await createVideoTrackFromImageTrack(turnOffCamera)
-    const newStream = new MediaStream([videoTrack])
-    newStream.addTrack(audioStream)
-    newStream.getVideoTracks()[0].muted = false
-    console.log('- New Media Stream : ', newStream.getVideoTracks()[0])
-    store.setLocalStream(newStream)
-    if (localVideo2) {
-        localVideo2.srcObject.getTracks().forEach((track) => {
-            track.stop();
-        });
-        localVideo2.srcObject = null
-        localVideo2.srcObject = newStream
-    }
-    await videoProducer.replaceTrack({ track: videoTrack });
-}
+// const turnOffTheCamera = async () => {
+//     let storeData = store.getState()
+//     let stream = storeData.localStream
+//     isCameraOn = false
+//     console.log('- Audio : ', stream)
+//     let audioStream = stream.getAudioTracks()[0]
+//     let localVideo2 = document.getElementById('local-video')
+//     let cameraIcons = document.getElementById('turn-on-off-camera-icons')
+//     cameraIcons.classList.remove('fa-video');
+//     cameraIcons.classList.add('fa-video-slash');
+//     if (!localVideo2) {
+//         localVideo2 = document.getElementById('current-user-video')
+//     }
+//     const turnOffCamera = await createImageTrack('/assets/pictures/unknown.jpg')
+//     const videoTrack = await createVideoTrackFromImageTrack(turnOffCamera)
+//     const newStream = new MediaStream([videoTrack])
+//     newStream.addTrack(audioStream)
+//     newStream.getVideoTracks()[0].muted = false
+//     console.log('- New Media Stream : ', newStream.getVideoTracks()[0])
+//     store.setLocalStream(newStream)
+//     if (localVideo2) {
+//         localVideo2.srcObject.getTracks().forEach((track) => {
+//             track.stop();
+//         });
+//         localVideo2.srcObject = null
+//         localVideo2.srcObject = newStream
+//     }
+//     await videoProducer.replaceTrack({ track: videoTrack });
+// }
 
-const replaceVideoToImage = async () => {
-    let storeData = store.getState()
-    let videoStream = storeData.localStream.getVideoTracks()[0]
-    await videoProducer.replaceTrack({ track: videoStream });
-}
+// const replaceVideoToImage = async () => {
+//     let storeData = store.getState()
+//     let videoStream = storeData.localStream.getVideoTracks()[0]
+//     await videoProducer.replaceTrack({ track: videoStream });
+// }
 
-const turnOnOffCamera = document.getElementById('user-turn-on-off-camera-button')
-turnOnOffCamera.addEventListener('click', async () => {
-    if (isCameraOn) {
-        await turnOffTheCamera()
-    } else {
-        isCameraOn = true
+// const turnOnOffCamera = document.getElementById('user-turn-on-off-camera-button')
+// turnOnOffCamera.addEventListener('click', async () => {
+//     if (isCameraOn) {
+//         await turnOffTheCamera()
+//     } else {
+//         isCameraOn = true
 
-        let storeData = store.getState()
-        let stream = storeData.localStream
+//         let storeData = store.getState()
+//         let stream = storeData.localStream
 
-        let cameraIcons = document.getElementById('turn-on-off-camera-icons')
-        cameraIcons.classList.add('fa-video');
-        cameraIcons.classList.remove('fa-video-slash');
+//         let cameraIcons = document.getElementById('turn-on-off-camera-icons')
+//         cameraIcons.classList.add('fa-video');
+//         cameraIcons.classList.remove('fa-video-slash');
 
-        let localVideo2 = document.getElementById('local-video')
+//         let localVideo2 = document.getElementById('local-video')
 
-        if (!localVideo2) {
-            localVideo2 = document.getElementById('current-user-video')
-        }
+//         if (!localVideo2) {
+//             localVideo2 = document.getElementById('current-user-video')
+//         }
 
-        let config = {
-            video: {
-                deviceId: { exact: localStorage.getItem("selectedVideoDevices") },
-                video: { facingMode: "environment" },
-            },
-        }
-        let newStream = await navigator.mediaDevices.getUserMedia(config);
-        newStream.addTrack(stream.getAudioTracks()[0])
-        store.setLocalStream(newStream)
-        if (localVideo2) {
-            localVideo2.srcObject.getTracks().forEach((track) => {
-                track.stop();
-            });
-            localVideo2.srcObject = null
-            localVideo2.srcObject = newStream
-        }
-        await videoProducer.replaceTrack({ track: newStream.getVideoTracks()[0] });
-    }
-})
+//         let config = {
+//             video: {
+//                 deviceId: { exact: localStorage.getItem("selectedVideoDevices") },
+//                 video: { facingMode: "environment" },
+//             },
+//         }
+//         let newStream = await navigator.mediaDevices.getUserMedia(config);
+//         newStream.addTrack(stream.getAudioTracks()[0])
+//         store.setLocalStream(newStream)
+//         if (localVideo2) {
+//             localVideo2.srcObject.getTracks().forEach((track) => {
+//                 track.stop();
+//             });
+//             localVideo2.srcObject = null
+//             localVideo2.srcObject = newStream
+//         }
+//         await videoProducer.replaceTrack({ track: newStream.getVideoTracks()[0] });
+//     }
+// })
 
 // Screen Sharing Button
 const screenSharingButton = document.getElementById('user-screen-share-button')
@@ -29704,50 +29706,50 @@ function dragElement(elmnt) {
 
 
 // Console Log Button
-const consoleLogButton = document.getElementById('console-log-button')
-consoleLogButton.addEventListener('click', () => {
-    // consumerTransports.forEach((transport) => {
-    //     transport.consumer.getStats().then((stat) => {
-    //         [...stat.entries()].forEach((data, index) => {
-    //             if (index == [...stat.entries()].length - 1) {
-    //                 console.log('- Data : ', data)
-    //             }
-    //         })
-    //     })
-    //     console.log("- Ice Paramaters : ", transport.consumer.rtpReceiver.transport.state)
-    //     transport.consumerTransport.getStats().then((stat) => {
-    //         console.log("- Stat : ", stat)
-    //     })
-    // })
-    // socket.emit('get-peers', (consumerTransports))
-    // console.log("- Producer : ", producerTransport)
-    // console.log("- Video Producer : ", videoProducer)
-    // producerTransport.getStats().then((data) => {
-    //     console.log(data)
-    // })
-    // console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
-    console.log("- Producer Details : ", producersDetails)
-    // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
-    // console.log("- Screen Sharing Producers : ", screenSharingProducer)
-    // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
+// const consoleLogButton = document.getElementById('console-log-button')
+// consoleLogButton.addEventListener('click', () => {
+//     consumerTransports.forEach((transport) => {
+//         transport.consumer.getStats().then((stat) => {
+//             [...stat.entries()].forEach((data, index) => {
+//                 if (index == [...stat.entries()].length - 1) {
+//                     console.log('- Data : ', data)
+//                 }
+//             })
+//         })
+//         console.log("- Ice Paramaters : ", transport.consumer.rtpReceiver.transport.state)
+//         transport.consumerTransport.getStats().then((stat) => {
+//             console.log("- Stat : ", stat)
+//         })
+//     })
+//     socket.emit('get-peers', (consumerTransports))
+//     console.log("- Producer : ", producerTransport)
+//     console.log("- Video Producer : ", videoProducer)
+//     producerTransport.getStats().then((data) => {
+//         console.log(data)
+//     })
+//     console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
+//     console.log("- Producer Details : ", producersDetails)
+//     console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
+//     console.log("- Screen Sharing Producers : ", screenSharingProducer)
+//     console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
 
-    // let allAudio = []
+//     let allAudio = []
 
-    // for (const key in allStream){
-    //     allAudio.push(allStream[key].audio)
-    // }
+//     for (const key in allStream){
+//         allAudio.push(allStream[key].audio)
+//     }
 
-    // let allAudioFlat = allAudio.flatMap(stream => stream);
-    // console.log('- All Audio Flat : ', allAudioFlat)
+//     let allAudioFlat = allAudio.flatMap(stream => stream);
+//     console.log('- All Audio Flat : ', allAudioFlat)
 
-    // console.log('- All Stream : ', allStream)
-    // socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
-    // })
+//     console.log('- All Stream : ', allStream)
+//     socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
+//     })
 
-    // console.log('- Total User : ', totalUsers)
-    // let stream = store.getState()
-    // console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
-})
+//     console.log('- Total User : ', totalUsers)
+//     let stream = store.getState()
+//     console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
+// })
 
 },{"./store":85,"mediasoup-client":62,"recordrtc":69,"socket.io-client":75}],85:[function(require,module,exports){
 let state = {

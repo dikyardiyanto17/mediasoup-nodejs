@@ -114,7 +114,10 @@ joinRoom.addEventListener('submit', (e) => {
 
     console.log("- New URL : ", newURL);
 
-    window.location.href = newURL;
+    setTimeout(() => {
+        window.location.href = newURL;
+    }, 1000);
+
 });
 
 
