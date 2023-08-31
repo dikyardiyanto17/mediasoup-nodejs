@@ -2,8 +2,13 @@ const store = require('./store')
 let localVideo = document.getElementById('local-video')
 
 const joinRoom = document.getElementById('join-room')
+const url = window.location.pathname;
+const parts = url.split('/');
+const roomName = parts[2];
+const goTo = 'room/' + roomName;
 
 const init = () => {
+    localStorage.setItem('room_id', roomName)
     getMyMic()
     getMyDevices()
     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
@@ -95,19 +100,15 @@ videoOptions.addEventListener("click", (e) => {
 
 
 
-
+const usernameForm = document.getElementById('username')
+usernameForm.addEventListener('input', (e) => {
+    localStorage.setItem('username', e.target.value);
+})
 
 joinRoom.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const userName = document.getElementById('username').value;
-    localStorage.setItem('username', userName);
-
-    const url = window.location.pathname;
-    const parts = url.split('/');
-    const roomName = parts[2];
-    const goTo = 'room/' + roomName;
-    localStorage.setItem('room_id', roomName)
+    // const userName = document.getElementById('username').value;
 
     const newURL = window.location.origin + "/" + goTo;
 
@@ -115,7 +116,7 @@ joinRoom.addEventListener('submit', (e) => {
 
     setTimeout(() => {
         window.location.href = newURL;
-    }, 1000);
+    }, 2000);
 
 });
 

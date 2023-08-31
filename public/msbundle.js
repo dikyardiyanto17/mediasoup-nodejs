@@ -28559,6 +28559,17 @@ const createSendTransport = () => {
                 buttonScreenShare.setAttribute('disabled', 'true')
                 buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
+            } else if (e == 'disconnected'){
+                producerStatus.innerHTML = 'Disconnected'
+                connectionStatusElement.className = 'dot status-failed'
+                buttonRecord.setAttribute('disabled', 'true')
+                buttonMic.setAttribute('disabled', 'true')
+                buttonHangUp.setAttribute('disabled', 'true')
+                buttonSwitchCamera.setAttribute('disabled', 'true')
+                // buttonTurnOffCamera.setAttribute('disabled', 'true')
+                buttonScreenShare.setAttribute('disabled', 'true')
+                buttonChat.setAttribute('disabled', 'true')
+                buttonShare.setAttribute('disabled', 'true')
             }
         })
 
