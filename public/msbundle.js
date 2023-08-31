@@ -28213,41 +28213,101 @@ let screenSharingInfo
 
 // Starting Video Local
 const streamSuccess = (stream) => {
-
+    // Set Local Stream To Global Variabel
     store.setLocalStream(stream)
+    // Set Stream To Local Video
     localVideo.srcObject = stream
+    // Add Current Stream To All Stream For Pagination Purpose
     allStream[socket.id] = { video: { track: stream.getVideoTracks()[0], id: 'current-user-video', username: localStorage.getItem('username') ? localStorage.getItem('username') : 'unknown', kind: 'video', status: true }, audio: { track: stream.getAudioTracks()[0], id: 'current-user-audio', username: localStorage.getItem('username') ? localStorage.getItem('username') : 'unknown', kind: 'audio', status: true } }
 
+    // Preparing For Producing Audio Params And Video Params 
     audioParams = { track: stream.getAudioTracks()[0], ...audioParams };
     videoParams = { track: stream.getVideoTracks()[0], ...videoParams };
 
+    // Set My Username
     const setUsername = document.getElementById('my-username')
-    if (localStorage.getItem('username')) {
-        setUsername.textContent = localStorage.getItem('username')
-    } else {
-        setUsername.textContent = 'Unknown'
-    }
+    setUsername.textContent = localStorage.getItem('username')
 
+    // Add 1 Total Users When Joining
     totalUsers++
 
+    // Joining Room
     joinRoom()
 }
 
+// Check Initial Configuration
 const checkLocalStorage = () => {
+    // Set Room Id
+    localStorage.setItem("room_id", roomName)
+    // Check Config For Audio Devices, Selected Audio Device, Video Devices, Selected Video Devices, Room Id, Username
     if (!localStorage.getItem('audioDevices') || !localStorage.getItem('room_id') || !localStorage.getItem('selectedVideoDevices') || !localStorage.getItem('videoDevices') || !localStorage.getItem('username') || !localStorage.getItem('selectedAudioDevices')) {
         const url = window.location.pathname;
         const parts = url.split('/');
         const roomName = parts[2];
         const goTo = 'lobby/' + roomName;
         const newURL = window.location.origin + "/" + goTo;
+        // If There Is Not, It Will Redirect To Lobby
         window.location.href = newURL;
     }
-
 }
-checkLocalStorage()
+
+// Adjust Template Normal Mode
+const normalTemplate = () => {
+    if (totalUsers <= 2) {
+        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+        userVideoContainers.forEach((container, index) => {
+            container.classList.remove(currentTemplate);
+            container.classList.add('user-video-container');
+        });
+        currentTemplate = 'user-video-container'
+    } else if (totalUsers == 3) {
+        // Check Total User Is 3 To Adjust Template
+        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+        userVideoContainers.forEach((container, index) => {
+            container.classList.remove(currentTemplate);
+            container.classList.add('user-video-container-3');
+        });
+        currentTemplate = 'user-video-container-3'
+    } else if (totalUsers >= 4 && totalUsers <= 6) {
+        // Check Total User Is Between 4 And 6 To Adjust Template
+        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+        userVideoContainers.forEach((container, index) => {
+            container.classList.remove(currentTemplate);
+            container.classList.add('user-video-container-6');
+        });
+        currentTemplate = 'user-video-container-6'
+    } else if (totalUsers >= 7 && totalUsers <= 8) {
+        // Check Total User Is 7 Or 8 To Adjust Template
+        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+        userVideoContainers.forEach((container, index) => {
+            container.classList.remove(currentTemplate);
+            container.classList.add('user-video-container-8');
+        });
+        currentTemplate = 'user-video-container-8'
+    } else {
+        // Check Total User Is More Than 8 To Adjust Template
+        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+        userVideoContainers.forEach((container, index) => {
+            container.classList.remove(currentTemplate);
+            container.classList.add('user-video-container-12');
+        });
+        currentTemplate = 'user-video-container-12'
+    }
+}
+
+// Screen Sharing Template
+const screenSharingTemplate = () => {
+    const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+    userVideoContainers.forEach((container, index) => {
+        container.classList.remove(currentTemplate);
+        container.classList.add('user-video-container-screen-sharing');
+    });
+    currentTemplate = 'user-video-container-screen-sharing'
+}
 
 // Changing Layout User Video
 const changeLayout = (isSharing) => {
+    // Screen Sharing Layout
     if (isSharing) {
         videoContainer.id = 'video-container-screen-sharing'
         const fullContainer = document.getElementById('full-container-id')
@@ -28273,61 +28333,27 @@ const changeLayout = (isSharing) => {
 
         videoContainer = document.getElementById('video-container-screen-sharing')
     } else {
+        // Normal Layout
         videoContainer.id = 'video-container'
         let removeDiv = document.getElementById('screen-sharing-container')
         if (removeDiv) {
             removeDiv.parentNode.removeChild(removeDiv)
         }
-
-        if (totalUsers <= 2) {
-            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-            userVideoContainers.forEach((container, index) => {
-                container.classList.remove(currentTemplate);
-                container.classList.add('user-video-container');
-            });
-            currentTemplate = 'user-video-container'
-        } else if (totalUsers == 3) {
-            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-            userVideoContainers.forEach((container, index) => {
-                container.classList.remove(currentTemplate);
-                container.classList.add('user-video-container-3');
-            });
-            currentTemplate = 'user-video-container-3'
-        } else if (totalUsers >= 4 && totalUsers <= 6) {
-            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-            userVideoContainers.forEach((container, index) => {
-                container.classList.remove(currentTemplate);
-                container.classList.add('user-video-container-6');
-            });
-            currentTemplate = 'user-video-container-6'
-        } else if (totalUsers >= 7 && totalUsers <= 8) {
-            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-            userVideoContainers.forEach((container, index) => {
-                container.classList.remove(currentTemplate);
-                container.classList.add('user-video-container-8');
-            });
-            currentTemplate = 'user-video-container-8'
-        } else {
-            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-            userVideoContainers.forEach((container, index) => {
-                container.classList.remove(currentTemplate);
-                container.classList.add('user-video-container-12');
-            });
-            currentTemplate = 'user-video-container-12'
-        }
-
+        normalTemplate()
         videoContainer = document.getElementById('video-container')
     }
 }
 
+// Screen Sharing
 const getScreenSharing = async () => {
     try {
+        // Check If There Is No One Screen Sharing
         if (!isScreenSharing) {
-
-
+            // Change Layout Based On Which Mode
             changeLayout(true)
-
+            // Get Screen Sharing Id
             let screenSharingVideo = document.getElementById('screen-sharing')
+            // Get Screen Sharing Stram
             screenSharingStreamsGlobal = await navigator.mediaDevices.getDisplayMedia({
                 video: {
                     cursor: "always",
@@ -28335,32 +28361,35 @@ const getScreenSharing = async () => {
                     chromeMediaSource: "desktop",
                 },
             });
+            // Insert Screen Sharing Stream To Element
             screenSharingVideo.srcObject = screenSharingStreamsGlobal
-
+            // Preparing Screen Sharing Producer
             screenSharingParams = { track: screenSharingStreamsGlobal.getVideoTracks()[0], ...screenSharingParams }
-
+            // Create Screen Sharing Producer
             screenSharingProducer = await producerTransport.produce(screenSharingParams);
-            console.log("- Producing : ", screenSharingProducer)
-
-
-
+            // Function When Screen Sharing Ended
             screenSharingStreamsGlobal.getVideoTracks()[0].onended = function () {
+                // Signaling Other User That Screen Sharing Is Ended
                 for (const key in producersDetails) {
                     socket.emit('screen-sharing', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: key, isSharing: false, producerId: screenSharingProducer.id }))
                 }
+                // Closing Screen Sharing Producer
                 socket.emit('screen-sharing-producer', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: socket.id, isSharing: false, producerId: screenSharingProducer.id }))
+                // Set Screen Sharing is False
                 isScreenSharing = false
+                // Change Layout To Normal Mode
                 changeLayout(false)
+                // Set Screen Sharing Global to Null
                 screenSharingStreamsGlobal = null
+                // Reset Screen Sharing Params
                 screenSharingParams = { params }
+                // Set Who Is Screen Sharing To Null
                 screenSharingInfo = null
             };
 
             // for (const key in producersDetails) {
             //     socket.emit('screen-sharing', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isScreenSharing: true }))
             // }
-
-
 
             screenSharingProducer.on('trackended', () => {
                 console.log('video track ended')
@@ -28371,17 +28400,22 @@ const getScreenSharing = async () => {
                 console.log('video transport ended')
             })
 
+            // Change Current Template
             if (!currentTemplate) {
                 currentTemplate = 'user-video-container'
             }
+
+            // Add Info Who Is Screen Sharing
             screenSharingInfo = { socketId: socket.id }
             isScreenSharing = true
         } else if (isScreenSharing && screenSharingInfo.socketId != socket.id) {
+            // If Someone Is Trying To Sharing Their Screen When Someone Is Already To Screen Share, Warn Them
             let as = document.getElementById("alert-screensharing");
             as.className = "show";
-
+            // Show Warning
             setTimeout(() => { as.className = as.className.replace("show", ""); }, 3000);
         } else {
+            // Stopping Screen Sharing and Set All Configuration To Normal Mode
             screenSharingStreamsGlobal.getTracks().forEach((track) => track.stop());
             screenSharingInfo = null
             isScreenSharing = false
@@ -28404,19 +28438,9 @@ const getScreenSharing = async () => {
 
 // Emitting Join Room and Getting RTP Capabilities From Server and Creating Media Devices
 const joinRoom = () => {
-    const originUrl = window.location.pathname;
-    const findUrl = originUrl.split('/');
-    const findoomName = findUrl[2];
-
-    let myUsername
-    localStorage.setItem("room_id", roomName)
-
-    if (!localStorage.getItem("username")) {
-        myUsername = "Unknown"
-    } else {
-        myUsername = localStorage.getItem("username")
-    }
-    socket.emit('joinRoom', { roomName: findoomName, username: myUsername }, (data) => {
+    // Emitting Signal To Server
+    // Getting RTP Capabilities
+    socket.emit('joinRoom', { roomName, username: localStorage.getItem("username") }, (data) => {
         console.log(`Router RTP Capabilities... ${data.rtpCapabilities}`)
         rtpCapabilities = data.rtpCapabilities
         createDevice()
@@ -28425,6 +28449,7 @@ const joinRoom = () => {
 
 // Get Local Stream
 const getLocalStream = () => {
+    // Config From Lobby
     let config = {
         video: { deviceId: { exact: localStorage.getItem('selectedVideoDevices') } },
         audio: { deviceId: { exact: localStorage.getItem('selectedAudioDevices') } }
@@ -28439,14 +28464,17 @@ const getLocalStream = () => {
 // Creating Media Devices and load RTPCapabilities to MediaSoup Client and Create Send Transport
 const createDevice = async () => {
     try {
+        // Create Device
         device = new mediasoupClient.Device()
 
+        // Load Device
         await device.load({
             routerRtpCapabilities: rtpCapabilities
         })
 
         console.log('- Device RTP Capabilities', device.rtpCapabilities)
 
+        // Create Send Transport
         createSendTransport()
 
     } catch (error) {
@@ -28456,6 +28484,7 @@ const createDevice = async () => {
     }
 }
 
+// Create User Online List
 const createUserList = (username) => {
     let userList = document.getElementById('user-list')
     let myUsername = document.createElement('p')
@@ -28466,6 +28495,7 @@ const createUserList = (username) => {
 
 // Create Send Transport
 const createSendTransport = () => {
+    // Signaling To Server
     socket.emit('createWebRtcTransport', { consumer: false }, ({ params }) => {
         if (params.error) {
             console.log(params.error)
@@ -28474,11 +28504,14 @@ const createSendTransport = () => {
 
         console.log("- Create Send Transport : ", params)
 
+        // Producing Producer Transport
         producerTransport = device.createSendTransport(params)
 
+        // Get DLTS Parameter
         producerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
                 console.log("- Producer Transport Connecting")
+                // Signaling To Server and Sending DLTS Parameters
                 await socket.emit('transport-connect', {
                     dtlsParameters,
                 })
@@ -28490,11 +28523,12 @@ const createSendTransport = () => {
             }
         })
 
+        // Producing Transport and Get Parameters
         producerTransport.on('produce', async (parameters, callback, errback) => {
-            console.log("- Create Web RTC Transport / Produce : ", parameters)
+            console.log("- Create Web RTC Transport / Producer : ", parameters)
 
             try {
-                console.log("- Producer Transport Producing")
+                // Signaling to Server And Sending Parameters
                 await socket.emit('transport-produce', {
                     kind: parameters.kind,
                     rtpParameters: parameters.rtpParameters,
@@ -28522,6 +28556,7 @@ const createSendTransport = () => {
             let buttonChat = document.getElementById('user-chat-button')
             let buttonShare = document.getElementById('share-link-button')
             let buttonUserList = document.getElementById('user-list-button')
+            // Enabling Button When Producer Is Connecting
             if (e == 'connected'){
                 producerStatus.innerHTML = 'Connected'
                 createUserList(localStorage.getItem('username'))
@@ -28580,6 +28615,7 @@ const createSendTransport = () => {
 
 // Connecting Send Transport and Producing Audio and Video Producer
 const connectSendTransport = async () => {
+    // Producing Audio And Video Transport
     audioProducer = await producerTransport.produce(audioParams);
     videoProducer = await producerTransport.produce(videoParams);
 
@@ -28606,10 +28642,11 @@ const connectSendTransport = async () => {
 
 // Signaling New Consumer Transport
 const signalNewConsumerTransport = async (remoteProducerId) => {
+    // Checking If Remote Proder Id Is Already Exists
     if (consumingTransports.includes(remoteProducerId)) return;
     consumingTransports.push(remoteProducerId);
 
-    // Creating WebRtc Transport
+    // Creating WebRtc Transport and Get Params From Server
     await socket.emit('createWebRtcTransport', { consumer: true }, ({ params }) => {
         if (params.error) {
             console.log(params.error)
@@ -28620,6 +28657,7 @@ const signalNewConsumerTransport = async (remoteProducerId) => {
         // Creating Receive Transport
         let consumerTransport
         try {
+            // Create Receive Transport
             consumerTransport = device.createRecvTransport(params)
         } catch (error) {
             console.log(error)
@@ -28640,10 +28678,9 @@ const signalNewConsumerTransport = async (remoteProducerId) => {
             }
         })
 
-
-
         // console.log('- Cunsomer Transport : ', consumerTransport)
 
+        // Connecting Receive Transport
         connectRecvTransport(consumerTransport, remoteProducerId, params.id)
     })
 }
@@ -28653,10 +28690,12 @@ const signalNewConsumerTransport = async (remoteProducerId) => {
 // Initiating When Socket is Estabilished
 socket.on('connection-success', ({ socketId }) => {
     console.log(socketId)
+    checkLocalStorage()
     getLocalStream()
 })
 
 // Mic Configuration
+// Receive Signaling To Change Mic Icon User (Off / On)
 socket.on('mic-config', (data) => {
     let videoId = document.querySelector('#td-' + data.videoProducerId);
     allStream[data.socketId].audio.track.enabled = data.isMicActive
@@ -28667,8 +28706,9 @@ socket.on('mic-config', (data) => {
                 allStream[firstKey][secondKey].status = data.isMicActive
             }
         }
-
     }
+
+    // Changing Mic Icon
     if (videoId) {
         let micPicture = videoId.querySelector('img');
         let audioId = document.getElementById(data.audioProducerId);
@@ -28684,13 +28724,16 @@ socket.on('mic-config', (data) => {
 // Screen Sharing Socket
 socket.on('screen-sharing', ({ videoProducerId, audioProducerId, isSharing, remoteProducerId }) => {
     if (!isSharing) {
+        // Closing Consumer Screen Sharing Trannsport
         const producerToClose = consumerTransports.find(transportData => transportData.producerId === remoteProducerId)
         producerToClose.consumerTransport.close()
         producerToClose.consumer.close()
+        // Changing Layout And Reset Screen Share Parameter
         screenSharingParams = { params }
         isScreenSharing = false
         screenSharingStreamsGlobal = null
         changeLayout(false)
+        // Deleting Screen Sharing Stream
         for (const firstKey in allStream) {
             for (const secondKey in allStream[firstKey]) {
                 if (allStream[firstKey][secondKey].id == remoteProducerId && secondKey == 'screenSharing') {
@@ -28699,6 +28742,7 @@ socket.on('screen-sharing', ({ videoProducerId, audioProducerId, isSharing, remo
                 }
             }
         }
+        // Deleting Screen Sharing Details
         for (const firstKey in producersDetails) {
             for (const secondKey in producersDetails[firstKey]) {
                 if (producersDetails[firstKey][secondKey] == videoProducerId && secondKey == 'screenSharing') {
@@ -28719,44 +28763,50 @@ socket.on('new-producer', ({ producerId }) => {
 // Cleaning When User Is Disconnected
 socket.on('producer-closed', ({ remoteProducerId }) => {
     try {
+        // Close Transport
         const producerToClose = consumerTransports.find(transportData => transportData.producerId === remoteProducerId)
         producerToClose.consumerTransport.close()
         producerToClose.consumer.close()
 
+        // Reset Pagination
         paginationStartIndex = 0
         paginationEndIndex = 11
         currentPage = 0
 
+        // Checkig Pagination
         const isExistLeft = document.getElementById('pagination-left-container')
         const isExistRight = document.getElementById('pagination-right-container')
+
+        // Deleting Pagination
         if (isExistLeft) isExistLeft.remove()
         if (isExistRight) isExistRight.remove()
 
-        const paginationRightContainer = document.getElementById('pagination-right-container')
-        if (paginationRightContainer) {
-            paginationRightContainer.remove()
-        }
-
+        // Deleting Disconnected Stream
         for (const firstkey in allStream) {
             for (const secondkey in allStream[firstkey]) {
+                // Check If It Is Screen Sharing Stream
                 if (allStream[firstkey][secondkey].id == remoteProducerId && allStream[firstkey][secondkey].kind != 'screen-sharing') {
+                    // Decrease Total Users By 1
                     totalUsers--
                     delete allStream[firstkey]
                     break
                 } else {
+                    // If It Is Delete Only Screen Sharing Stream
                     delete allStream[firstkey][secondkey].kind
                     break
                 }
             }
         }
 
-        // Creating Other Variables For other Purposes
+        // Deleting Producer Details
         for (const firstKey in producersDetails) {
             for (const secondKey in producersDetails[firstKey]) {
+                // Deleting If Producers Is Screen Sharing Only
                 if (producersDetails[firstKey][secondKey] == remoteProducerId && secondKey == 'screenSharing') {
                     delete producersDetails[firstKey][secondKey]
                     break
                 }
+                // Deleting Producers
                 if (producersDetails[firstKey][secondKey] == remoteProducerId) {
                     // console.log('- Deleting : ', producersDetails[firstKey])
                     let deleteUser = document.getElementById('user-'+producersDetails[firstKey].name)
@@ -28768,71 +28818,33 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
         }
 
 
-        if (currentPage != 0) {
-            createPaginationLeft()
-        }
+        // if (currentPage != 0) {
+        //     createPaginationLeft()
+        // }
 
+        // Create Right Pagination If Total Users More Than Limited Per Page
         if (totalUsers > limitedPerPage) {
             createPaginationRight()
         }
 
         if (!isScreenSharing) {
-            if (totalUsers <= 2) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container');
-                });
-                currentTemplate = 'user-video-container'
-            } else if (totalUsers == 3) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-3');
-                });
-                currentTemplate = 'user-video-container-3'
-            } else if (totalUsers >= 4 && totalUsers <= 6) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-6');
-                });
-                currentTemplate = 'user-video-container-6'
-            } else if (totalUsers >= 7 && totalUsers <= 8) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-8');
-                });
-                currentTemplate = 'user-video-container-8'
-            } else {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-12');
-                });
-                currentTemplate = 'user-video-container-12'
-            }
+            normalTemplate()
         } else {
-            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-            userVideoContainers.forEach((container, index) => {
-                container.classList.remove(currentTemplate);
-                container.classList.add('user-video-container-screen-sharing');
-            });
-            currentTemplate = 'user-video-container-screen-sharing'
-
-
+            screenSharingTemplate()
         }
 
 
+        // Filtering Consumer Transports
         consumerTransports = consumerTransports.filter(transportData => transportData.producerId !== remoteProducerId)
 
         console.log('- Remove Producer : ', remoteProducerId, " - Producer Details : ", producersDetails)
 
+        // Deleting Consumer Elements
         if (document.getElementById(`td-${remoteProducerId}`)) {
             videoContainer.removeChild(document.getElementById(`td-${remoteProducerId}`))
         }
 
+        // Change Layout To Normal For Current User
         if (screenSharingInfo) {
             if (screenSharingInfo.producerId == remoteProducerId) {
                 isScreenSharing = false
@@ -28841,9 +28853,12 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
         }
 
         let counter = 0
+        // Removing Current Diplayed User
         while (videoContainer.firstChild) {
             videoContainer.removeChild(videoContainer.firstChild);
         }
+
+        // Displaying All Users With Limit
         for (const firstKey in allStream) {
             if (counter >= paginationStartIndex && counter <= paginationEndIndex) {
                 for (const secondKey in allStream[firstKey]) {
@@ -28864,32 +28879,20 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
 const getProducers = () => {
     socket.emit('getProducers', producerIds => {
         console.log("- Get Product Id : ", producerIds)
+        // Informing Consumer Transport
         producerIds.forEach(signalNewConsumerTransport)
     })
 }
 
+// Create Video
 const createVideo = (remoteId, kind, track, username, micIcon) => {
-
     const newElem = document.createElement('div')
     newElem.setAttribute('id', `td-${remoteId}`)
-
-    if (kind == 'audio') {
-        // const newElem = document.createElement('div')
-        // newElem.setAttribute('id', `td-${remoteId}`)
-        // let fullContainer = document.getElementById('full-container-id')
-        // if (remoteId == 'current-user-audio') {
-        //     let stream = store.getState()
-        //     track = stream.localStream.getAudioTracks()[0]
-        //     newElem.innerHTML = '<audio id="' + remoteId + '" autoplay muted></audio>'
-        // } else {
-        //     newElem.innerHTML = '<audio id="' + remoteId + '" autoplay></audio>'
-        // }
-        // fullContainer.appendChild(newElem)
-        // document.getElementById(remoteId).srcObject = new MediaStream([track])
-        console.log('Do Nothing')
-    } else {
+    if (kind == 'video') {
+        // If Current User, Get Track From Global Video
         if (remoteId == 'current-user-video') {
             let stream = store.getState()
+            // Check If Mic Is On Or Off
             track = stream.localStream.getVideoTracks()[0]
             let isMic
             if (stream.localStream.getAudioTracks()[0].enabled) {
@@ -28900,7 +28903,7 @@ const createVideo = (remoteId, kind, track, username, micIcon) => {
             newElem.setAttribute('class', currentTemplate)
             newElem.innerHTML = '<img src="/assets/pictures/' + isMic + '" class="icons-mic" id="local-mic"/><video id="' + remoteId + '" autoplay class="user-video" muted></video><div class="username">' + username + '</div>'
         } else {
-            console.log('- Trackkkkk : ', track  )
+            // Create Video For Other Users
             let isMic
             if (micIcon) {
                 isMic = 'micOn.png'
@@ -28910,6 +28913,7 @@ const createVideo = (remoteId, kind, track, username, micIcon) => {
             newElem.setAttribute('class', currentTemplate)
             newElem.innerHTML = '<img src="/assets/pictures/' + isMic + '" poster="/assets/pictures/unknown.jpg" preload="auto" class="icons-mic" /><video id="' + remoteId + '" autoplay class="user-video" ></video><div class="username">' + username + '</div>'
         }
+        // Append Element And Set Track
         videoContainer.appendChild(newElem)
         document.getElementById(remoteId).srcObject = new MediaStream([track])
     }
@@ -28947,7 +28951,7 @@ const createVideoTrackFromImageTrack = async (imageTrack) => {
 };
 
 
-
+// Create Screen Sharing
 const createScreenSharing = (track) => {
     let screenSharingVideo = document.getElementById('screen-sharing')
     screenSharingVideo.srcObject = new MediaStream([track])
@@ -28972,25 +28976,34 @@ const createPaginationRight = () => {
         newPaginationRightButton.appendChild(newPaginationRightIcon)
         newPaginationRightContainer.appendChild(newPaginationRightButton)
 
+        // Function When Arrow Is Clicked
         newPaginationRightButton.addEventListener('click', () => {
-            paginationStartIndex = paginationStartIndex + 12
-            paginationEndIndex = paginationEndIndex + 12
+            // Increase Start and End Index
+            paginationStartIndex = paginationStartIndex + limitedPerPage
+            paginationEndIndex = paginationEndIndex + limitedPerPage
+            // Change Current Page
             currentPage++
 
             let counter = 0
+            // Remove Video Container
             while (videoContainer.firstChild) {
                 videoContainer.removeChild(videoContainer.firstChild);
             }
+
+            // Diplaying Video
             for (const firstKey in allStream) {
+                // Limiting Displayed Video
                 if (counter >= paginationStartIndex && counter <= paginationEndIndex) {
                     for (const secondKey in allStream[firstKey]) {
                         if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
                             console.log('- Check : ', allStream[firstKey].audio.track.enabled)
                             createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
+                            // Resume Displayed Video Consumer
                             socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
                         }
                     }
                 } else {
+                    // Pausing Video Consumer
                     for (const secondKey in allStream[firstKey]) {
                         if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
                             createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
@@ -29000,11 +29013,15 @@ const createPaginationRight = () => {
                 }
                 counter++
             }
+            // Create Left Arrow
             if (currentPage != 0) {
                 createPaginationLeft()
             }
 
+            // Calculate Total Page
             let totalPage = Math.ceil(totalUsers / limitedPerPage)
+
+            // Remove Rigt Arrow If Its End Of Page
             if (totalPage == currentPage + 1) {
                 newPaginationRightContainer.remove()
             }
@@ -29031,24 +29048,32 @@ const createPaginationLeft = () => {
         newPaginationleftButton.appendChild(newPaginationleftIcon)
         newPaginationleftContainer.appendChild(newPaginationleftButton)
 
+        // Function When Arrow Is Clicked
         newPaginationleftButton.addEventListener('click', () => {
-            paginationStartIndex = paginationStartIndex - 12
-            paginationEndIndex = paginationEndIndex - 12
+            // Decrease Start and End Index
+            paginationStartIndex = paginationStartIndex - limitedPerPage
+            paginationEndIndex = paginationEndIndex - limitedPerPage
+            // Change Current Page
             currentPage--
 
             let counter = 0
+            // Remove Video Container
             while (videoContainer.firstChild) {
                 videoContainer.removeChild(videoContainer.firstChild);
             }
+            // Diplaying Video
             for (const firstKey in allStream) {
+                // Limiting Displayed Video
                 if (counter >= paginationStartIndex && counter <= paginationEndIndex) {
                     for (const secondKey in allStream[firstKey]) {
                         if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
                             createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
+                            // Resume Displayed Video Consumer
                             socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
                         }
                     }
                 } else {
+                    // Pausing Video Consumer
                     for (const secondKey in allStream[firstKey]) {
                         if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
                             createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
@@ -29059,8 +29084,10 @@ const createPaginationLeft = () => {
                 counter++
             }
 
+            // Create Right Arrow
             createPaginationRight()
 
+            // Remove Left Arrow If Its First Page
             if (currentPage == 0) {
                 newPaginationleftContainer.remove()
             }
@@ -29075,6 +29102,7 @@ const isScreenSharingType = (input) => {
 
 // Connecting Receive Transport
 const connectRecvTransport = async (consumerTransport, remoteProducerId, serverConsumerTransportId) => {
+    // Consumer Transport
     await socket.emit('consume', {
         rtpCapabilities: device.rtpCapabilities,
         remoteProducerId,
@@ -29132,43 +29160,70 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
         const { track } = consumer
 
         
-        
+        // Check Consumer Connection State
         consumerTransport.on('connectionstatechange', async (e) => {
-            console.log('- State Consumer : ', e)
+
+            console.log('- State Consumer : ', e, ' - Remote Id : ', remoteProducerId)
+            
+            // If Consumer State is Connected
             if (e == 'connected') {
+                // Check If User With 
+                let checkConnection = document.getElementById('td-' + remoteProducerId)
+                if (checkConnection){
+                    console.log('Reconnecting : ', remoteProducerId)
+                    return
+                }
                 let check = false
+
+                // Check if Video Is Screen Share
                 if (params.username) {
                     check = isScreenSharingType(params.username)
                 }
+                
+                // Make a List For Every User
                 if (params.kind == 'video' && !check){
                     createUserList(params?.username)
                 }
                 
+                // Get Local Stream
                 let stream = store.getState()
+
+                // Make An Initial Data Object For Spesific Stream Using Socket Id
                 if (!allStream[params.producerOwnerSocket]) {
                     allStream[params.producerOwnerSocket] = {}
                 }
+
+                // Fill All Stream Object With Audio Or Video Stream
                 if (!allStream[params.producerOwnerSocket][params.kind]) {
                     allStream[params.producerOwnerSocket][params.kind] = { track, id: remoteProducerId, username: params?.username, kind: params.kind, status: true, serverConsumerId: params.serverConsumerId }
                 }
         
+                // Make An Initial Data Object For Every Details of Remote Id
                 if (!producersDetails[params.producerOwnerSocket]) {
                     producersDetails[params.producerOwnerSocket] = {}
+                    // Fill Producer Details With Audio/Video and Check if Video Is Screen Share Or Not
                     if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
                         producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
+                        // Limiting Displayed Video
                         if (totalUsers <= limitedPerPage) {
                             createVideo(remoteProducerId, params.kind, track, params?.username, true)
                         }
                     }
+                    // Labeling Producer Id With Owner Of Producer
                     if (!producersDetails[params.producerOwnerSocket].name) {
                         producersDetails[params.producerOwnerSocket].name = params.producerName
                     }
                 } else {
+                    // Fill Producer Details With Audio/Video and Check if Video Is Screen Share Or Not
+                    // Checking If The Stream Is Screen Sharing
                     if (check) {
+                        // If It Is, Add Screen Sharing Stream To All Stream Variable
                         if (!allStream[params.producerOwnerSocket].screenSharing) {
                             allStream[params.producerOwnerSocket].screenSharing = { track, id: remoteProducerId, username: params?.username, kind: 'screen-sharing' }
                         }
+                        // And Add It To Producer Details
                         if (!producersDetails[params.producerOwnerSocket].screenSharing) {
+                            // Change to Screen Share Mode
                             isScreenSharing = true
                             changeLayout(true)
                             producersDetails[params.producerOwnerSocket].screenSharing = params.producerId
@@ -29176,36 +29231,47 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                             screenSharingInfo = { socketId: params.producerOwnerSocket, producerId: params.producerId }
                         }
                     }
+
+                    // Check If The Stream Is Not Screen Sharing and Producer Details With Socket Already Exist (Either Video or Audio With Same Socket Id), It Will Means One User Is Completely Join (Audio And Video)
                     if (producersDetails[params.producerOwnerSocket] && !check && (!producersDetails[params.producerOwnerSocket].video || !producersDetails[params.producerOwnerSocket].audio)) {
+                        // User Joins +1
                         totalUsers++
                     }
+
+                    // Check If The Stream Is Not Screen Sharing and Its Either Video Or Audio Stream
                     if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
+                        // Limiting Displayed Video
                         if (totalUsers <= limitedPerPage) {
                             createVideo(remoteProducerId, params.kind, track, params?.username, true)
                         }
                         producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
+                        // If Current User Is Muted, Then Change Other User Mic Icons
                         if (!stream.localStream.getAudioTracks()[0].enabled) {
                             for (const key in producersDetails) {
                                 socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
                             }
                         }
-                        if (!isCameraOn){
-                            console.log('Off')
-                            replaceVideoToImage()
-                        }
+                        // if (!isCameraOn){
+                        //     console.log('Off')
+                        //     replaceVideoToImage()
+                        // }
                     }
                 }
         
+                // If Current User Is Recording, Add New Audio User Stream To Recording Media
                 if (isRecording && params.kind == 'audio') {
                     const audioSource = audioContext.createMediaStreamSource(new MediaStream([track]));
                     audioSource.connect(audioDestination);
                     // recordedStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
                 }
         
+                // If It Is Audio Stream, Then Create Audio Element And Collect It To One Div
                 if (params.kind == 'audio') {
                     const newElem = document.createElement('div')
                     newElem.setAttribute('id', `td-${remoteProducerId}`)
+                    // If This Is Current User Id (It Will Running When Pagination is Active / User Is More Than Limited Per Page)
                     if (remoteProducerId == 'current-user-audio') {
+                        // Get Audio Stream From Local
                         let stream = store.getState()
                         track = stream.localStream.getAudioTracks()[0]
                         newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay muted></audio>'
@@ -29216,57 +29282,21 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
                 }
         
-        
+                // If Its Not In Screen Share Mode To Adjust Template
                 if (!isScreenSharing) {
-                    if (totalUsers <= 2) {
-                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                        userVideoContainers.forEach((container, index) => {
-                            container.classList.remove(currentTemplate);
-                            container.classList.add('user-video-container');
-                        });
-                        currentTemplate = 'user-video-container'
-                    } else if (totalUsers == 3) {
-                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                        userVideoContainers.forEach((container, index) => {
-                            container.classList.remove(currentTemplate);
-                            container.classList.add('user-video-container-3');
-                        });
-                        currentTemplate = 'user-video-container-3'
-                    } else if (totalUsers >= 4 && totalUsers <= 6) {
-                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                        userVideoContainers.forEach((container, index) => {
-                            container.classList.remove(currentTemplate);
-                            container.classList.add('user-video-container-6');
-                        });
-                        currentTemplate = 'user-video-container-6'
-                    } else if (totalUsers >= 7 && totalUsers <= 8) {
-                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                        userVideoContainers.forEach((container, index) => {
-                            container.classList.remove(currentTemplate);
-                            container.classList.add('user-video-container-8');
-                        });
-                        currentTemplate = 'user-video-container-8'
-                    } else {
-                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                        userVideoContainers.forEach((container, index) => {
-                            container.classList.remove(currentTemplate);
-                            container.classList.add('user-video-container-12');
-                        });
-                        currentTemplate = 'user-video-container-12'
-                    }
+                    // Check Total User Is Less Than 2 To Adjust Template
+                    normalTemplate()
                 } else {
-                    const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                    userVideoContainers.forEach((container, index) => {
-                        container.classList.remove(currentTemplate);
-                        container.classList.add('user-video-container-screen-sharing');
-                    });
-                    currentTemplate = 'user-video-container-screen-sharing'
+                    // If In Screen Share Mode, It Will Adjust Template
+                    screenSharingTemplate()
                 }
         
+                // Create Pagination If Total Users Is More Than Limited Displayed User Per Page
                 if (totalUsers > limitedPerPage) {
                     createPaginationRight()
                 }
         
+                // Resuming Consumer
                 socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
             }
         })

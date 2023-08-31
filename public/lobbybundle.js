@@ -10,9 +10,12 @@ const goTo = 'room/' + roomName;
 
 const init = () => {
     localStorage.setItem('room_id', roomName)
-    getMyMic()
-    getMyDevices()
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
+    getMyMic().then((config) => {
+        return getMyDevices(config)
+    }).then((config) => {
+        return navigator.mediaDevices.getUserMedia(config)
+    })
+    .then((stream) => {
         localVideo.srcObject = stream;
         store.setLocalStream(stream)
     })
@@ -29,14 +32,12 @@ const getMyMic = async () => {
         newElement.className = "dropdown-item dropdown-select-options";
         newElement.textContent = audio.label;
         newElement.setAttribute('value', audio.deviceId)
-
-
         micOptions.appendChild(newElement);
-
     })
 
     localStorage.setItem("audioDevices", audioDevices)
     localStorage.setItem("selectedAudioDevices", audioDevices[0].deviceId)
+    return config = { audio: { deviceId: { exact: audioDevices[0].deviceId } } }
 }
 
 micOptions.addEventListener("click", (e) => {
@@ -60,7 +61,7 @@ micOptions.addEventListener("click", (e) => {
 });
 
 const videoOptions = document.getElementById('camera-options')
-const getMyDevices = async () => {
+const getMyDevices = async (config) => {
     let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter(
         (device) => device.kind === "videoinput"
     );
@@ -76,6 +77,7 @@ const getMyDevices = async () => {
 
     localStorage.setItem('videoDevices', videoDevices)
     localStorage.setItem('selectedVideoDevices', videoDevices[0].deviceId)
+    return config = {...config, video: { deviceId: { exact: videoDevices[0].deviceId } } }
 }
 
 videoOptions.addEventListener("click", (e) => {

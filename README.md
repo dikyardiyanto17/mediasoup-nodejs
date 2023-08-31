@@ -13,6 +13,7 @@
 - Tampilkan semua error notification
 - Tampilkan jika semua sudah ready
 - Handling jika jika producer state : failed, connecting, connected
+- Cek Saat Mode Normal dan Mode Screen Share Di Limited Usernya
 
 ### Secondary
 - Tambahkan Turn Off / On Camera (Masih perlu perbaikan)
