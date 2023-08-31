@@ -12,6 +12,7 @@
 - Kasih penanda jika sudah terhubung atau belum.
 - Tampilkan semua error notification
 - Tampilkan jika semua sudah ready
+- Handling jika jika producer state : failed, connecting, connected
 
 ### Secondary
 - Tambahkan Turn Off / On Camera (Masih perlu perbaikan)

@@ -377,6 +377,7 @@ const createSendTransport = () => {
 
         producerTransport.on('connectionstatechange', async (e) => {
             console.log('- State Change Producer : ', e)
+            let producerStatus = document.getElementById('producer-status')
             let connectionStatusElement = document.getElementById('connection-status-id')
             let buttonRecord = document.getElementById('user-record-button')
             let buttonMic = document.getElementById('user-mic-button')
@@ -388,6 +389,7 @@ const createSendTransport = () => {
             let buttonShare = document.getElementById('share-link-button')
             let buttonUserList = document.getElementById('user-list-button')
             if (e == 'connected'){
+                producerStatus.innerHTML = 'Connected'
                 createUserList(localStorage.getItem('username'))
                 // console.log('- Status Element : ', )
                 connectionStatusElement.className = 'dot status-connected'
@@ -402,6 +404,7 @@ const createSendTransport = () => {
                 buttonShare.removeAttribute('disabled', 'false')
                 buttonUserList.removeAttribute('disabled', 'false')
             } else if (e = 'connecting'){
+                producerStatus.innerHTML = 'Connecting'
                 connectionStatusElement.className = 'dot status-connecting'
                 buttonRecord.setAttribute('disabled', 'true')
                 buttonMic.setAttribute('disabled', 'true')
@@ -412,6 +415,7 @@ const createSendTransport = () => {
                 buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
             } else if (e == 'failed'){
+                producerStatus.innerHTML = 'Failed'
                 connectionStatusElement.className = 'dot status-failed'
                 buttonRecord.setAttribute('disabled', 'true')
                 buttonMic.setAttribute('disabled', 'true')
