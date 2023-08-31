@@ -6,11 +6,12 @@
 - Membuat UI yang lebih baik (on Development)
 - Pause consumer jika tidak sedang digunakan (sudah ditambahkan, belum ditesting)
 - Konfigurasi menjalankan consumer yang didisplay saja, dalam kasus ini maksimal 12 user per page. 11 x 2 = 24 consumer per user. 24 x 12 = 288 consumer  (sudah ditambahkan, belum ditesting)
-- Konfigurasi Worker untuk setiap core, maksimal 1 worker terdapat 50 orang. 1 orang menerima 98 consumer dari 49 video dan audio dan total consumer adalah 50 x 98 = 4900 Consumer (skema ada dibawah)
+- Konfigurasi Worker untuk setiap core, maksimal 1 worker terdapat 50 orang. 1 orang menerima 98 consumer dari 49 video dan audio dan total consumer adalah 50 x 98 = 4900 Consumer (skema ada dibawah)(skema sudah di terapkan dikodingan)
 - Deployment ke dua video putus-putus (Perbedaan dari deployment ke dua dengan pertama adalah cara memasukan videonya), kemungkinan masalah : 1. Terkena bandwidth di VPS Server.
-- Apply kondisi tidak bisa buka mic jika state change di production bukan connected.
 - Jika semua sudah ready, tombol controller di enable.
 - Kasih penanda jika sudah terhubung atau belum.
+- Tampilkan semua error notification
+- Tampilkan jika semua sudah ready
 
 ### Secondary
 - Tambahkan Turn Off / On Camera (Masih perlu perbaikan)

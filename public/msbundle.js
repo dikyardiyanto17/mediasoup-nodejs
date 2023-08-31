@@ -28137,6 +28137,7 @@ const RecordRTC = require('recordrtc')
 const io = require('socket.io-client')
 const socket = io('/')
 const store = require('./store')
+// console.log('- Document : ', document)
 
 // Get Room Id
 const url = window.location.pathname;
@@ -28455,6 +28456,14 @@ const createDevice = async () => {
     }
 }
 
+const createUserList = (username) => {
+    let userList = document.getElementById('user-list')
+    let myUsername = document.createElement('p')
+    myUsername.innerHTML = username
+    myUsername.id = 'user-'+username
+    userList.appendChild(myUsername)
+}
+
 // Create Send Transport
 const createSendTransport = () => {
     socket.emit('createWebRtcTransport', { consumer: false }, ({ params }) => {
@@ -28501,7 +28510,52 @@ const createSendTransport = () => {
         })
 
         producerTransport.on('connectionstatechange', async (e) => {
-            console.log('- State Change : ', e)
+            console.log('- State Change Producer : ', e)
+            let connectionStatusElement = document.getElementById('connection-status-id')
+            let buttonRecord = document.getElementById('user-record-button')
+            let buttonMic = document.getElementById('user-mic-button')
+            let buttonHangUp = document.getElementById('user-hang-up-button')
+            let buttonSwitchCamera = document.getElementById('user-switch-camera-button')
+            let buttonTurnOffCamera = document.getElementById('user-turn-on-off-camera-button')
+            let buttonScreenShare = document.getElementById('user-screen-share-button')
+            let buttonChat = document.getElementById('user-chat-button')
+            let buttonShare = document.getElementById('share-link-button')
+            let buttonUserList = document.getElementById('user-list-button')
+            if (e == 'connected'){
+                createUserList(localStorage.getItem('username'))
+                // console.log('- Status Element : ', )
+                connectionStatusElement.className = 'dot status-connected'
+
+                buttonRecord.removeAttribute('disabled', 'false')
+                buttonMic.removeAttribute('disabled', 'false')
+                buttonHangUp.removeAttribute('disabled', 'false')
+                buttonSwitchCamera.removeAttribute('disabled', 'false')
+                buttonTurnOffCamera.removeAttribute('disabled', 'false')
+                buttonScreenShare.removeAttribute('disabled', 'false')
+                buttonChat.removeAttribute('disabled', 'false')
+                buttonShare.removeAttribute('disabled', 'false')
+                buttonUserList.removeAttribute('disabled', 'false')
+            } else if (e = 'connecting'){
+                connectionStatusElement.className = 'dot status-connecting'
+                buttonRecord.setAttribute('disabled', 'true')
+                buttonMic.setAttribute('disabled', 'true')
+                buttonHangUp.setAttribute('disabled', 'true')
+                buttonSwitchCamera.setAttribute('disabled', 'true')
+                buttonTurnOffCamera.setAttribute('disabled', 'true')
+                buttonScreenShare.setAttribute('disabled', 'true')
+                buttonChat.setAttribute('disabled', 'true')
+                buttonShare.setAttribute('disabled', 'true')
+            } else if (e == 'failed'){
+                connectionStatusElement.className = 'dot status-failed'
+                buttonRecord.setAttribute('disabled', 'true')
+                buttonMic.setAttribute('disabled', 'true')
+                buttonHangUp.setAttribute('disabled', 'true')
+                buttonSwitchCamera.setAttribute('disabled', 'true')
+                buttonTurnOffCamera.setAttribute('disabled', 'true')
+                buttonScreenShare.setAttribute('disabled', 'true')
+                buttonChat.setAttribute('disabled', 'true')
+                buttonShare.setAttribute('disabled', 'true')
+            }
         })
 
         // Connecting Send Transport
@@ -28689,6 +28743,9 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
                     break
                 }
                 if (producersDetails[firstKey][secondKey] == remoteProducerId) {
+                    // console.log('- Deleting : ', producersDetails[firstKey])
+                    let deleteUser = document.getElementById('user-'+producersDetails[firstKey].name)
+                    deleteUser.remove()
                     delete producersDetails[firstKey]
                     break
                 }
@@ -29059,152 +29116,143 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 
         const { track } = consumer
 
-        let check = false
-        if (params.username) {
-            check = isScreenSharingType(params.username)
-        }
         
-        let stream = store.getState()
-        if (!allStream[params.producerOwnerSocket]) {
-            allStream[params.producerOwnerSocket] = {}
-        }
-        if (!allStream[params.producerOwnerSocket][params.kind]) {
-            allStream[params.producerOwnerSocket][params.kind] = { track, id: remoteProducerId, username: params?.username, kind: params.kind, status: true, serverConsumerId: params.serverConsumerId }
-        }
-
-        if (!producersDetails[params.producerOwnerSocket]) {
-            producersDetails[params.producerOwnerSocket] = {}
-            if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
-                producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
-                if (totalUsers <= limitedPerPage) {
-                    createVideo(remoteProducerId, params.kind, track, params?.username, true)
+        
+        consumerTransport.on('connectionstatechange', async (e) => {
+            console.log('- State Consumer : ', e)
+            if (e == 'connected') {
+                let check = false
+                if (params.username) {
+                    check = isScreenSharingType(params.username)
                 }
-            }
-            if (!producersDetails[params.producerOwnerSocket].name) {
-                producersDetails[params.producerOwnerSocket].name = params.producerName
-            }
-        } else {
-            if (check) {
-                if (!allStream[params.producerOwnerSocket].screenSharing) {
-                    allStream[params.producerOwnerSocket].screenSharing = { track, id: remoteProducerId, username: params?.username, kind: 'screen-sharing' }
+                
+                let stream = store.getState()
+                if (!allStream[params.producerOwnerSocket]) {
+                    allStream[params.producerOwnerSocket] = {}
                 }
-                if (!producersDetails[params.producerOwnerSocket].screenSharing) {
-                    isScreenSharing = true
-                    changeLayout(true)
-                    producersDetails[params.producerOwnerSocket].screenSharing = params.producerId
-                    createScreenSharing(track)
-                    screenSharingInfo = { socketId: params.producerOwnerSocket, producerId: params.producerId }
+                if (!allStream[params.producerOwnerSocket][params.kind]) {
+                    allStream[params.producerOwnerSocket][params.kind] = { track, id: remoteProducerId, username: params?.username, kind: params.kind, status: true, serverConsumerId: params.serverConsumerId }
                 }
-            }
-            if (producersDetails[params.producerOwnerSocket] && !check && (!producersDetails[params.producerOwnerSocket].video || !producersDetails[params.producerOwnerSocket].audio)) {
-                totalUsers++
-            }
-            if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
-                if (totalUsers <= limitedPerPage) {
-                    createVideo(remoteProducerId, params.kind, track, params?.username, true)
-                }
-                producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
-                if (!stream.localStream.getAudioTracks()[0].enabled) {
-                    for (const key in producersDetails) {
-                        socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
+        
+                if (!producersDetails[params.producerOwnerSocket]) {
+                    producersDetails[params.producerOwnerSocket] = {}
+                    if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
+                        producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
+                        if (totalUsers <= limitedPerPage) {
+                            createVideo(remoteProducerId, params.kind, track, params?.username, true)
+                        }
+                    }
+                    if (!producersDetails[params.producerOwnerSocket].name) {
+                        producersDetails[params.producerOwnerSocket].name = params.producerName
+                    }
+                } else {
+                    if (check) {
+                        if (!allStream[params.producerOwnerSocket].screenSharing) {
+                            allStream[params.producerOwnerSocket].screenSharing = { track, id: remoteProducerId, username: params?.username, kind: 'screen-sharing' }
+                        }
+                        if (!producersDetails[params.producerOwnerSocket].screenSharing) {
+                            isScreenSharing = true
+                            changeLayout(true)
+                            producersDetails[params.producerOwnerSocket].screenSharing = params.producerId
+                            createScreenSharing(track)
+                            screenSharingInfo = { socketId: params.producerOwnerSocket, producerId: params.producerId }
+                        }
+                    }
+                    if (producersDetails[params.producerOwnerSocket] && !check && (!producersDetails[params.producerOwnerSocket].video || !producersDetails[params.producerOwnerSocket].audio)) {
+                        totalUsers++
+                        createUserList(params?.username)
+                    }
+                    if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
+                        if (totalUsers <= limitedPerPage) {
+                            createVideo(remoteProducerId, params.kind, track, params?.username, true)
+                        }
+                        producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
+                        if (!stream.localStream.getAudioTracks()[0].enabled) {
+                            for (const key in producersDetails) {
+                                socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
+                            }
+                        }
+                        if (!isCameraOn){
+                            console.log('Off')
+                            replaceVideoToImage()
+                        }
                     }
                 }
-                if (!isCameraOn){
-                    console.log('Off')
-                    replaceVideoToImage()
-                }
-            }
-        }
-
-        if (isRecording && params.kind == 'audio') {
-            const audioSource = audioContext.createMediaStreamSource(new MediaStream([track]));
-            audioSource.connect(audioDestination);
-            // recordedStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
-        }
-
-        if (params.kind == 'audio') {
-            const newElem = document.createElement('div')
-            newElem.setAttribute('id', `td-${remoteProducerId}`)
-            if (remoteProducerId == 'current-user-audio') {
-                let stream = store.getState()
-                track = stream.localStream.getAudioTracks()[0]
-                newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay muted></audio>'
-            } else {
-                newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
-            }
-            videoContainer.appendChild(newElem)
-            document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
-        }
-
-
-        if (!isScreenSharing) {
-            if (totalUsers <= 2) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container');
-                });
-                currentTemplate = 'user-video-container'
-            } else if (totalUsers == 3) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-3');
-                });
-                currentTemplate = 'user-video-container-3'
-            } else if (totalUsers >= 4 && totalUsers <= 6) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-6');
-                });
-                currentTemplate = 'user-video-container-6'
-            } else if (totalUsers >= 7 && totalUsers <= 8) {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-8');
-                });
-                currentTemplate = 'user-video-container-8'
-            } else {
-                const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-                userVideoContainers.forEach((container, index) => {
-                    container.classList.remove(currentTemplate);
-                    container.classList.add('user-video-container-12');
-                });
-                currentTemplate = 'user-video-container-12'
-            }
-        } else {
-            const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
-            userVideoContainers.forEach((container, index) => {
-                container.classList.remove(currentTemplate);
-                container.classList.add('user-video-container-screen-sharing');
-            });
-            currentTemplate = 'user-video-container-screen-sharing'
-        }
-
-        if (totalUsers > limitedPerPage) {
-            createPaginationRight()
-        }
-
-        socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
-
         
-        // consumerTransport.on('connectionstatechange', async (e) => {
-        //     if (e == 'connected') {
-        //         console.log('- State : ', e)
-        //     }
-        // })
-
-
-        // document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
-        // consumer.rtpReceiver.transport.onstatechange = (e) => {
-        //     console.log('- On State Change : ', e)
-        // }
-        // console.log('- Ice Server : ', consumer)
-        // console.log('- Ice Server : ', consumer.rtpReceiver.transport.state)
-
-
+                if (isRecording && params.kind == 'audio') {
+                    const audioSource = audioContext.createMediaStreamSource(new MediaStream([track]));
+                    audioSource.connect(audioDestination);
+                    // recordedStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
+                }
+        
+                if (params.kind == 'audio') {
+                    const newElem = document.createElement('div')
+                    newElem.setAttribute('id', `td-${remoteProducerId}`)
+                    if (remoteProducerId == 'current-user-audio') {
+                        let stream = store.getState()
+                        track = stream.localStream.getAudioTracks()[0]
+                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay muted></audio>'
+                    } else {
+                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
+                    }
+                    videoContainer.appendChild(newElem)
+                    document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
+                }
+        
+        
+                if (!isScreenSharing) {
+                    if (totalUsers <= 2) {
+                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                        userVideoContainers.forEach((container, index) => {
+                            container.classList.remove(currentTemplate);
+                            container.classList.add('user-video-container');
+                        });
+                        currentTemplate = 'user-video-container'
+                    } else if (totalUsers == 3) {
+                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                        userVideoContainers.forEach((container, index) => {
+                            container.classList.remove(currentTemplate);
+                            container.classList.add('user-video-container-3');
+                        });
+                        currentTemplate = 'user-video-container-3'
+                    } else if (totalUsers >= 4 && totalUsers <= 6) {
+                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                        userVideoContainers.forEach((container, index) => {
+                            container.classList.remove(currentTemplate);
+                            container.classList.add('user-video-container-6');
+                        });
+                        currentTemplate = 'user-video-container-6'
+                    } else if (totalUsers >= 7 && totalUsers <= 8) {
+                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                        userVideoContainers.forEach((container, index) => {
+                            container.classList.remove(currentTemplate);
+                            container.classList.add('user-video-container-8');
+                        });
+                        currentTemplate = 'user-video-container-8'
+                    } else {
+                        const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                        userVideoContainers.forEach((container, index) => {
+                            container.classList.remove(currentTemplate);
+                            container.classList.add('user-video-container-12');
+                        });
+                        currentTemplate = 'user-video-container-12'
+                    }
+                } else {
+                    const userVideoContainers = document.querySelectorAll('.' + currentTemplate);
+                    userVideoContainers.forEach((container, index) => {
+                        container.classList.remove(currentTemplate);
+                        container.classList.add('user-video-container-screen-sharing');
+                    });
+                    currentTemplate = 'user-video-container-screen-sharing'
+                }
+        
+                if (totalUsers > limitedPerPage) {
+                    createPaginationRight()
+                }
+        
+                socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
+            }
+        })
     })
 }
 
@@ -29564,7 +29612,16 @@ chatButton.addEventListener('click', () => {
     else chatContainer.className = 'invisible'
 })
 
+// Chat Button
+const userListButton = document.getElementById('user-list-button')
+userListButton.addEventListener('click', () => {
+    const userListContainer = document.getElementById('user-container')
+    if (userListContainer.className == 'invisible') userListContainer.className = 'visible'
+    else userListContainer.className = 'invisible'
+})
+
 dragElement(document.getElementById("chat-bar"));
+dragElement(document.getElementById("user-bar"));
 
 function dragElement(elmnt) {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -29669,7 +29726,7 @@ consoleLogButton.addEventListener('click', () => {
     //     console.log(data)
     // })
     // console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
-    // console.log("- Producer Details : ", producersDetails)
+    console.log("- Producer Details : ", producersDetails)
     // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
     // console.log("- Screen Sharing Producers : ", screenSharingProducer)
     // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
@@ -29684,8 +29741,8 @@ consoleLogButton.addEventListener('click', () => {
     // console.log('- All Audio Flat : ', allAudioFlat)
 
     // console.log('- All Stream : ', allStream)
-    socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
-    })
+    // socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
+    // })
 
     // console.log('- Total User : ', totalUsers)
     // let stream = store.getState()

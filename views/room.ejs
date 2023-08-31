@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -486,12 +487,84 @@
                 position: relative;
             }
         }
+
+        .connection-status {
+            background-color: rgba(255, 255, 255, 0.4);
+            position: absolute;
+            top: 30px;
+            border-radius: 10px;
+            padding: 5px;
+            right: 20px;
+        }
+
+        .dot {
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .status-connecting {
+            background-color: #bbb;
+        }
+
+        .status-failed {
+            background-color: red;
+        }
+
+        .status-connected {
+            background-color: green;
+        }
+
+        .chat-bar {
+            background-color: #f1f1f1;
+            border: 1px solid #d3d3d3;
+            max-width: 300px;
+            min-width: 300px;
+            position: absolute;
+            right: 0;
+            text-align: center;
+            top: 100px;
+            z-index: 9;
+        }
+
+        .user-bar {
+            background-color: #f1f1f1;
+            border: 1px solid #d3d3d3;
+            max-width: 300px;
+            min-width: 300px;
+            position: absolute;
+            left: 20px;
+            text-align: center;
+            top: 100px;
+            z-index: 10;
+        }
+
+        #user-bar-header {
+            background-color: #2196f3;
+            color: #fff;
+            cursor: move;
+            max-width: 300px;
+            padding: 10px;
+            z-index: 10;
+        }
+
+        #user-list {
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        #user-list>p {
+            margin-bottom: 0px;
+        }
         </style>
 </head>
 
 <body>
     <div class="outside-container">
         <div class="full-container" id="full-container-id">
+            <div class="connection-status"><span class="dot status-connecting" id="connection-status-id"></span><span>Connected</span></div>
             <audio id="audio-collection" autoplay></audio>
             <!-- <div class="pagination-left">
                 <button class="pagination-button" id="slide-left">
@@ -556,6 +629,13 @@
                     </div>
                 </div>
             </div>
+            <div class="invisible" id="user-container">
+                <div class="user-bar" id="user-bar">
+                    <div id="user-bar-header"><i class="fas fa-users"></i> User</div>
+                    <div id="user-list">
+                    </div>
+                </div>
+            </div>
             <span id="alert-screensharing">Screensharing is ongoing</span>
             <div id="video-container">
                 <div class="user-video-container">
@@ -567,28 +647,31 @@
             </div>
         </div>
         <div class="controller">
-            <button class="button-small-custom" id="user-record-button">
+            <button disabled class="button-small-custom" id="user-record-button">
                 <img src="/assets/pictures/record.png" class="button-image" id="record-image" />
             </button>
-            <button class="button-small-custom" id="user-mic-button">
+            <button disabled class="button-small-custom" id="user-mic-button">
                 <img src="/assets/pictures/micOn.png" id="mic-image" />
             </button>
-            <button class="button-big-custom" id="user-hang-up-button">
+            <button disabled class="button-big-custom" id="user-hang-up-button">
                 <img src="/assets/pictures/hangUp.png" />
             </button>
-            <button class="button-small-custom" id="user-switch-camera-button">
+            <button disabled class="button-small-custom" id="user-switch-camera-button">
                 <img src="/assets/pictures/switchCamera.png" />
             </button>
-            <button class="button-small-custom" id="user-turn-on-off-camera-button">
+            <button disabled class="button-small-custom" id="user-turn-on-off-camera-button">
                 <i class="fas fa-video" style="color: #ffffff;" id="turn-on-off-camera-icons"></i>
             </button>
-            <button class="button-small-custom" id="user-screen-share-button">
+            <button disabled class="button-small-custom" id="user-list-button">
+                <i class="fas fa-users" style="color: #ffffff;"></i>
+            </button>
+            <button disabled class="button-small-custom" id="user-screen-share-button">
                 <img src="/assets/pictures/share.png" />
             </button>
-            <button class="button-small-custom" id="user-chat-button">
+            <button disabled class="button-small-custom" id="user-chat-button">
                 <i class="fas fa-comment-dots" style="color: white;"></i>
             </button>
-            <button class="button-small-custom" id="share-link-button">
+            <button disabled class="button-small-custom" id="share-link-button">
                 <i class="far fa-share-square" style="color: white;"></i>
                 <span id="snackbar">Successfully Copied</span>
             </button>
@@ -598,6 +681,13 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+    <script>
+        NProgress.start();
+        window.onload = function() {
+          NProgress.done();
+        };
+      </script>
     <script src="/msbundle.js"></script>
     <script src="/socket.io/socket.io.js"></script>
 </body>
