@@ -10,9 +10,9 @@ let isReady = {video: false, audio: false}
 
 const init = async () => {
     localStorage.setItem('room_id', roomName)
+    const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true})
     await getMyDevices()
     await getMyMic()
-    const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true})
     localVideo.srcObject = stream;
     store.setLocalStream(stream)
 }
