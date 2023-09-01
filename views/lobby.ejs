@@ -118,11 +118,32 @@
                 width: 100%;
             }
         }
+
+        #alert-username {
+            visibility: hidden;
+            color: #fff;
+            background-color: #333;
+            margin-left: -125px;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            top: 30px;
+            left: 50%;
+            z-index: 1;
+            position: absolute;
+        }
+
+        #alert-username.show {
+            visibility: visible;
+            -webkit-animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+            animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+        }
     </style>
 </head>
 
 <body>
     <div class="full-container">
+        <span id="alert-username">Enter Your Name!</span>
         <section class="left-bar">
             <form id="join-room">
                 <div class="input-wrap">
@@ -132,7 +153,8 @@
                     <div class="dropdown m-2">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-microphone"></i>
+                            <!-- <i class="fas fa-microphone"></i> -->
+                            <i class="fas fa-spinner fa-pulse" id="select-audio"></i>
                         </button>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="mic-options">
                         </div>
@@ -140,13 +162,14 @@
                     <div class="dropdown m-2">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-video"></i>
+                            <!-- <i class="fas fa-video"></i> -->
+                            <i class="fas fa-spinner fa-pulse" id="select-video"></i>
                         </button>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="camera-options">
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="button-custom"> Join </button>
+                <button type="submit" class="button-custom" id="submit-button" disabled> Join </button>
             </form>
         </section>
         <section class="right-bar">

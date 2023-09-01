@@ -6,18 +6,15 @@ const url = window.location.pathname;
 const parts = url.split('/');
 const roomName = parts[2];
 const goTo = 'room/' + roomName;
+let isReady = {video: false, audio: false}
 
-const init = () => {
+const init = async () => {
     localStorage.setItem('room_id', roomName)
-    getMyMic().then((config) => {
-        return getMyDevices(config)
-    }).then((config) => {
-        return navigator.mediaDevices.getUserMedia(config)
-    })
-    .then((stream) => {
-        localVideo.srcObject = stream;
-        store.setLocalStream(stream)
-    })
+    await getMyDevices()
+    await getMyMic()
+    const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true})
+    localVideo.srcObject = stream;
+    store.setLocalStream(stream)
 }
 
 const micOptions = document.getElementById('mic-options')
@@ -26,7 +23,8 @@ const getMyMic = async () => {
         (device) => device.kind === "audioinput"
     );
 
-    audioDevices.forEach((audio) => {
+    audioDevices.forEach((audio, index) => {
+        // console.log('- Audio : ', index, ' - Total : ', audioDevices.length)
         let newElement = document.createElement("p");
         newElement.className = "dropdown-item dropdown-select-options";
         newElement.textContent = audio.label;
@@ -34,9 +32,18 @@ const getMyMic = async () => {
         micOptions.appendChild(newElement);
     })
 
+    isReady.audio = true
+
+    if (isReady.audio && isReady.video){
+        let submitButton = document.getElementById('submit-button')
+        submitButton.removeAttribute('disabled')
+    }
+
+    let audioIcons = document.getElementById('select-audio')
+    audioIcons.className = 'fas fa-microphone'
+
     localStorage.setItem("audioDevices", audioDevices)
     localStorage.setItem("selectedAudioDevices", audioDevices[0].deviceId)
-    return config = { audio: { deviceId: { exact: audioDevices[0].deviceId } } }
 }
 
 micOptions.addEventListener("click", (e) => {
@@ -65,7 +72,8 @@ const getMyDevices = async (config) => {
         (device) => device.kind === "videoinput"
     );
 
-    videoDevices.forEach((video) => {
+    videoDevices.forEach((video, index) => {
+        // console.log('- Video : ', index, " - Total : ", videoDevices.length)
         let newElement = document.createElement("p");
         newElement.className = "dropdown-item dropdown-select-options";
         newElement.textContent = video.label;
@@ -74,9 +82,18 @@ const getMyDevices = async (config) => {
         videoOptions.appendChild(newElement);
     })
 
+    isReady.video = true
+
+    if (isReady.audio && isReady.video){
+        let submitButton = document.getElementById('submit-button')
+        submitButton.removeAttribute('disabled')
+    }
+
+    let videoIcons = document.getElementById('select-video')
+    videoIcons.className = 'fas fa-video'
+
     localStorage.setItem('videoDevices', videoDevices)
     localStorage.setItem('selectedVideoDevices', videoDevices[0].deviceId)
-    return config = {...config, video: { deviceId: { exact: videoDevices[0].deviceId } } }
 }
 
 videoOptions.addEventListener("click", (e) => {
@@ -110,7 +127,15 @@ usernameForm.addEventListener('input', (e) => {
 joinRoom.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    // const userName = document.getElementById('username').value;
+    const userName = document.getElementById('username').value;
+
+    if (!userName){
+        let au = document.getElementById("alert-username");
+        au.className = "show";
+        // Show Warning
+        setTimeout(() => { au.className = au.className.replace("show", ""); }, 3000);
+        return
+    }
 
     const newURL = window.location.origin + "/" + goTo;
 
