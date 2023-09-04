@@ -28174,9 +28174,9 @@ let allStream = {}
 let audioContext
 let audioDestination
 let paginationStartIndex = 0
-let paginationEndIndex = 2
+let paginationEndIndex = 11
 let currentPage = 0
-let limitedPerPage = 3
+let limitedPerPage = 12
 let isCameraOn = true
 
 
@@ -29865,50 +29865,50 @@ function dragElement(elmnt) {
 
 
 // Console Log Button
-const consoleLogButton = document.getElementById('console-log-button')
-consoleLogButton.addEventListener('click', () => {
-    // consumerTransports.forEach((transport) => {
-    //     transport.consumer.getStats().then((stat) => {
-    //         [...stat.entries()].forEach((data, index) => {
-    //             if (index == [...stat.entries()].length - 1) {
-    //                 console.log('- Data : ', data)
-    //             }
-    //         })
-    //     })
-    //     console.log("- Ice Paramaters : ", transport.consumer.rtpReceiver.transport.state)
-    //     transport.consumerTransport.getStats().then((stat) => {
-    //         console.log("- Stat : ", stat)
-    //     })
-    // })
-    // socket.emit('get-peers', (consumerTransports))
-    // console.log("- Producer : ", producerTransport)
-    // console.log("- Video Producer : ", videoProducer)
-    // producerTransport.getStats().then((data) => {
-    //     console.log(data)
-    // })
-    // console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
-    // console.log("- Producer Details : ", producersDetails)
-    // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
-    // console.log("- Screen Sharing Producers : ", screenSharingProducer)
-    // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
+// const consoleLogButton = document.getElementById('console-log-button')
+// consoleLogButton.addEventListener('click', () => {
+//     consumerTransports.forEach((transport) => {
+//         transport.consumer.getStats().then((stat) => {
+//             [...stat.entries()].forEach((data, index) => {
+//                 if (index == [...stat.entries()].length - 1) {
+//                     console.log('- Data : ', data)
+//                 }
+//             })
+//         })
+//         console.log("- Ice Paramaters : ", transport.consumer.rtpReceiver.transport.state)
+//         transport.consumerTransport.getStats().then((stat) => {
+//             console.log("- Stat : ", stat)
+//         })
+//     })
+//     socket.emit('get-peers', (consumerTransports))
+//     console.log("- Producer : ", producerTransport)
+//     console.log("- Video Producer : ", videoProducer)
+//     producerTransport.getStats().then((data) => {
+//         console.log(data)
+//     })
+//     console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
+//     console.log("- Producer Details : ", producersDetails)
+//     console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
+//     console.log("- Screen Sharing Producers : ", screenSharingProducer)
+//     console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
 
-    // let allAudio = []
+//     let allAudio = []
 
-    // for (const key in allStream){
-    //     allAudio.push(allStream[key].audio)
-    // }
+//     for (const key in allStream){
+//         allAudio.push(allStream[key].audio)
+//     }
 
-    // let allAudioFlat = allAudio.flatMap(stream => stream);
-    // console.log('- All Audio Flat : ', allAudioFlat)
+//     let allAudioFlat = allAudio.flatMap(stream => stream);
+//     console.log('- All Audio Flat : ', allAudioFlat)
 
-    console.log('- All Stream : ', allStream)
-    // socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
-    // })
+//     console.log('- All Stream : ', allStream)
+//     socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
+//     })
 
-    // console.log('- Total User : ', totalUsers)
-    // let stream = store.getState()
-    // console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
-})
+//     console.log('- Total User : ', totalUsers)
+//     let stream = store.getState()
+//     console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
+// })
 
 },{"./store":85,"mediasoup-client":62,"recordrtc":69,"socket.io-client":75}],85:[function(require,module,exports){
 let state = {
