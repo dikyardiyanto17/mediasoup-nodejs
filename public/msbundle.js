@@ -28174,9 +28174,9 @@ let allStream = {}
 let audioContext
 let audioDestination
 let paginationStartIndex = 0
-let paginationEndIndex = 11
+let paginationEndIndex = 2
 let currentPage = 0
-let limitedPerPage = 12
+let limitedPerPage = 3
 let isCameraOn = true
 
 
@@ -28768,19 +28768,6 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
         producerToClose.consumerTransport.close()
         producerToClose.consumer.close()
 
-        // Reset Pagination
-        paginationStartIndex = 0
-        paginationEndIndex = 11
-        currentPage = 0
-
-        // Checkig Pagination
-        const isExistLeft = document.getElementById('pagination-left-container')
-        const isExistRight = document.getElementById('pagination-right-container')
-
-        // Deleting Pagination
-        if (isExistLeft) isExistLeft.remove()
-        if (isExistRight) isExistRight.remove()
-
         // Deleting Disconnected Stream
         for (const firstkey in allStream) {
             for (const secondkey in allStream[firstkey]) {
@@ -28790,7 +28777,7 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
                     totalUsers--
                     delete allStream[firstkey]
                     break
-                } else {
+                } else if (allStream[firstkey][secondkey].kind == 'screen-sharing') {
                     // If It Is Delete Only Screen Sharing Stream
                     delete allStream[firstkey][secondkey].kind
                     break
@@ -28815,16 +28802,6 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
                     break
                 }
             }
-        }
-
-
-        // if (currentPage != 0) {
-        //     createPaginationLeft()
-        // }
-
-        // Create Right Pagination If Total Users More Than Limited Per Page
-        if (totalUsers > limitedPerPage) {
-            createPaginationRight()
         }
 
         if (!isScreenSharing) {
@@ -28852,22 +28829,111 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
             }
         }
 
-        let counter = 0
-        // Removing Current Diplayed User
-        while (videoContainer.firstChild) {
-            videoContainer.removeChild(videoContainer.firstChild);
+        let checkPage = videoContainer.querySelectorAll("[id*='td']")
+        // console.log('- Check Page : ', checkPage)
+
+        // if (currentPage != 0) {
+        //     createPaginationLeft()
+        // }
+
+        // Create Right Pagination If Total Users More Than Limited Per Page
+        // if (totalUsers > limitedPerPage) {
+        //     createPaginationRight()
+        // }
+
+        // Checking Pagination
+        const isExistLeft = document.getElementById('pagination-left-container')
+        const isExistRight = document.getElementById('pagination-right-container')
+
+        // Deleting Pagination
+        if (isExistLeft) isExistLeft.remove()
+        if (isExistRight) isExistRight.remove()
+
+        // Calculate Total Page
+        let totalPage = Math.ceil(totalUsers / limitedPerPage)
+
+        if (totalPage > 1 && currentPage == 0){
+            createPaginationRight()
+        } else if (currentPage != 0 && currentPage + 1 < totalPage){
+            createPaginationLeft()
+            createPaginationRight()
+        } else if (currentPage != 0 && currentPage + 1 == totalPage){
+            createPaginationLeft()
         }
 
-        // Displaying All Users With Limit
-        for (const firstKey in allStream) {
-            if (counter >= paginationStartIndex && counter <= paginationEndIndex) {
-                for (const secondKey in allStream[firstKey]) {
-                    if (allStream[firstKey][secondKey].kind != 'screen-sharing') {
-                        createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
+
+        let counter = 0
+
+        // Reset All Video
+        let deleteVideo = videoContainer.querySelectorAll("[id*='td']")
+        if (deleteVideo.length == 0){
+
+            // Create Right Pagination If Total Users More Than Limited Per Page
+            if (totalUsers > limitedPerPage) {
+                createPaginationRight()
+            }
+
+            // Reset Pagination
+            paginationStartIndex = 0
+            paginationEndIndex = limitedPerPage - 1
+            currentPage = 0
+
+            // Displaying All Users With Limit
+            for (const firstKey in allStream) {
+                if (counter >= paginationStartIndex && counter <= paginationEndIndex) {
+                    for (const secondKey in allStream[firstKey]) {
+                        if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
+                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
+                            if (allStream[firstKey][secondKey].serverConsumerId){
+                                socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
+                            }
+                        }
+                    }
+                } 
+                else {
+                    // Pausing Video Consumer
+                    for (const secondKey in allStream[firstKey]) {
+                        if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
+                            console.log('- Paused : ', allStream[firstKey][secondKey].serverConsumerId)
+                            if (allStream[firstKey][secondKey].serverConsumerId){
+                                socket.emit('consumer-pause', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
+                            }
+                        }
                     }
                 }
+                counter++
             }
-            counter++
+        } else {
+            // Delete All Video Element
+            deleteVideo.forEach((element) => {
+                element.remove()
+            })
+    
+            // Displaying All Users With Limit
+            for (const firstKey in allStream) {
+                if (counter >= paginationStartIndex && counter <= paginationEndIndex) {
+                    for (const secondKey in allStream[firstKey]) {
+                        if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
+                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
+                            if (allStream[firstKey][secondKey].serverConsumerId){
+                                socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
+                            }
+                        }
+                    }
+                } 
+                else {
+                    // Pausing Video Consumer
+                    for (const secondKey in allStream[firstKey]) {
+                        if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
+                            console.log('- Paused : ', allStream[firstKey][secondKey].serverConsumerId)
+                            if (allStream[firstKey][secondKey].serverConsumerId){
+                                socket.emit('consumer-pause', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
+                            }
+                        }
+                    }
+                }
+                counter++
+            }
         }
     } catch (error) {
         console.log(error)
@@ -28986,9 +29052,21 @@ const createPaginationRight = () => {
 
             let counter = 0
             // Remove Video Container
-            while (videoContainer.firstChild) {
-                videoContainer.removeChild(videoContainer.firstChild);
-            }
+            // while (videoContainer.firstChild) {
+            //     videoContainer.removeChild(videoContainer.firstChild);
+            // }
+
+            // Delete Current User
+            // let currentUser = document.getElementById('td-current-user-video')
+            // if (currentUser){
+            //     currentUser.remove()
+            // }
+
+            // Remove Element to Replace The Next Page
+            let deleteVideo = videoContainer.querySelectorAll("[id*='td']")
+            deleteVideo.forEach((element) => {
+                element.remove()
+            })
 
             // Diplaying Video
             for (const firstKey in allStream) {
@@ -28999,15 +29077,20 @@ const createPaginationRight = () => {
                             console.log('- Check : ', allStream[firstKey].audio.track.enabled)
                             createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
                             // Resume Displayed Video Consumer
-                            socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
+                            if (allStream[firstKey][secondKey].serverConsumerId){
+                                socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
+                            }
                         }
                     }
-                } else {
+                } 
+                else {
                     // Pausing Video Consumer
                     for (const secondKey in allStream[firstKey]) {
                         if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
-                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
-                            socket.emit('consumer-pause', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
+                            console.log('- Paused : ', allStream[firstKey][secondKey].serverConsumerId)
+                            if (allStream[firstKey][secondKey].serverConsumerId){
+                                socket.emit('consumer-pause', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
+                            }
                         }
                     }
                 }
@@ -29057,10 +29140,13 @@ const createPaginationLeft = () => {
             currentPage--
 
             let counter = 0
-            // Remove Video Container
-            while (videoContainer.firstChild) {
-                videoContainer.removeChild(videoContainer.firstChild);
-            }
+
+            // Remove Element to Replace The Next Page
+            let deleteVideo = videoContainer.querySelectorAll("[id*='td']")
+            deleteVideo.forEach((element) => {
+                element.remove()
+            })
+
             // Diplaying Video
             for (const firstKey in allStream) {
                 // Limiting Displayed Video
@@ -29069,15 +29155,19 @@ const createPaginationLeft = () => {
                         if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
                             createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
                             // Resume Displayed Video Consumer
-                            socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
+                            if (allStream[firstKey][secondKey].serverConsumerId){
+                                socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
+                            }
                         }
                     }
-                } else {
+                } 
+                else {
                     // Pausing Video Consumer
                     for (const secondKey in allStream[firstKey]) {
                         if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
-                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
-                            socket.emit('consumer-pause', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
+                            if (allStream[firstKey][secondKey].serverConsumerId){
+                                socket.emit('consumer-pause', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
+                            }
                         }
                     }
                 }
@@ -29159,10 +29249,8 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 
         const { track } = consumer
 
-        
         // Check Consumer Connection State
         consumerTransport.on('connectionstatechange', async (e) => {
-
             console.log('- State Consumer : ', e, ' - Remote Id : ', remoteProducerId)
             
             // If Consumer State is Connected
@@ -29183,6 +29271,14 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                 // Make a List For Every User
                 if (params.kind == 'video' && !check){
                     createUserList(params?.username)
+                    totalUsers++
+                }
+
+                // Calculate Total Page
+                let totalPage2 = Math.ceil(totalUsers / limitedPerPage)
+
+                if (params.kind == 'video' && !check && ((totalUsers <= limitedPerPage && currentPage == 0) || totalUsers >= limitedPerPage && totalPage2 == currentPage + 1 && currentPage != 0)) {
+                    createVideo(remoteProducerId, params.kind, track, params?.username, true)
                 }
                 
                 // Get Local Stream
@@ -29205,9 +29301,9 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
                         producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
                         // Limiting Displayed Video
-                        if (totalUsers <= limitedPerPage) {
-                            createVideo(remoteProducerId, params.kind, track, params?.username, true)
-                        }
+                        // if (totalUsers <= limitedPerPage && currentPage == 0) {
+                        //     createVideo(remoteProducerId, params.kind, track, params?.username, true)
+                        // }
                     }
                     // Labeling Producer Id With Owner Of Producer
                     if (!producersDetails[params.producerOwnerSocket].name) {
@@ -29235,15 +29331,28 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     // Check If The Stream Is Not Screen Sharing and Producer Details With Socket Already Exist (Either Video or Audio With Same Socket Id), It Will Means One User Is Completely Join (Audio And Video)
                     if (producersDetails[params.producerOwnerSocket] && !check && (!producersDetails[params.producerOwnerSocket].video || !producersDetails[params.producerOwnerSocket].audio)) {
                         // User Joins +1
-                        totalUsers++
                     }
 
                     // Check If The Stream Is Not Screen Sharing and Its Either Video Or Audio Stream
                     if (!producersDetails[params.producerOwnerSocket][params.kind] && !check) {
-                        // Limiting Displayed Video
-                        if (totalUsers <= limitedPerPage) {
-                            createVideo(remoteProducerId, params.kind, track, params?.username, true)
+                        // Limiting Displayed Video When In Page 1
+                        // if (totalUsers <= limitedPerPage && currentPage == 0) {
+                        //     createVideo(remoteProducerId, params.kind, track, params?.username, true)
+                        // }
+                        
+                        // Calculate Total Page
+                        let totalPage = Math.ceil(totalUsers / limitedPerPage)
+
+                        // Create Pagination If Total Users Is More Than Limited Displayed User Per Page
+                        if ((totalUsers > limitedPerPage && currentPage == 0) || (currentPage+1 < totalPage && currentPage != 0)) {
+                            createPaginationRight()
                         }
+
+                        // If There Is More Than Limited Displayed User and Current User Is In Last Page
+                        // if (totalUsers >= limitedPerPage && totalPage == currentPage + 1 && currentPage != 0) {
+                        //     createVideo(remoteProducerId, params.kind, track, params?.username, true)
+                        // }
+
                         producersDetails[params.producerOwnerSocket][params.kind] = params.producerId
                         // If Current User Is Muted, Then Change Other User Mic Icons
                         if (!stream.localStream.getAudioTracks()[0].enabled) {
@@ -29290,14 +29399,19 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     // If In Screen Share Mode, It Will Adjust Template
                     screenSharingTemplate()
                 }
-        
-                // Create Pagination If Total Users Is More Than Limited Displayed User Per Page
-                if (totalUsers > limitedPerPage) {
-                    createPaginationRight()
-                }
+
+                // Calculate Total Page
+                let totalPage = Math.ceil(totalUsers / limitedPerPage)
         
                 // Resuming Consumer
-                socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
+                if (params.kind == 'video' && !check && ((currentPage == 0 && totalUsers <= limitedPerPage) || (totalUsers >= limitedPerPage && totalPage == currentPage + 1 && currentPage != 0))){
+                    socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
+                }
+
+                // Resuming Consumer Screen Sharing
+                if (check){
+                    socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
+                }
             }
         })
     })
@@ -29751,50 +29865,50 @@ function dragElement(elmnt) {
 
 
 // Console Log Button
-// const consoleLogButton = document.getElementById('console-log-button')
-// consoleLogButton.addEventListener('click', () => {
-//     consumerTransports.forEach((transport) => {
-//         transport.consumer.getStats().then((stat) => {
-//             [...stat.entries()].forEach((data, index) => {
-//                 if (index == [...stat.entries()].length - 1) {
-//                     console.log('- Data : ', data)
-//                 }
-//             })
-//         })
-//         console.log("- Ice Paramaters : ", transport.consumer.rtpReceiver.transport.state)
-//         transport.consumerTransport.getStats().then((stat) => {
-//             console.log("- Stat : ", stat)
-//         })
-//     })
-//     socket.emit('get-peers', (consumerTransports))
-//     console.log("- Producer : ", producerTransport)
-//     console.log("- Video Producer : ", videoProducer)
-//     producerTransport.getStats().then((data) => {
-//         console.log(data)
-//     })
-//     console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
-//     console.log("- Producer Details : ", producersDetails)
-//     console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
-//     console.log("- Screen Sharing Producers : ", screenSharingProducer)
-//     console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
+const consoleLogButton = document.getElementById('console-log-button')
+consoleLogButton.addEventListener('click', () => {
+    // consumerTransports.forEach((transport) => {
+    //     transport.consumer.getStats().then((stat) => {
+    //         [...stat.entries()].forEach((data, index) => {
+    //             if (index == [...stat.entries()].length - 1) {
+    //                 console.log('- Data : ', data)
+    //             }
+    //         })
+    //     })
+    //     console.log("- Ice Paramaters : ", transport.consumer.rtpReceiver.transport.state)
+    //     transport.consumerTransport.getStats().then((stat) => {
+    //         console.log("- Stat : ", stat)
+    //     })
+    // })
+    // socket.emit('get-peers', (consumerTransports))
+    // console.log("- Producer : ", producerTransport)
+    // console.log("- Video Producer : ", videoProducer)
+    // producerTransport.getStats().then((data) => {
+    //     console.log(data)
+    // })
+    // console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
+    // console.log("- Producer Details : ", producersDetails)
+    // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
+    // console.log("- Screen Sharing Producers : ", screenSharingProducer)
+    // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
 
-//     let allAudio = []
+    // let allAudio = []
 
-//     for (const key in allStream){
-//         allAudio.push(allStream[key].audio)
-//     }
+    // for (const key in allStream){
+    //     allAudio.push(allStream[key].audio)
+    // }
 
-//     let allAudioFlat = allAudio.flatMap(stream => stream);
-//     console.log('- All Audio Flat : ', allAudioFlat)
+    // let allAudioFlat = allAudio.flatMap(stream => stream);
+    // console.log('- All Audio Flat : ', allAudioFlat)
 
-//     console.log('- All Stream : ', allStream)
-//     socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
-//     })
+    console.log('- All Stream : ', allStream)
+    // socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
+    // })
 
-//     console.log('- Total User : ', totalUsers)
-//     let stream = store.getState()
-//     console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
-// })
+    // console.log('- Total User : ', totalUsers)
+    // let stream = store.getState()
+    // console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
+})
 
 },{"./store":85,"mediasoup-client":62,"recordrtc":69,"socket.io-client":75}],85:[function(require,module,exports){
 let state = {

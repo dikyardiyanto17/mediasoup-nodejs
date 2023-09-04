@@ -14,6 +14,8 @@
 - Tampilkan jika semua sudah ready
 - Handling jika jika producer state : failed, connecting, connected
 - Cek Saat Mode Normal dan Mode Screen Share Di Limited Usernya
+- Kadang saat user baru join di mode pagination, tembus padahal sudah lebih dari limitedPerPage
+- Bug duplikat Video
 
 ### Secondary
 - Tambahkan Turn Off / On Camera (Masih perlu perbaikan)
@@ -32,6 +34,13 @@
 - So your CPU with that capacity can handle around 48000 consumers. But in reality actual number of consumers can be lower than this because of the piping, if you are doing, and some other stuff of your server.
 
 - You can calculate the number of consumers in your call session and see the max number of users your CPU can handle
+
+## Testing
+- When Someone Screen Sharing, new user join, it will enable Screen Share Mode Display (DONE)
+- When total user join room more than limited displayed video, new user video wont displayed and consumer get paused (only tested with limited displayed video = 3) (DONE)
+- When new user join room, and current user is on last page, new user video should be displayed (DONE)
+- When current user is recording, and new user joining, the recorded audio will include new user audio (DONE)
+- When user has weak network, it will remove, configuration on producer and consumer state (not yet)
 
 ## Question
 - When 100 user hit the join room in the sametime?
@@ -167,3 +176,7 @@ socket.on('joinRoom', (data) => {
     }
 })
 ```
+
+## Optional
+- Changing Displayed Video By Collecting Stream First
+- Dont Need To Delete Element To Replace Next or Previus Video
