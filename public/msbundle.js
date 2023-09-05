@@ -28184,17 +28184,17 @@ let isCameraOn = true
 let params = {
     encodings: [
         {
-            rid: 'r0',
-            maxBitrate: 100000,
-            scalabilityMode: 'S1T3',
-        },
-        {
-            rid: 'r1',
+            // rid: 'r0',
             maxBitrate: 300000,
             scalabilityMode: 'S1T3',
         },
         {
-            rid: 'r2',
+            // rid: 'r1',
+            maxBitrate: 500000,
+            scalabilityMode: 'S1T3',
+        },
+        {
+            // rid: 'r2',
             maxBitrate: 900000,
             scalabilityMode: 'S1T3',
         },
@@ -28346,7 +28346,9 @@ const changeLayout = (isSharing) => {
 
 // Screen Sharing
 const getScreenSharing = async () => {
+    let screenShareButton = document.getElementById('user-screen-share-button')
     try {
+        
         // Check If There Is No One Screen Sharing
         if (!isScreenSharing) {
             // Change Layout Based On Which Mode
@@ -28408,6 +28410,7 @@ const getScreenSharing = async () => {
             // Add Info Who Is Screen Sharing
             screenSharingInfo = { socketId: socket.id }
             isScreenSharing = true
+            screenShareButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
         } else if (isScreenSharing && screenSharingInfo.socketId != socket.id) {
             // If Someone Is Trying To Sharing Their Screen When Someone Is Already To Screen Share, Warn Them
             let as = document.getElementById("alert-screensharing");
@@ -28427,6 +28430,7 @@ const getScreenSharing = async () => {
             screenSharingParams = { params }
 
             screenSharingStreamsGlobal = null
+            screenShareButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
         }
     } catch (error) {
         changeLayout(false)
@@ -28493,6 +28497,15 @@ const createUserList = (username) => {
     userList.appendChild(myUsername)
 }
 
+const showLoadingScreen = () => {
+    document.getElementById('loading-screen').style.display = 'block';
+}
+
+const hideLoadingScreen = () => {
+    document.getElementById('loading-screen').style.display = 'none';
+}
+
+
 // Create Send Transport
 const createSendTransport = () => {
     // Signaling To Server
@@ -28521,7 +28534,7 @@ const createSendTransport = () => {
             } catch (error) {
                 errback(error)
             }
-        })
+        })  
 
         // Producing Transport and Get Parameters
         producerTransport.on('produce', async (parameters, callback, errback) => {
@@ -28558,10 +28571,11 @@ const createSendTransport = () => {
             let buttonUserList = document.getElementById('user-list-button')
             // Enabling Button When Producer Is Connecting
             if (e == 'connected'){
+                hideLoadingScreen()
                 producerStatus.innerHTML = 'Connected'
                 createUserList(localStorage.getItem('username'))
                 // console.log('- Status Element : ', )
-                connectionStatusElement.className = 'dot status-connected'
+                connectionStatusElement.style.color = 'green'
 
                 buttonRecord.removeAttribute('disabled', 'false')
                 buttonMic.removeAttribute('disabled', 'false')
@@ -28572,9 +28586,11 @@ const createSendTransport = () => {
                 buttonChat.removeAttribute('disabled', 'false')
                 buttonShare.removeAttribute('disabled', 'false')
                 buttonUserList.removeAttribute('disabled', 'false')
-            } else if (e = 'connecting'){
-                producerStatus.innerHTML = 'Connecting'
-                connectionStatusElement.className = 'dot status-connecting'
+            } 
+            if (e == 'connecting'){
+                showLoadingScreen()
+                producerStatus.innerHTML = 'Connecting...'
+                connectionStatusElement.style.color = '#bbb'
                 buttonRecord.setAttribute('disabled', 'true')
                 buttonMic.setAttribute('disabled', 'true')
                 buttonHangUp.setAttribute('disabled', 'true')
@@ -28583,9 +28599,15 @@ const createSendTransport = () => {
                 buttonScreenShare.setAttribute('disabled', 'true')
                 buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
-            } else if (e == 'failed'){
+            } 
+            const url = window.location.pathname;
+            const parts = url.split('/');
+            const roomName = parts[2];
+            const goTo = 'lobby/' + roomName;
+            if (e == 'failed'){
+                showLoadingScreen()
                 producerStatus.innerHTML = 'Failed'
-                connectionStatusElement.className = 'dot status-failed'
+                connectionStatusElement.style.color = 'red'
                 buttonRecord.setAttribute('disabled', 'true')
                 buttonMic.setAttribute('disabled', 'true')
                 buttonHangUp.setAttribute('disabled', 'true')
@@ -28594,9 +28616,13 @@ const createSendTransport = () => {
                 buttonScreenShare.setAttribute('disabled', 'true')
                 buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
-            } else if (e == 'disconnected'){
+                const newURL = window.location.origin + "/" + goTo;
+                window.location.href = newURL;
+            } 
+            if (e == 'disconnected'){
+                showLoadingScreen()
                 producerStatus.innerHTML = 'Disconnected'
-                connectionStatusElement.className = 'dot status-failed'
+                connectionStatusElement.style.color = 'red'
                 buttonRecord.setAttribute('disabled', 'true')
                 buttonMic.setAttribute('disabled', 'true')
                 buttonHangUp.setAttribute('disabled', 'true')
@@ -28605,6 +28631,8 @@ const createSendTransport = () => {
                 buttonScreenShare.setAttribute('disabled', 'true')
                 buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
+                const newURL = window.location.origin + "/" + goTo;
+                window.location.href = newURL;
             }
         })
 
@@ -28967,7 +28995,7 @@ const createVideo = (remoteId, kind, track, username, micIcon) => {
                 isMic = 'micOff.png'
             }
             newElem.setAttribute('class', currentTemplate)
-            newElem.innerHTML = '<img src="/assets/pictures/' + isMic + '" class="icons-mic" id="local-mic"/><video id="' + remoteId + '" autoplay class="user-video" muted></video><div class="username">' + username + '</div>'
+            newElem.innerHTML = '<div class="icons-mic"><img src="/assets/pictures/' + isMic + '" class="mic-image" id="local-mic"/></div><video id="' + remoteId + '" autoplay class="user-video" muted></video><div class="username">' + username + '</div>'
         } else {
             // Create Video For Other Users
             let isMic
@@ -28977,7 +29005,7 @@ const createVideo = (remoteId, kind, track, username, micIcon) => {
                 isMic = 'micOff.png'
             }
             newElem.setAttribute('class', currentTemplate)
-            newElem.innerHTML = '<img src="/assets/pictures/' + isMic + '" poster="/assets/pictures/unknown.jpg" preload="auto" class="icons-mic" /><video id="' + remoteId + '" autoplay class="user-video" ></video><div class="username">' + username + '</div>'
+            newElem.innerHTML = '<div class="icons-mic"><img src="/assets/pictures/' + isMic + '" poster="/assets/pictures/unknown.jpg" preload="auto" class="mic-image" /></div><video id="' + remoteId + '" autoplay class="user-video" ></video><div class="username">' + username + '</div>'
         }
         // Append Element And Set Track
         videoContainer.appendChild(newElem)
@@ -29257,15 +29285,16 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
             if (e == 'connected') {
                 // Check If User With 
                 let checkConnection = document.getElementById('td-' + remoteProducerId)
-                if (checkConnection){
-                    console.log('Reconnecting : ', remoteProducerId)
-                    return
-                }
                 let check = false
-
+                
                 // Check if Video Is Screen Share
                 if (params.username) {
                     check = isScreenSharingType(params.username)
+                }
+                // Check If Its Reconnectiong Or Not
+                if (!check && (checkConnection || (allStream[params.producerOwnerSocket]?.video && allStream[params.producerOwnerSocket]?.audio))){
+                    console.log('Reconnecting : ', remoteProducerId)
+                    return
                 }
                 
                 // Make a List For Every User
@@ -29428,6 +29457,7 @@ micButton.addEventListener("click", () => {
     let stream = store.getState()
 
     if (micImage.src.endsWith("micOn.png")) {
+        micButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
         for (const key in producersDetails) {
             socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
         }
@@ -29445,6 +29475,7 @@ micButton.addEventListener("click", () => {
         stream.localStream.getAudioTracks()[0].enabled = true
         if (localMic) localMic.src = "/assets/pictures/micOn.png";
         micImage.src = "/assets/pictures/micOn.png";
+        micButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
     }
 });
 
@@ -29602,11 +29633,12 @@ const timerLayout = (trigger) => {
     const fullContainer = document.getElementById('full-container-id')
     const timerImage = document.getElementById('record-image')
     if (trigger) {
-        timerImage.src = '/assets/pictures/recording.webp'
+        recordButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
+        // timerImage.style.color = 'red'
         let container = document.createElement("div");
         container.setAttribute('class', 'record-timer')
         container.id = "timer";
-        let timerParagraph = document.createElement("p");
+        let timerParagraph = document.createElement("span");
         timerParagraph.textContent = "On Recording : ";
         let span = document.createElement("span");
         span.id = "realtime-timer";
@@ -29617,7 +29649,8 @@ const timerLayout = (trigger) => {
         isRecording = true
         startTimer()
     } else {
-        timerImage.src = '/assets/pictures/record.png'
+        recordButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+        // timerImage.style.color = '#bbb'
         fullContainer.removeChild(document.getElementById('timer'))
         isRecording = false
     }
@@ -29751,11 +29784,15 @@ recordButton.addEventListener('click', () => {
 // Share Link Button
 const shareButton = document.getElementById('share-link-button')
 shareButton.addEventListener('click', () => {
+    shareButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
     let sb = document.getElementById("snackbar");
 
     sb.className = "show";
 
-    setTimeout(() => { sb.className = sb.className.replace("show", ""); }, 3000);
+    setTimeout(() => { 
+        shareButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+        sb.className = sb.className.replace("show", ""); 
+    }, 3000);
     navigator.clipboard.writeText(window.location.href);
 })
 
@@ -29769,16 +29806,28 @@ hangUpButton.addEventListener('click', () => {
 const chatButton = document.getElementById('user-chat-button')
 chatButton.addEventListener('click', () => {
     const chatContainer = document.getElementById('chat-container')
-    if (chatContainer.className == 'invisible') chatContainer.className = 'visible'
-    else chatContainer.className = 'invisible'
+    if (chatContainer.className == 'invisible') {
+        chatButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
+        chatContainer.className = 'visible'
+    }
+    else {
+        chatContainer.className = 'invisible'
+        chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+    }
 })
 
 // Chat Button
 const userListButton = document.getElementById('user-list-button')
 userListButton.addEventListener('click', () => {
     const userListContainer = document.getElementById('user-container')
-    if (userListContainer.className == 'invisible') userListContainer.className = 'visible'
-    else userListContainer.className = 'invisible'
+    if (userListContainer.className == 'invisible') {
+        userListContainer.className = 'visible'
+        userListButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
+    }
+    else {
+        userListContainer.className = 'invisible'
+        userListButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+    }
 })
 
 dragElement(document.getElementById("chat-bar"));
@@ -29863,52 +29912,83 @@ function dragElement(elmnt) {
 //     console.log('- End Index : ', paginationEndIndex)
 // })
 
+// Hide Control Button
+const elementToControl = document.getElementById('control-button');
+let isCursorMoving = false;
+let hideTimeout;
+
+// Function to show the element
+const showElement = () => {
+    elementToControl.className = 'controller visible';
+    isCursorMoving = true;
+}
+
+// Function to hide the element
+const hideElement = () => {
+    elementToControl.className = 'controller invisible';
+    isCursorMoving = false;
+}
+
+// Add mousemove event listener to detect cursor movement across the entire screen
+document.addEventListener('mousemove', () => {
+    if (!isCursorMoving) {
+        showElement();
+    }
+
+    // Reset cursor movement detection and hide the element after a certain time (e.g., 3 seconds)
+    clearTimeout(hideTimeout);
+    hideTimeout = setTimeout(hideElement, 3000); // Adjust the time as needed
+});
+
+
 
 // Console Log Button
-// const consoleLogButton = document.getElementById('console-log-button')
-// consoleLogButton.addEventListener('click', () => {
-//     consumerTransports.forEach((transport) => {
-//         transport.consumer.getStats().then((stat) => {
-//             [...stat.entries()].forEach((data, index) => {
-//                 if (index == [...stat.entries()].length - 1) {
-//                     console.log('- Data : ', data)
-//                 }
-//             })
-//         })
-//         console.log("- Ice Paramaters : ", transport.consumer.rtpReceiver.transport.state)
-//         transport.consumerTransport.getStats().then((stat) => {
-//             console.log("- Stat : ", stat)
-//         })
-//     })
-//     socket.emit('get-peers', (consumerTransports))
-//     console.log("- Producer : ", producerTransport)
-//     console.log("- Video Producer : ", videoProducer)
-//     producerTransport.getStats().then((data) => {
-//         console.log(data)
-//     })
-//     console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
-//     console.log("- Producer Details : ", producersDetails)
-//     console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
-//     console.log("- Screen Sharing Producers : ", screenSharingProducer)
-//     console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
+const consoleLogButton = document.getElementById('console-log-button')
+consoleLogButton.addEventListener('click', () => {
+    consumerTransports.forEach((transport) => {
+        transport.consumer.getStats().then((stat) => {
+            [...stat.entries()].forEach((data, index) => {
+                if (index == [...stat.entries()].length - 1) {
+                    console.log('- Data : ', data)
+                }
+            })
+            stat.forEach((report) => {
+                if (report.type === 'inbound-rtp' && report.kind === 'video') {
+                    console.log('- Received Bit Rate : ', report)
+                }
+            })
+            console.log('- Stat : ', stat)
+        })
+    })
+    // socket.emit('get-peers', (consumerTransports))
+    // console.log("- Producer : ", producerTransport)
+    // console.log("- Video Producer : ", videoProducer)
+    // producerTransport.getStats().then((data) => {
+    //     console.log(data)
+    // })
+    // console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
+    // console.log("- Producer Details : ", producersDetails)
+    // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
+    // console.log("- Screen Sharing Producers : ", screenSharingProducer)
+    // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
 
-//     let allAudio = []
+    // let allAudio = []
 
-//     for (const key in allStream){
-//         allAudio.push(allStream[key].audio)
-//     }
+    // for (const key in allStream){
+    //     allAudio.push(allStream[key].audio)
+    // }
 
-//     let allAudioFlat = allAudio.flatMap(stream => stream);
-//     console.log('- All Audio Flat : ', allAudioFlat)
+    // let allAudioFlat = allAudio.flatMap(stream => stream);
+    // console.log('- All Audio Flat : ', allAudioFlat)
 
-//     console.log('- All Stream : ', allStream)
-//     socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
-//     })
+    // console.log('- All Stream : ', allStream)
+    // socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
+    // })
 
-//     console.log('- Total User : ', totalUsers)
-//     let stream = store.getState()
-//     console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
-// })
+    // console.log('- Total User : ', totalUsers)
+    // let stream = store.getState()
+    // console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
+})
 
 },{"./store":85,"mediasoup-client":62,"recordrtc":69,"socket.io-client":75}],85:[function(require,module,exports){
 let state = {

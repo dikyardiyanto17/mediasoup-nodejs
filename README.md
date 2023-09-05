@@ -15,7 +15,7 @@
 - Handling jika jika producer state : failed, connecting, connected
 - Cek Saat Mode Normal dan Mode Screen Share Di Limited Usernya
 - Kadang saat user baru join di mode pagination, tembus padahal sudah lebih dari limitedPerPage
-- Bug duplikat Video
+- Bug duplikat Video (DONE)
 
 ### Secondary
 - Tambahkan Turn Off / On Camera (Masih perlu perbaikan)
@@ -40,7 +40,7 @@
 - When total user join room more than limited displayed video, new user video wont displayed and consumer get paused (only tested with limited displayed video = 3) (DONE)
 - When new user join room, and current user is on last page, new user video should be displayed (DONE)
 - When current user is recording, and new user joining, the recorded audio will include new user audio (DONE)
-- When user has weak network, it will remove, configuration on producer and consumer state (not yet)
+- When user has weak network, the producer will trying to reconnect first for 8 seconds, if its failed or disconnected it will redirect to lobby (DONE)
 
 ## Question
 - When 100 user hit the join room in the sametime?

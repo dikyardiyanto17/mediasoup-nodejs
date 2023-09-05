@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursor Movement Detection</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Style for the element */
+        #element-to-control {
+            position: fixed;
+            width: 200px;
+            height: 100px;
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px;
+            transition: opacity 0.5s ease;
+            pointer-events: none; /* Allows clicks to go through the element */
+        }
+
+        .hidden {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Element to be hidden/showed -->
+    <div id="element-to-control" class="hidden">This is the element</div>
+    <button>Hello World</button>
+
+    <script src="/testing.js"></script>
+</body>
+</html>

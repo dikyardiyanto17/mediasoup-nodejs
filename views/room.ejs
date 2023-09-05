@@ -135,8 +135,11 @@
 
         .icons-mic {
             position: absolute;
-            top: 0px;
-            right: 0px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            top: 10px;
+            right: 10px;
             width: 20px;
             height: 20px;
             border-radius: 30px;
@@ -145,26 +148,62 @@
         }
 
 
+        .mic-image {
+            width: 12px;
+            height: 12px;
+        }
 
         .button-small-custom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             position: relative;
-            width: 50px;
-            height: 50px;
-            border-radius: 50px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             transition: 0.3s;
-            background: #1e1f20;
+            background: #44474A;
             margin-left: 10px;
             margin-right: 10px;
         }
 
+        .button-small-custom:hover {
+            background-color: #959ca3;
+        }
+
+        .button-small-custom-clicked {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: 0.3s;
+            background: #fc5d5b;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        .button-small-custom-clicked:hover {
+            background-color: #ff0000;
+        }
+
         .button-big-custom {
-            width: 50px;
-            height: 50px;
-            border-radius: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             background: #fc5d5b;
             transition: 0.3s;
             margin-left: 10px;
             margin-right: 10px;
+        }
+        .button-big-custom:hover {
+            background-color: #ff0000;
         }
 
         .button-image {
@@ -174,11 +213,14 @@
 
         .record-timer {
             position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             top: 10px;
             left: 10px;
             background-color: rgba(255, 0, 0, 0.4);
             border-radius: 10px;
-            font-size: 20px;
+            font-size: 15px;
             padding: 10px;
         }
 
@@ -489,9 +531,10 @@
         }
 
         .connection-status {
+            font-size: 12px;
             background-color: rgba(255, 255, 255, 0.4);
             position: absolute;
-            top: 30px;
+            top: 20px;
             border-radius: 10px;
             padding: 5px;
             right: 20px;
@@ -531,6 +574,7 @@
         }
 
         .user-bar {
+            border-radius: 10px;
             background-color: #f1f1f1;
             border: 1px solid #d3d3d3;
             max-width: 300px;
@@ -539,16 +583,18 @@
             left: 20px;
             text-align: center;
             top: 100px;
-            z-index: 10;
+            z-index: 20 !important;
         }
 
         #user-bar-header {
-            background-color: #2196f3;
+            background: #44474A;
             color: #fff;
             cursor: move;
             max-width: 300px;
             padding: 10px;
-            z-index: 10;
+            z-index: 10 !important;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
         }
 
         #user-list {
@@ -559,13 +605,53 @@
         #user-list>p {
             margin-bottom: 0px;
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #control-button {
+            transition: opacity 0.5s ease;
+        }
+
+        .hidden {
+            opacity: 0;
+        }
         </style>
 </head>
 
 <body>
     <div class="outside-container">
+        <div id="loading-screen" class="modal" style="display: block;">
+            <div class="loader"></div>
+        </div>
         <div class="full-container" id="full-container-id">
-            <div class="connection-status"><span class="dot status-connecting" id="connection-status-id"></span><span id="producer-status">Waiting</span></div>
+            <div class="connection-status"><i class="far fa-dot-circle" id="connection-status-id" style="color: #bbb;"></i>
+                <span id="producer-status">Waiting...</span></div>
             <audio id="audio-collection" autoplay></audio>
             <!-- <div class="pagination-left">
                 <button class="pagination-button" id="slide-left">
@@ -640,45 +726,48 @@
             <span id="alert-screensharing">Screensharing is ongoing</span>
             <div id="video-container">
                 <div class="user-video-container" id="td-current-user-video">
-                    <img src="/assets/pictures/micOn.png" class="icons-mic" id="local-mic" />
+                    <div class="icons-mic">
+                        <img src="/assets/pictures/micOn.png" class="mic-image" id="local-mic" />
+                    </div>
                     <video id="local-video" poster="/assets/pictures/unknown.jpg" preload="auto" autoplay class="user-video" muted></video>
                     <div class="username" id="my-username"></div>
                 </div>
                 <div class="screen-sharing-container"></div>
             </div>
         </div>
-        <div class="controller">
-            <button disabled class="button-small-custom" id="user-mic-button">
+        <div class="controller" id="control-button">
+            <button disabled class="btn button-small-custom" id="user-mic-button">
                 <img src="/assets/pictures/micOn.png" id="mic-image" />
             </button>
-            <button disabled class="button-small-custom" id="user-switch-camera-button">
+            <button disabled class="btn button-small-custom" id="user-switch-camera-button">
                 <img src="/assets/pictures/switchCamera.png" />
             </button>
             <!-- <button disabled class="button-small-custom" id="user-turn-on-off-camera-button">
                 <i class="fas fa-video" style="color: #ffffff;" id="turn-on-off-camera-icons"></i>
             </button> -->
-            <button disabled class="button-small-custom" id="user-screen-share-button">
+            <button disabled class="btn button-small-custom" id="user-screen-share-button">
                 <img src="/assets/pictures/share.png" />
             </button>
-            <button disabled class="button-big-custom" id="user-hang-up-button">
+            <button disabled class="btn button-big-custom" id="user-hang-up-button">
                 <img src="/assets/pictures/hangUp.png" />
             </button>
-            <button disabled class="button-small-custom" id="user-record-button">
-                <img src="/assets/pictures/record.png" class="button-image" id="record-image" />
+            <button disabled class="btn button-small-custom" id="user-record-button">
+                <i class="far fa-dot-circle" id="record-image" style="color: #bbb;"></i>
+                <!-- <img src="/assets/pictures/record.png" class="button-image" id="record-image" /> -->
             </button>
-            <button disabled class="button-small-custom" id="user-list-button">
+            <button disabled class="btn button-small-custom" id="user-list-button">
                 <i class="fas fa-users" style="color: #ffffff;"></i>
             </button>
-            <button disabled class="button-small-custom" id="user-chat-button">
+            <button disabled class="btn button-small-custom" id="user-chat-button">
                 <i class="fas fa-comment-dots" style="color: white;"></i>
             </button>
-            <button disabled class="button-small-custom" id="share-link-button">
+            <button disabled class="btn button-small-custom" id="share-link-button">
                 <i class="far fa-share-square" style="color: white;"></i>
                 <span id="snackbar">Successfully Copied</span>
             </button>
-            <!-- <button class="button-small-custom" id="console-log-button" style="color: white;">
+            <button class="btn button-small-custom" id="console-log-button" style="color: white;">
                 Log
-            </button> -->
+            </button>
         </div>
     </div>
 

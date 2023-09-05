@@ -24,5 +24,13 @@ class Controller {
             console.log(error)
         }
     }
+
+    static testing (req, res){
+        try {
+            res.render('testing')
+        } catch (error) {
+            console.log(error)
+        }
+    }
 }
 module.exports = Controller
