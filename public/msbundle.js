@@ -28227,6 +28227,14 @@ const streamSuccess = (stream) => {
     // Set My Username
     const setUsername = document.getElementById('my-username')
     setUsername.textContent = localStorage.getItem('username')
+    let audioContainer = document.getElementById('audio-collection')
+    const newElem = document.createElement('div')
+    newElem.setAttribute('id', `td-current-user-audio`)
+    // Get Audio Stream From Local
+    let track = stream.getAudioTracks()[0]
+    newElem.innerHTML = '<audio id="' + 'current-user-audio' + '" autoplay></audio>'
+    audioContainer.appendChild(newElem)
+    document.getElementById('current-user-audio').srcObject = new MediaStream([track])
 
     // Add 1 Total Users When Joining
     totalUsers++
@@ -29309,6 +29317,24 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                 if (params.kind == 'video' && !check && ((totalUsers <= limitedPerPage && currentPage == 0) || totalUsers >= limitedPerPage && totalPage2 == currentPage + 1 && currentPage != 0)) {
                     createVideo(remoteProducerId, params.kind, track, params?.username, true)
                 }
+
+                // If It Is Audio Stream, Then Create Audio Element And Collect It To One Div
+                if (params.kind == 'audio') {
+                    let audioContainer = document.getElementById('audio-collection')
+                    const newElem = document.createElement('div')
+                    newElem.setAttribute('id', `td-${remoteProducerId}`)
+                    // If This Is Current User Id (It Will Running When Pagination is Active / User Is More Than Limited Per Page)
+                    if (remoteProducerId == 'current-user-audio') {
+                        // Get Audio Stream From Local
+                        let stream = store.getState()
+                        track = stream.localStream.getAudioTracks()[0]
+                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
+                    } else {
+                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
+                    }
+                    audioContainer.appendChild(newElem)
+                    document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
+                }
                 
                 // Get Local Stream
                 let stream = store.getState()
@@ -29401,23 +29427,6 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     const audioSource = audioContext.createMediaStreamSource(new MediaStream([track]));
                     audioSource.connect(audioDestination);
                     // recordedStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
-                }
-        
-                // If It Is Audio Stream, Then Create Audio Element And Collect It To One Div
-                if (params.kind == 'audio') {
-                    const newElem = document.createElement('div')
-                    newElem.setAttribute('id', `td-${remoteProducerId}`)
-                    // If This Is Current User Id (It Will Running When Pagination is Active / User Is More Than Limited Per Page)
-                    if (remoteProducerId == 'current-user-audio') {
-                        // Get Audio Stream From Local
-                        let stream = store.getState()
-                        track = stream.localStream.getAudioTracks()[0]
-                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay muted></audio>'
-                    } else {
-                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
-                    }
-                    videoContainer.appendChild(newElem)
-                    document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
                 }
         
                 // If Its Not In Screen Share Mode To Adjust Template
