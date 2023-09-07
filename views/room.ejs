@@ -641,6 +641,34 @@
         .hidden {
             opacity: 0;
         }
+
+        #audio-indicator {
+            position: absolute;
+            height: 25px;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 2px;
+            border-radius: 5px;
+        }
+
+        .bar {
+            width: 18px;
+            height: 0; /* Initial height of 0 for silent bars */
+            background-color: #ccc; /* Gray for silence */
+            border-radius: 2px;
+            transition: height 0.1s, background-color 0.2s; /* Add transitions for smooth changes */
+        }
+
+        .audio-visualizer {
+            position: absolute;
+            background-color: #333;
+            height: 50px;
+            width: 20px;
+            left: 20px;
+            top: 20px;
+        }
         </style>
 </head>
 
@@ -669,39 +697,27 @@
                     <div class="chat-container">
                         <div class="chat-messages">
                             <div class="received-messages">
-                                <p class="sender">Dika</p>
+                                <p class="sender">Brother</p>
                                 <div class="received-message">
-                                    <div class="inside-message"><span>lalalala</span></div>
+                                    <div class="inside-message"><span>Message</span></div>
+                                </div>
+                            </div>
+                            <div class="received-messages">
+                                <p class="sender">M</p>
+                                <div class="received-message">
+                                    <div class="inside-message"><span>Is</span></div>
                                 </div>
                             </div>
                             <div class="received-messages">
                                 <p class="sender">Dika</p>
                                 <div class="received-message">
-                                    <div class="inside-message"><span>lalalala</span></div>
+                                    <div class="inside-message"><span>On</span></div>
                                 </div>
                             </div>
                             <div class="received-messages">
-                                <p class="sender">Dika</p>
+                                <p class="sender">Triyanto</p>
                                 <div class="received-message">
-                                    <div class="inside-message"><span>lalalala</span></div>
-                                </div>
-                            </div>
-                            <div class="received-messages">
-                                <p class="sender">Dika</p>
-                                <div class="received-message">
-                                    <div class="inside-message"><span>lalalalala</span></div>
-                                </div>
-                            </div>
-                            <div class="your-messages">
-                                <p class="sender">You</p>
-                                <div class="your-message">
-                                    <div class="inside-message"><span>hahaha</span></div>
-                                </div>
-                            </div>
-                            <div class="your-messages">
-                                <p class="sender">You</p>
-                                <div class="your-message">
-                                    <div class="inside-message"><span>hahaha</span></div>
+                                    <div class="inside-message"><span>Development</span></div>
                                 </div>
                             </div>
                         </div>
@@ -726,6 +742,7 @@
             <span id="alert-screensharing">Screensharing is ongoing</span>
             <div id="video-container">
                 <div class="user-video-container" id="td-current-user-video">
+                    <canvas class="audio-visualizer" id="av-current-user-audio"></canvas>
                     <div class="icons-mic">
                         <img src="/assets/pictures/micOn.png" class="mic-image" id="local-mic" />
                     </div>
@@ -765,9 +782,9 @@
                 <i class="far fa-share-square" style="color: white;"></i>
                 <span id="snackbar">Successfully Copied</span>
             </button>
-            <!-- <button class="btn button-small-custom" id="console-log-button" style="color: white;">
+            <button class="btn button-small-custom" id="console-log-button" style="color: white;">
                 Log
-            </button> -->
+            </button>
         </div>
     </div>
 

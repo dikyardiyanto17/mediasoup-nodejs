@@ -1,5 +1,8 @@
 # mediasoup-nodejs
 ## Needs Improvement
+### Urgent
+- Saat producer dalam kondisi disconnect, mulai ulang reconnect jangan langsung ke lobby
+
 ### Primary
 - Kamera belakang tidak mau (handphone) (Sudah di diperbaiki, belum ditesting)
 - Responsive Design (basic design)
@@ -176,6 +179,31 @@ socket.on('joinRoom', (data) => {
     }
 })
 ```
+
+## Handle Error
+- Error Database
+- Error Server
+
+## Database
+- Account :
+-- Username
+-- Password
+-- Email
+-- Identitas
+-- Authority
+
+- Room
+-- RoomId
+-- Participants (Account)
+-- Producer ID
+-- Consumer ID
+-- Transport ID
+
+- Chat
+-- Room
+-- Sender (Account)
+-- Date
+-- Message
 
 ## Optional
 - Changing Displayed Video By Collecting Stream First
