@@ -104,10 +104,11 @@ const createAudioVisualizer = (track, id, appendTo) => {
         analyser.getByteFrequencyData(dataArray);
 
         const barHeight = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
+        canvas.style.boxShadow = `inset 0 0 0 ${barHeight/10}px green, 0 0 0 ${barHeight/10}px green`
         // console.log('- Volume : ', barHeight)
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = `rgb(${barHeight + 100}, 255, 100)`;
-        ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight);
+        // ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // ctx.fillStyle = `rgb(${barHeight + 100}, 255, 100)`;
+        // ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight);
 
         requestAnimationFrame(drawBar);
     }
@@ -150,9 +151,10 @@ const streamSuccess = (stream) => {
 
         const barHeight = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
         // console.log('- Volume : ', barHeight)
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = `rgb(${barHeight + 100}, 255, 100)`;
-        ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight);
+        canvas.style.boxShadow = `inset 0 0 0 ${barHeight/10}px green, 0 0 0 ${barHeight/10}px green`
+        // ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // ctx.fillStyle = `rgb(${barHeight + 100}, 255, 100)`;
+        // ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight);
 
         requestAnimationFrame(drawBar);
     }
@@ -330,6 +332,9 @@ const getScreenSharing = async () => {
                 screenSharingParams = { params }
                 // Set Who Is Screen Sharing To Null
                 screenSharingInfo = null
+            
+                screenShareButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+
             };
 
             // for (const key in producersDetails) {
@@ -380,6 +385,7 @@ const getScreenSharing = async () => {
         console.log(error)
         screenSharingInfo = null
         isScreenSharing = false
+        screenShareButton.className = 'button-small-custom'
     }
 }
 
@@ -404,6 +410,14 @@ const getLocalStream = () => {
     navigator.mediaDevices.getUserMedia(config)
         .then(streamSuccess)
         .catch(error => {
+            let ae = document.getElementById("alert-error");
+            ae.className = "show";
+            ae.innerHTML = `Error : ${error.message}`
+            // Show Warning
+            setTimeout(() => { 
+                ae.className = ae.className.replace("show", ""); 
+                ae.innerHTML = ``
+            }, 3000);
             console.log(error.message)
         })
 }
@@ -574,8 +588,8 @@ const createSendTransport = () => {
                 buttonScreenShare.setAttribute('disabled', 'true')
                 buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
-                const newURL = window.location.origin + "/" + goTo;
-                window.location.href = newURL;
+                // const newURL = window.location.origin + "/" + goTo;
+                // window.location.href = newURL;
             }
         })
 
@@ -1990,13 +2004,13 @@ let hideTimeout;
 
 // Function to show the element
 const showElement = () => {
-    elementToControl.className = 'controller visible';
+    elementToControl.className = 'controller';
     isCursorMoving = true;
 }
 
 // Function to hide the element
 const hideElement = () => {
-    elementToControl.className = 'controller invisible';
+    elementToControl.className = 'controller hidden';
     isCursorMoving = false;
 }
 
@@ -2014,51 +2028,51 @@ document.addEventListener('mousemove', () => {
 
 
 // Console Log Button
-const consoleLogButton = document.getElementById('console-log-button')
-consoleLogButton.addEventListener('click', () => {
-    // consumerTransports.forEach((transport) => {
-    //     transport.consumer.getStats().then((stat) => {
-    //         [...stat.entries()].forEach((data, index) => {
-    //             if (index == [...stat.entries()].length - 1) {
-    //                 console.log('- Data : ', data)
-    //             }
-    //         })
-    //         stat.forEach((report) => {
-    //             if (report.type === 'inbound-rtp' && report.kind === 'video') {
-    //                 console.log('- Received Bit Rate : ', report)
-    //             }
-    //         })
-    //         console.log('- Stat : ', stat)
-    //     })
-    // })
-    // socket.emit('get-peers', (consumerTransports))
-    // console.log("- Producer : ", producerTransport)
-    // console.log("- Video Producer : ", videoProducer)
-    // producerTransport.getStats().then((data) => {
-    //     console.log(data)
-    // })
-    // console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
-    // console.log("- Producer Details : ", producersDetails)
-    // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
-    // console.log("- Screen Sharing Producers : ", screenSharingProducer)
-    // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
+// const consoleLogButton = document.getElementById('console-log-button')
+// consoleLogButton.addEventListener('click', () => {
+//     consumerTransports.forEach((transport) => {
+//         transport.consumer.getStats().then((stat) => {
+//             [...stat.entries()].forEach((data, index) => {
+//                 if (index == [...stat.entries()].length - 1) {
+//                     console.log('- Data : ', data)
+//                 }
+//             })
+//             stat.forEach((report) => {
+//                 if (report.type === 'inbound-rtp' && report.kind === 'video') {
+//                     console.log('- Received Bit Rate : ', report)
+//                 }
+//             })
+//             console.log('- Stat : ', stat)
+//         })
+//     })
+//     socket.emit('get-peers', (consumerTransports))
+//     console.log("- Producer : ", producerTransport)
+//     console.log("- Video Producer : ", videoProducer)
+//     producerTransport.getStats().then((data) => {
+//         console.log(data)
+//     })
+//     console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
+//     console.log("- Producer Details : ", producersDetails)
+//     console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
+//     console.log("- Screen Sharing Producers : ", screenSharingProducer)
+//     console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
 
-    // let allAudio = []
+//     let allAudio = []
 
-    // for (const key in allStream){
-    //     allAudio.push(allStream[key].audio)
-    // }
+//     for (const key in allStream){
+//         allAudio.push(allStream[key].audio)
+//     }
 
-    // let allAudioFlat = allAudio.flatMap(stream => stream);
-    // console.log('- All Audio Flat : ', allAudioFlat)
+//     let allAudioFlat = allAudio.flatMap(stream => stream);
+//     console.log('- All Audio Flat : ', allAudioFlat)
 
 
 
-    console.log('- All Stream : ', allStream)
-    // socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
-    // })
+//     console.log('- All Stream : ', allStream)
+//     socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
+//     })
 
-    // console.log('- Total User : ', totalUsers)
-    // let stream = store.getState()
-    // console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
-})
+//     console.log('- Total User : ', totalUsers)
+//     let stream = store.getState()
+//     console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
+// })

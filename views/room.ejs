@@ -145,6 +145,7 @@
             border-radius: 30px;
             transition: 0.3s;
             background: #1e1f20;
+            z-index: 22;
         }
 
 
@@ -308,6 +309,26 @@
         }
 
         #alert-screensharing.show {
+            visibility: visible;
+            -webkit-animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+            animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+        }
+
+        #alert-error {
+            visibility: hidden;
+            color: #fff;
+            background-color: #333;
+            margin-left: -125px;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            top: 30px;
+            left: 50%;
+            z-index: 1;
+            position: absolute;
+        }
+
+        #alert-error.show {
             visibility: visible;
             -webkit-animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
             animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
@@ -635,7 +656,7 @@
         }
 
         #control-button {
-            transition: opacity 0.5s ease;
+            transition: opacity 2s ease;
         }
 
         .hidden {
@@ -664,10 +685,34 @@
         .audio-visualizer {
             position: absolute;
             background-color: #333;
-            height: 50px;
             width: 20px;
-            left: 20px;
-            top: 20px;
+            height: 20px;
+            right: 10px;
+            top: 10px;
+            border-radius: 50%;
+        }
+
+        #option-menu {
+            position: absolute;
+            background-color: rgba(68, 71, 74, 0.7);
+            padding: 10px;
+            bottom: 40px;
+            color: #fff;
+            border-radius: 10px;
+        }
+
+        #option-menu > ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #option-menu > ul > li {
+            padding: 5px;
+        }
+
+        #option-menu > ul > li:hover {
+            background-color: rgba(68, 71, 74, 1);
         }
         </style>
 </head>
@@ -740,6 +785,7 @@
                 </div>
             </div>
             <span id="alert-screensharing">Screensharing is ongoing</span>
+            <span id="alert-error"></span>
             <div id="video-container">
                 <div class="user-video-container" id="td-current-user-video">
                     <canvas class="audio-visualizer" id="av-current-user-audio"></canvas>
@@ -782,9 +828,18 @@
                 <i class="far fa-share-square" style="color: white;"></i>
                 <span id="snackbar">Successfully Copied</span>
             </button>
+            <!-- <button disabled class="btn button-small-custom" id="option-button">
+                <i class="fas fa-ellipsis-v" style="color: white;"></i>
+                <div id="option-menu">
+                    <ul>
+                        <li>Layout</li>
+                        <li>Break</li>
+                    </ul>
+                </div>
+            </button>
             <button class="btn button-small-custom" id="console-log-button" style="color: white;">
                 Log
-            </button>
+            </button> -->
         </div>
     </div>
 

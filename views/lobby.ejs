@@ -138,12 +138,33 @@
             -webkit-animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
             animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
         }
+
+        #alert-error {
+            visibility: hidden;
+            color: #fff;
+            background-color: #333;
+            margin-left: -125px;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            top: 30px;
+            left: 50%;
+            z-index: 1;
+            position: absolute;
+        }
+
+        #alert-error.show {
+            visibility: visible;
+            -webkit-animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+            animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+        }
     </style>
 </head>
 
 <body>
     <div class="full-container">
         <span id="alert-username">Enter Your Name!</span>
+        <span id="alert-error"></span>
         <section class="left-bar">
             <form id="join-room">
                 <div class="input-wrap">

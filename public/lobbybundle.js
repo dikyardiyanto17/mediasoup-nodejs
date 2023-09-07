@@ -10,41 +10,65 @@ const goTo = 'room/' + roomName;
 let isReady = {video: false, audio: false}
 
 const init = async () => {
-    localStorage.setItem('room_id', roomName)
-    const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true})
-    await getMyDevices()
-    await getMyMic()
-    localVideo.srcObject = stream;
-    store.setLocalStream(stream)
+    try {
+        localStorage.setItem('room_id', roomName)
+        const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true})
+        await getMyDevices()
+        await getMyMic()
+        localVideo.srcObject = stream;
+        store.setLocalStream(stream)
+    } catch (error) {
+        let ae = document.getElementById("alert-error");
+        ae.className = "show";
+        ae.innerHTML = `Error : ${error.message}`
+        // Show Warning
+        setTimeout(() => { 
+            ae.className = ae.className.replace("show", ""); 
+            ae.innerHTML = ``
+        }, 3000);
+        console.log(error.message)
+    }
 }
 
 const micOptions = document.getElementById('mic-options')
 const getMyMic = async () => {
-    let audioDevices = (await navigator.mediaDevices.enumerateDevices()).filter(
-        (device) => device.kind === "audioinput"
-    );
-
-    audioDevices.forEach((audio, index) => {
-        // console.log('- Audio : ', index, ' - Total : ', audioDevices.length)
-        let newElement = document.createElement("p");
-        newElement.className = "dropdown-item dropdown-select-options";
-        newElement.textContent = audio.label;
-        newElement.setAttribute('value', audio.deviceId)
-        micOptions.appendChild(newElement);
-    })
-
-    isReady.audio = true
-
-    if (isReady.audio && isReady.video){
-        let submitButton = document.getElementById('submit-button')
-        submitButton.removeAttribute('disabled')
+    try {
+        let audioDevices = (await navigator.mediaDevices.enumerateDevices()).filter(
+            (device) => device.kind === "audioinput"
+        );
+    
+        audioDevices.forEach((audio, index) => {
+            // console.log('- Audio : ', index, ' - Total : ', audioDevices.length)
+            let newElement = document.createElement("p");
+            newElement.className = "dropdown-item dropdown-select-options";
+            newElement.textContent = audio.label;
+            newElement.setAttribute('value', audio.deviceId)
+            micOptions.appendChild(newElement);
+        })
+    
+        isReady.audio = true
+    
+        if (isReady.audio && isReady.video){
+            let submitButton = document.getElementById('submit-button')
+            submitButton.removeAttribute('disabled')
+        }
+    
+        let audioIcons = document.getElementById('select-audio')
+        audioIcons.className = 'fas fa-microphone'
+    
+        localStorage.setItem("audioDevices", audioDevices)
+        localStorage.setItem("selectedAudioDevices", audioDevices[0].deviceId)
+    } catch (error) {
+        let ae = document.getElementById("alert-error");
+        ae.className = "show";
+        ae.innerHTML = `Error : ${error.message}`
+        // Show Warning
+        setTimeout(() => { 
+            ae.className = ae.className.replace("show", ""); 
+            ae.innerHTML = ``
+        }, 3000);
+        console.log(error.message)
     }
-
-    let audioIcons = document.getElementById('select-audio')
-    audioIcons.className = 'fas fa-microphone'
-
-    localStorage.setItem("audioDevices", audioDevices)
-    localStorage.setItem("selectedAudioDevices", audioDevices[0].deviceId)
 }
 
 micOptions.addEventListener("click", (e) => {
@@ -69,32 +93,44 @@ micOptions.addEventListener("click", (e) => {
 
 const videoOptions = document.getElementById('camera-options')
 const getMyDevices = async (config) => {
-    let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter(
-        (device) => device.kind === "videoinput"
-    );
-
-    videoDevices.forEach((video, index) => {
-        // console.log('- Video : ', index, " - Total : ", videoDevices.length)
-        let newElement = document.createElement("p");
-        newElement.className = "dropdown-item dropdown-select-options";
-        newElement.textContent = video.label;
-        newElement.setAttribute('value', video.deviceId)
-
-        videoOptions.appendChild(newElement);
-    })
-
-    isReady.video = true
-
-    if (isReady.audio && isReady.video){
-        let submitButton = document.getElementById('submit-button')
-        submitButton.removeAttribute('disabled')
+    try {
+        let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter(
+            (device) => device.kind === "videoinput"
+        );
+    
+        videoDevices.forEach((video, index) => {
+            // console.log('- Video : ', index, " - Total : ", videoDevices.length)
+            let newElement = document.createElement("p");
+            newElement.className = "dropdown-item dropdown-select-options";
+            newElement.textContent = video.label;
+            newElement.setAttribute('value', video.deviceId)
+    
+            videoOptions.appendChild(newElement);
+        })
+    
+        isReady.video = true
+    
+        if (isReady.audio && isReady.video){
+            let submitButton = document.getElementById('submit-button')
+            submitButton.removeAttribute('disabled')
+        }
+    
+        let videoIcons = document.getElementById('select-video')
+        videoIcons.className = 'fas fa-video'
+    
+        localStorage.setItem('videoDevices', videoDevices)
+        localStorage.setItem('selectedVideoDevices', videoDevices[0].deviceId)
+    } catch (error) {
+        let ae = document.getElementById("alert-error");
+        ae.className = "show";
+        ae.innerHTML = `Error : ${error.message}`
+        // Show Warning
+        setTimeout(() => { 
+            ae.className = ae.className.replace("show", ""); 
+            ae.innerHTML = ``
+        }, 3000);
+        console.log(error.message)
     }
-
-    let videoIcons = document.getElementById('select-video')
-    videoIcons.className = 'fas fa-video'
-
-    localStorage.setItem('videoDevices', videoDevices)
-    localStorage.setItem('selectedVideoDevices', videoDevices[0].deviceId)
 }
 
 videoOptions.addEventListener("click", (e) => {
@@ -144,7 +180,7 @@ joinRoom.addEventListener('submit', (e) => {
 
     setTimeout(() => {
         window.location.href = newURL;
-    }, 2000);
+    }, 1000);
 
 });
 
