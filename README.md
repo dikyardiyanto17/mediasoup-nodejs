@@ -2,7 +2,6 @@
 ## Needs Improvement
 ### Urgent
 
-
 ### Primary
 - Kamera belakang tidak mau (handphone) (Sudah di diperbaiki, belum ditesting)
 - Responsive Design (basic design)
@@ -208,3 +207,13 @@ socket.on('joinRoom', (data) => {
 ## Optional
 - Changing Displayed Video By Collecting Stream First
 - Dont Need To Delete Element To Replace Next or Previus Video
+
+## Scenario
+- Register
+- Login
+- Get Access Token
+- Get Room Password
+- Done
+
+## Change Log 0.0.1
+- Starting Development

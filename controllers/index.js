@@ -1,7 +1,7 @@
 const mediasoup = require('mediasoup')
 
 class Controller {
-    static room(req, res) {
+    static room(req, res, next) {
         try {
             res.render('room')
         } catch (error) {
@@ -9,7 +9,7 @@ class Controller {
         }
     }
 
-    static home (req, res){
+    static home (req, res, next){
         try {
             res.render('home')
         } catch (error) {
@@ -17,7 +17,7 @@ class Controller {
         }
     }
 
-    static lobby (req, res){
+    static lobby (req, res, next){
         try {
             res.render('lobby')
         } catch (error) {
@@ -25,9 +25,25 @@ class Controller {
         }
     }
 
-    static testing (req, res){
+    static testing (req, res, next){
         try {
             res.render('testing')
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    static register (req, res, next){
+        try {
+            res.render('register')
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    static login (req, res, next){
+        try {
+            res.render('login')
         } catch (error) {
             console.log(error)
         }
