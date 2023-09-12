@@ -216,3 +216,4 @@ socket.on('joinRoom', (data) => {
 - Adding unmute and mute all participants
 - Lock mic when host mute all participants
 - Host title will chane to the erliest participant that joined the room
+- Router is closed when there is no one in the room
