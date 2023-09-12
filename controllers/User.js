@@ -1,6 +1,7 @@
 const { hashPassword, comparePassword } = require("../helpers/bcryptjs")
 const { encodeToken } = require("../helpers/jwt")
 const User = require("../schema/User")
+const Room = require("../schema/Room")
 const { decodeToken } = require("../helpers/jwt")
 
 class Users {

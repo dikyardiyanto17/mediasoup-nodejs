@@ -48,5 +48,13 @@ class Controller {
             console.log(error)
         }
     }
+
+    static authentication (req, res, next){
+        try {
+            console.log('HELLO')
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 module.exports = Controller

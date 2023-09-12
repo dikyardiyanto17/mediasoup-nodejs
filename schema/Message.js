@@ -1,19 +1,19 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const userSchema = new Schema({
-    email: {
+const messageSchema = new Schema({
+    message: {
         type: String,
         required: true
     },
-    password: {
-        type: String,
+    sender: {
+        type: mongoose.ObjectId,
         required: true
     },
-    authority: {
+    room: {
         type: String,
         required: true
     }
 })
 
-module.exports = mongoose.model('User', userSchema)
+module.exports = mongoose.model('Message', messageSchema)

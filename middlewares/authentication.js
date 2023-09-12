@@ -6,6 +6,7 @@ const authentication = async (req, res, next) => {
 	try {
 		if (!access_token) throw { name: "Invalid", message: "Token is invalid" }
 		const payload = decodeToken(access_token)
+		console.log("- ID : ", payload)
 		const user = await User.findById(payload.id)
 		if (!user) throw { name: "Invalid", message: "Token is invalid" }
 		req.user = { userId: user.id }

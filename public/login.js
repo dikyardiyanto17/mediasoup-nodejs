@@ -23,8 +23,9 @@ document.addEventListener("DOMContentLoaded", function () {
 			})
 			if (response.ok) {
 				const responseData = await response.json()
-                console.log("- Access Token : ", responseData)
+				localStorage.setItem("access_token", responseData.access_token)
 				// Redirect To Login Page
+				window.location.href = window.location.origin
 			} else {
 				const errorFromServer = await response.json()
 				throw { errorFromServer }

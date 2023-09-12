@@ -6,6 +6,8 @@ const errorHandler = (err, req, res, next) => {
     res.status(401).json({ name: err.name, message: err.message })
   } else if (err.name == "Not Found") {
     res.status(404).json({ name: err.name, message: err.message })
+  } else if (err.name == 'Invalid' || err.name == 'JsonWebTokenError') {
+    res.status(401).json({ name: err.name, message: err.message })
   }
 }
 

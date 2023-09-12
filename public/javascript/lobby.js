@@ -10,12 +10,23 @@ let isReady = {video: false, audio: false}
 
 const init = async () => {
     try {
+        const authAPI = 'https://192.168.18.68:3001/api/auth'
         localStorage.setItem('room_id', roomName)
         const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true})
         await getMyDevices()
         await getMyMic()
         localVideo.srcObject = stream;
         store.setLocalStream(stream)
+        const response = await fetch(authAPI, {
+            method: "get",
+            headers: {
+                "Content-Type": "application/json",
+                'access_token': localStorage.getItem('access_token')
+            },
+        })
+        if (!response.ok){
+            window.location.href = window.location.origin + '/login'
+        }
     } catch (error) {
         let ae = document.getElementById("alert-error");
         ae.className = "show";
