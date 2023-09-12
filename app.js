@@ -30,8 +30,8 @@ const webRtcTransport_options = {
             // ip: '127.0.0.1',
             // ip: '192.168.206.123',
             // ip: '192.168.205.229',
-            // ip: '192.168.18.68', // Laptop Jaringan 5G
-            ip: '203.194.113.166', // VPS Mr. Indra IP
+            ip: '192.168.18.68', // Laptop Jaringan 5G
+            // ip: '203.194.113.166', // VPS Mr. Indra IP
             // ip: '203.175.10.29' // My VPS
             // ip: '192.168.3.135' // IP Kost
             // announcedIp: "88.12.10.41"
@@ -50,19 +50,19 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// const httpsServer = https.createServer(options, app)
-// httpsServer.listen(port, () => {
-//     console.log('App On : ' + port)
-// })
-
-// const io = new Server(httpsServer)
-
-const httpServer = http.createServer(app)
-httpServer.listen(port, () => {
+const httpsServer = https.createServer(options, app)
+httpsServer.listen(port, () => {
     console.log('App On : ' + port)
 })
 
-const io = new Server(httpServer)
+const io = new Server(httpsServer)
+
+// const httpServer = http.createServer(app)
+// httpServer.listen(port, () => {
+//     console.log('App On : ' + port)
+// })
+
+// const io = new Server(httpServer)
 
 let worker
 let rooms = {}
@@ -154,8 +154,9 @@ io.on('connection', async socket => {
         // consumers.forEach(consumer => {
         //     console.log('- Consumer : ', consumer.consumer)
         // })
+        console.log(JSON.stringify(rooms, null, 4));
         // console.log(rooms)
-        console.log('- All Workers : ', allWorkers)
+        // console.log('- All Workers : ', allWorkers)
         // console.log('- Producers : ', producers)
 
         // worker.events = (e) => {
@@ -182,7 +183,6 @@ io.on('connection', async socket => {
 
         if (peers[socket.id]) {
             const { roomName } = peers[socket.id]
-            console.log('- Peers : ', peers[socket.id].producers)
             peers[socket.id].producers.forEach((producerId) => {
                 socket.emit('producer-closed', { remoteProducerId: producerId })
             })
@@ -191,12 +191,29 @@ io.on('connection', async socket => {
             roomsSocketCollection[roomName] = roomsSocketCollection[roomName].filter(item => item.socketId !== socket.id)
             rooms[roomName] = {
                 router: rooms[roomName].router,
-                peers: rooms[roomName].peers.filter(socketId => socketId !== socket.id),
+                peers: rooms[roomName].peers.filter(data => data.socketId !== socket.id),
                 worker: rooms[roomName].worker
+            }
+            let changeHost = true
+            for (let i = 0; i < rooms[roomName].peers.length; i++){
+                if (!rooms[roomName].peers[i].authority){
+                    changeHost = false
+                }
+            }
+            if (changeHost && rooms[roomName].peers.length != 0){
+                for (let i = 0; i < rooms[roomName].peers.length; i++){
+                    socket.to(rooms[roomName].peers[i].socketId).emit('change-host', {newHost: rooms[roomName].peers[0].socketId})
+                }
+                rooms[roomName].peers[0].authority = 'Host'
+            }
+            if (rooms[roomName].peers.length == 0){
+                rooms[roomName].router.close()
+                delete rooms[roomName]
             }
         }
 
         // console.log("- Room Participant : ", roomsSocketCollection)
+        console.log('- Room : ', rooms)
     })
 
     socket.on('joinRoom', async (data, callback) => {
@@ -231,19 +248,22 @@ io.on('connection', async socket => {
     const createRoom = async (roomName, socketId) => {
         let router1
         let peers = []
+        let data
         if (rooms[roomName]) {
             router1 = rooms[roomName].router
             peers = rooms[roomName].peers || []
+            data = { socketId, authority: 'Participant'}
         } else {
             if (!worker) {
                 worker = await createWorker()
             }
             router1 = await worker.createRouter({ mediaCodecs })
+            data = { socketId, authority: 'Host'}
         }
 
         rooms[roomName] = {
             router: router1,
-            peers: [...peers, socketId],
+            peers: [...peers, data],
         }
 
         return router1
@@ -286,6 +306,10 @@ io.on('connection', async socket => {
 
     //     return router1
     // }
+
+    socket.on('unlock-mic-all', ({socketId}) => {
+        socket.to(socketId).emit('unlock-mic-all', ({message: 'Hello World'}))
+    })
 
     socket.on('createWebRtcTransport', async ({ consumer }, callback) => {
         const roomName = peers[socket.id].roomName
@@ -375,8 +399,18 @@ io.on('connection', async socket => {
         socket.to(socketId).emit('mic-config', ({ videoProducerId, audioProducerId, isMicActive, socketId: socket.id }))
     })
 
+    socket.on('mute-all', ({socketId}) => {
+        socket.to(socketId).emit('mute-all', ({hostSocketId: socketId}))
+    })
 
-
+    socket.on('am-i-host', ({socketId, roomName}, callback) => {
+        for (let i = 0; i < rooms[roomName].peers.length; i++){
+            if (rooms[roomName].peers[i].socketId == socketId){
+                callback({authority: rooms[roomName].peers[i].authority})
+            }
+            
+        }
+    })
 
     const informConsumers = (roomName, socketId, id) => {
         producers.forEach(producerData => {
@@ -504,6 +538,15 @@ io.on('connection', async socket => {
                             // console.log("- Key : ", key, " - Peers : ", peers[key].producers, " - My Socket ID : ", socket.id, " - Owner : ", peers[key].socket.id, " - Name : ", peers[key].peerDetails.name)
                             if (!params.producerOwnerSocket) {
                                 params.producerOwnerSocket = peers[key].socket.id
+                            }
+                            let authority
+                            for (let i = 0; i < rooms[roomName].peers.length; i++){
+                                if (rooms[roomName].peers[i].socketId == peers[key].socket.id){
+                                    authority = rooms[roomName].peers[i].authority
+                                }
+                            }
+                            if (!params.authority){
+                                params.authority = authority
                             }
                             if (!params.producerName) {
                                 params.producerName = peers[key].peerDetails.name

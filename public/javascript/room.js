@@ -44,7 +44,9 @@ let paginationEndIndex = 11
 let currentPage = 0
 let limitedPerPage = 12
 let isCameraOn = true
-
+let lockedMic = false
+let host
+let isMutedAll
 
 // Params for MediaSoup
 let params = {
@@ -604,6 +606,14 @@ const connectSendTransport = async () => {
     audioProducer = await producerTransport.produce(audioParams);
     videoProducer = await producerTransport.produce(videoParams);
 
+    socket.emit('am-i-host', {socketId: socket.id, roomName: localStorage.getItem('room_id')}, (data) => {
+        if (data.authority == 'Host'){
+            document.getElementById('my-username').innerHTML = localStorage.getItem('username') + ' ( Host )'
+            console.log('- Authority : ', data.authority)
+            host = socket.id
+        }
+    })
+
     audioProducer.on('trackended', () => {
         console.log('audio track ended')
 
@@ -682,6 +692,31 @@ socket.on('connection-success', ({ socketId }) => {
     console.log(socketId)
     checkLocalStorage()
     getLocalStream()
+})
+
+// Mute All
+socket.on('mute-all', (data) => {
+    const micButton = document.getElementById("user-mic-button");
+    const micImage = document.getElementById("mic-image");
+    let localMic = document.getElementById('local-mic')
+    let stream = store.getState()
+    muteAll = true
+    micButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
+    for (const key in producersDetails) {
+        socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
+    }
+    allStream[socket.id].audio.track.enabled = false
+    allStream[socket.id].audio.status = false
+    stream.localStream.getAudioTracks()[0].enabled = false
+    if (localMic) localMic.src = "/assets/pictures/micOff.png";
+    micImage.src = "/assets/pictures/micOff.png";
+    lockedMic = true
+})
+
+// Change Host
+socket.on('change-host', ({newHost}) => {
+    host = newHost
+    lockedMic = false
 })
 
 // Mic Configuration
@@ -877,7 +912,11 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
                 if (counter >= paginationStartIndex && counter <= paginationEndIndex) {
                     for (const secondKey in allStream[firstKey]) {
                         if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
-                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
+                            let authority = false
+                            if (firstKey == host){
+                                authority = true
+                            }
+                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority)
                             createAudioVisualizer(allStream[firstKey].audio.track, allStream[firstKey].audio.id, allStream[firstKey].video.id)
                             if (allStream[firstKey][secondKey].serverConsumerId){
                                 socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
@@ -909,7 +948,11 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
                 if (counter >= paginationStartIndex && counter <= paginationEndIndex) {
                     for (const secondKey in allStream[firstKey]) {
                         if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
-                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
+                            let authority = false
+                            if (firstKey == host){
+                                authority = true
+                            }
+                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority)
                             createAudioVisualizer(allStream[firstKey].audio.track, allStream[firstKey].audio.id, allStream[firstKey].video.id)
                             if (allStream[firstKey][secondKey].serverConsumerId){
                                 socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
@@ -947,9 +990,13 @@ const getProducers = () => {
 }
 
 // Create Video
-const createVideo = (remoteId, kind, track, username, micIcon) => {
+const createVideo = (remoteId, kind, track, username, micIcon, authority) => {
     const newElem = document.createElement('div')
     newElem.setAttribute('id', `td-${remoteId}`)
+    let newUsername = username
+    if (authority){
+        newUsername = username + ' ( Host )'
+    }
     if (kind == 'video') {
         // If Current User, Get Track From Global Video
         if (remoteId == 'current-user-video') {
@@ -963,7 +1010,7 @@ const createVideo = (remoteId, kind, track, username, micIcon) => {
                 isMic = 'micOff.png'
             }
             newElem.setAttribute('class', currentTemplate)
-            newElem.innerHTML = '<div class="icons-mic"><img src="/assets/pictures/' + isMic + '" class="mic-image" id="local-mic"/></div><video id="' + remoteId + '" autoplay class="user-video" muted></video><div class="username">' + username + '</div>'
+            newElem.innerHTML = '<div class="icons-mic"><img src="/assets/pictures/' + isMic + '" class="mic-image" id="local-mic"/></div><video id="' + remoteId + '" autoplay class="user-video" muted></video><div class="username">' + newUsername + '</div>'
             // Append Element And Set Track
             videoContainer.appendChild(newElem)
             document.getElementById(remoteId).srcObject = track
@@ -976,7 +1023,7 @@ const createVideo = (remoteId, kind, track, username, micIcon) => {
                 isMic = 'micOff.png'
             }
             newElem.setAttribute('class', currentTemplate)
-            newElem.innerHTML = '<div class="icons-mic"><img src="/assets/pictures/' + isMic + '" poster="/assets/pictures/unknown.jpg" preload="auto" class="mic-image" /></div><video id="' + remoteId + '" autoplay class="user-video" ></video><div class="username">' + username + '</div>'
+            newElem.innerHTML = '<div class="icons-mic"><img src="/assets/pictures/' + isMic + '" poster="/assets/pictures/unknown.jpg" preload="auto" class="mic-image" /></div><video id="' + remoteId + '" autoplay class="user-video" ></video><div class="username">' + newUsername + '</div>'
             // Append Element And Set Track
             videoContainer.appendChild(newElem)
             document.getElementById(remoteId).srcObject = new MediaStream([track])
@@ -1074,7 +1121,11 @@ const createPaginationRight = () => {
                     for (const secondKey in allStream[firstKey]) {
                         if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
                             console.log('- Check : ', allStream[firstKey].audio.track.enabled)
-                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
+                            let authority = false
+                            if (firstKey == host){
+                                authority = true
+                            }
+                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority)
                             // Resume Displayed Video Consumer
                             if (allStream[firstKey][secondKey].serverConsumerId){
                                 socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
@@ -1152,7 +1203,11 @@ const createPaginationLeft = () => {
                 if (counter >= paginationStartIndex && counter <= paginationEndIndex) {
                     for (const secondKey in allStream[firstKey]) {
                         if (allStream[firstKey][secondKey].kind != 'screen-sharing' && allStream[firstKey][secondKey].kind == 'video') {
-                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled)
+                            let authority = false
+                            if (firstKey == host){
+                                authority = true
+                            }
+                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority)
                             // Resume Displayed Video Consumer
                             if (allStream[firstKey][secondKey].serverConsumerId){
                                 socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
@@ -1197,6 +1252,9 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
         remoteProducerId,
         serverConsumerTransportId,
     }, async ({ params }) => {
+        if (params.authority == 'Host'){
+            host = params.producerOwnerSocket
+        }
         if (params.error) {
             console.log('Cannot Consume : ', params.error)
             return
@@ -1278,7 +1336,11 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                 let totalPage2 = Math.ceil(totalUsers / limitedPerPage)
 
                 if (params.kind == 'video' && !check && ((totalUsers <= limitedPerPage && currentPage == 0) || totalUsers >= limitedPerPage && totalPage2 == currentPage + 1 && currentPage != 0)) {
-                    createVideo(remoteProducerId, params.kind, track, params?.username, true)
+                    let checkAuthority = false
+                    if (params.producerOwnerSocket == host){
+                        checkAuthority = true
+                    }
+                    createVideo(remoteProducerId, params.kind, track, params?.username, true, checkAuthority)
                 }
                 
                 // Get Local Stream
@@ -1359,6 +1421,10 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                             for (const key in producersDetails) {
                                 socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
                             }
+                        }
+
+                        if (isMutedAll){
+                            muteAllParticipants()
                         }
                         // if (!isCameraOn){
                         //     console.log('Off')
@@ -1447,7 +1513,16 @@ micButton.addEventListener("click", () => {
     let localMic = document.getElementById('local-mic')
     let stream = store.getState()
 
-    if (micImage.src.endsWith("micOn.png")) {
+    if (lockedMic) {
+        let ae = document.getElementById("alert-error");
+        ae.className = "show";
+        ae.innerHTML = `Mic is Locked By Host`
+        // Show Warning
+        setTimeout(() => { 
+            ae.className = ae.className.replace("show", ""); 
+            ae.innerHTML = ``
+        }, 3000);
+    } else if (micImage.src.endsWith("micOn.png")) {
         micButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
         for (const key in producersDetails) {
             socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: false }))
@@ -1952,6 +2027,78 @@ function dragElement(elmnt) {
     }
 }
 
+const optionButton = document.getElementById("option-button");
+const optionMenu = document.getElementById("option-menu");
+
+// Function to show the option menu
+function showOptionMenu() {
+    optionMenu.className = "visible";
+}
+
+// Function to hide the option menu
+function hideOptionMenu() {
+    optionMenu.className = "invisible";
+}
+
+// Click event for the option button
+optionButton.addEventListener("click", function (event) {
+    event.stopPropagation(); // Prevent the click event from propagating to the document
+
+    // Toggle the option menu
+    if (optionMenu.className === "visible") {
+        hideOptionMenu();
+    } else {
+        showOptionMenu();
+    }
+});
+
+// Click event for the document (to hide the option menu when clicking outside)
+document.addEventListener("click", function () {
+    hideOptionMenu();
+});
+
+// Mute All Mic
+const muteAllParticipants = () => {
+    for (const key in producersDetails) {
+        socket.emit('mute-all', ({ socketId: key }))
+    }
+}
+
+// Unlock Mic
+const unlockAllMic = () => {
+    for (const key in producersDetails) {
+        socket.emit('unlock-mic-all', ({ socketId: key }))
+    }
+}
+
+socket.on('unlock-mic-all', (data) => {
+    lockedMic = false
+})
+
+
+// Mute All
+const muteAllButton = document.getElementById('mute-all')
+muteAllButton.addEventListener('click', () => {
+    if (host == socket.id && muteAllButton.innerHTML == 'Mute All Participants'){
+        isMutedAll = true
+        muteAllParticipants()
+        muteAllButton.innerHTML = 'Unmute All Participants'
+    } else if (host == socket.id && muteAllButton.innerHTML == 'Unmute All Participants'){
+        isMutedAll = false
+        unlockAllMic()
+        muteAllButton.innerHTML = 'Mute All Participants'
+    } else {
+        let ae = document.getElementById("alert-error");
+        ae.className = "show";
+        ae.innerHTML = `You're Not Host`
+        // Show Warning
+        setTimeout(() => { 
+            ae.className = ae.className.replace("show", ""); 
+            ae.innerHTML = ``
+        }, 3000);
+    }
+})
+
 // Pagination Button Right
 // const rightPagination = document.getElementById('slide-right')
 // rightPagination.addEventListener('click', () => {
@@ -2008,71 +2155,74 @@ const showElement = () => {
     isCursorMoving = true;
 }
 
-// Function to hide the element
+// Hide Element
 const hideElement = () => {
     elementToControl.className = 'controller hidden';
     isCursorMoving = false;
 }
 
-// Add mousemove event listener to detect cursor movement across the entire screen
+// Hide Element When There is No Mouse Movement
 document.addEventListener('mousemove', () => {
     if (!isCursorMoving) {
         showElement();
     }
+    const hideAll = () => {
+        hideElement()
+        hideOptionMenu()
+    }
 
-    // Reset cursor movement detection and hide the element after a certain time (e.g., 3 seconds)
     clearTimeout(hideTimeout);
-    hideTimeout = setTimeout(hideElement, 3000); // Adjust the time as needed
+    hideTimeout = setTimeout(hideAll, 3000); 
 });
 
 
 
 // Console Log Button
-// const consoleLogButton = document.getElementById('console-log-button')
-// consoleLogButton.addEventListener('click', () => {
-//     consumerTransports.forEach((transport) => {
-//         transport.consumer.getStats().then((stat) => {
-//             [...stat.entries()].forEach((data, index) => {
-//                 if (index == [...stat.entries()].length - 1) {
-//                     console.log('- Data : ', data)
-//                 }
-//             })
-//             stat.forEach((report) => {
-//                 if (report.type === 'inbound-rtp' && report.kind === 'video') {
-//                     console.log('- Received Bit Rate : ', report)
-//                 }
-//             })
-//             console.log('- Stat : ', stat)
-//         })
-//     })
-//     socket.emit('get-peers', (consumerTransports))
-//     console.log("- Producer : ", producerTransport)
-//     console.log("- Video Producer : ", videoProducer)
-//     producerTransport.getStats().then((data) => {
-//         console.log(data)
-//     })
-//     console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
-//     console.log("- Producer Details : ", producersDetails)
-//     console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
-//     console.log("- Screen Sharing Producers : ", screenSharingProducer)
-//     console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
+const consoleLogButton = document.getElementById('console-log-button')
+consoleLogButton.addEventListener('click', () => {
+    // consumerTransports.forEach((transport) => {
+    //     transport.consumer.getStats().then((stat) => {
+    //         [...stat.entries()].forEach((data, index) => {
+    //             if (index == [...stat.entries()].length - 1) {
+    //                 console.log('- Data : ', data)
+    //             }
+    //         })
+    //         stat.forEach((report) => {
+    //             if (report.type === 'inbound-rtp' && report.kind === 'video') {
+    //                 console.log('- Received Bit Rate : ', report)
+    //             }
+    //         })
+    //         console.log('- Stat : ', stat)
+    //     })
+    // })
+    // socket.emit('get-peers', (consumerTransports))
+    // console.log("- Producer : ", producerTransport)
+    // console.log("- Video Producer : ", videoProducer)
+    // producerTransport.getStats().then((data) => {
+    //     console.log(data)
+    // })
+    // console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
+    // console.log("- Producer Details : ", producersDetails)
+    // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
+    // console.log("- Screen Sharing Producers : ", screenSharingProducer)
+    // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
 
-//     let allAudio = []
+    // let allAudio = []
 
-//     for (const key in allStream){
-//         allAudio.push(allStream[key].audio)
-//     }
+    // for (const key in allStream){
+    //     allAudio.push(allStream[key].audio)
+    // }
 
-//     let allAudioFlat = allAudio.flatMap(stream => stream);
-//     console.log('- All Audio Flat : ', allAudioFlat)
+    // let allAudioFlat = allAudio.flatMap(stream => stream);
+    // console.log('- All Audio Flat : ', allAudioFlat)
 
+    // console.log('- All Stream : ', allStream)
+    // socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
+    //     console.log(data)
+    // })
 
-
-//     console.log('- All Stream : ', allStream)
-//     socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
-//     })
-
-//     console.log('- Total User : ', totalUsers)
-//     let stream = store.getState()
-//     console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
-// })
+    // console.log('- Total User : ', totalUsers)
+    // let stream = store.getState()
+    // console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
+    console.log('- Host : ', host)
+})
