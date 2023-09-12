@@ -208,3 +208,11 @@ socket.on('joinRoom', (data) => {
 ## Optional
 - Changing Displayed Video By Collecting Stream First
 - Dont Need To Delete Element To Replace Next or Previus Video
+
+## Change Log
+### 0.0.1
+- Starting Development
+### 0.0.2
+- Adding unmute and mute all participants
+- Lock mic when host mute all participants
+- Host title will chane to the erliest participant that joined the room
