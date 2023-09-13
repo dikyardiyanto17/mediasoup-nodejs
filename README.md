@@ -4,26 +4,25 @@
 
 
 ### Primary
-- Kamera belakang tidak mau (handphone) (Sudah di diperbaiki, belum ditesting)
-- Responsive Design (basic design)
-- Membuat UI yang lebih baik (on Development)
-- Pause consumer jika tidak sedang digunakan (sudah ditambahkan, belum ditesting)
-- Konfigurasi menjalankan consumer yang didisplay saja, dalam kasus ini maksimal 12 user per page. 11 x 2 = 24 consumer per user. 24 x 12 = 288 consumer  (sudah ditambahkan, belum ditesting)
-- Konfigurasi Worker untuk setiap core, maksimal 1 worker terdapat 50 orang. 1 orang menerima 98 consumer dari 49 video dan audio dan total consumer adalah 50 x 98 = 4900 Consumer (skema ada dibawah)(skema sudah di terapkan dikodingan)
-- Deployment ke dua video putus-putus (Perbedaan dari deployment ke dua dengan pertama adalah cara memasukan videonya), kemungkinan masalah : 1. Terkena bandwidth di VPS Server. (DONE, Terdapat maintenance network pada penyedia layanan VPS)
-- Jika semua sudah ready, tombol controller di enable.
-- Kasih penanda jika sudah terhubung atau belum. (DONE)
+- Kamera belakang tidak mau *(handphone) *(Sudah di diperbaiki, belum ditesting)
+- Responsive Design *(basic design)
+- Membuat UI yang lebih baik *(on Development)
+- Pause consumer jika tidak sedang digunakan *(sudah di testing untuk case 1 halaman maksimal 3 user dengan total 7 user (3 page))
+- Konfigurasi menjalankan consumer yang didisplay saja, dalam kasus ini maksimal 12 user per page. 11 x 2 = 24 consumer per user. 24 x 12 = 288 consumer  *(sudah di testing untuk case 1 halaman maksimal 3 user dengan total 7 user (3 page))
+- Konfigurasi Worker untuk setiap core, maksimal 1 worker terdapat 50 orang. 1 orang menerima 98 consumer dari 49 video dan audio dan total consumer adalah 50 x 98 = 4900 Consumer *(skema ada dibawah)(skema sudah di terapkan dikodingan)
+- Deployment ke dua video putus-putus (Perbedaan dari deployment ke dua dengan pertama adalah cara memasukan videonya), kemungkinan masalah : 1. Terkena bandwidth di VPS Server. (&#x2713;)
+- Jika semua sudah ready, tombol controller di enable. (&#x2713;)
+- Kasih penanda jika sudah terhubung atau belum. (&#x2713;)
 - Tampilkan semua error notification
-- Tampilkan jika semua sudah ready 
-- Handling jika jika producer state : failed, connecting, connected (DONE)
+- Handling jika jika producer state : failed, connecting, connected (&#x2713;)
 - Cek Saat Mode Normal dan Mode Screen Share Di Limited Usernya
-- Kadang saat user baru join di mode pagination, tembus padahal sudah lebih dari limitedPerPage (DONE)
-- Bug duplikat Video (DONE)
+- Kadang saat user baru join di mode pagination, tembus padahal sudah lebih dari limitedPerPage (&#x2713;)
+- Bug duplikat Video (&#x2713;)
 
 ### Secondary
-- Tambahkan Turn Off / On Camera (Masih perlu perbaikan)
 - Case jika 1000 user online bersamaan
 - Case jika seseorang sedang merekam, lalu tiba-tiba kepencet exit, harus auto download
+- Check bottom and upper limit for available port
 
 ## Critical Information
 - 1 worker untuk 1 core CPU
@@ -39,11 +38,11 @@
 - You can calculate the number of consumers in your call session and see the max number of users your CPU can handle
 
 ## Testing
-- When Someone Screen Sharing, new user join, it will enable Screen Share Mode Display (DONE)
-- When total user join room more than limited displayed video, new user video wont displayed and consumer get paused (only tested with limited displayed video = 3) (DONE)
-- When new user join room, and current user is on last page, new user video should be displayed (DONE)
-- When current user is recording, and new user joining, the recorded audio will include new user audio (DONE)
-- When user has weak network, the producer will trying to reconnect first for 8 seconds, if its failed or disconnected it will redirect to lobby (DONE)
+- When Someone Screen Sharing, new user join, it will enable Screen Share Mode Display (&#x2713;)
+- When total user join room more than limited displayed video, new user video wont displayed and consumer get paused (only tested with limited displayed video = 3) (&#x2713;)
+- When new user join room, and current user is on last page, new user video should be displayed (&#x2713;)
+- When current user is recording, and new user joining, the recorded audio will include new user audio (&#x2713;)
+- When user has weak network, the producer will trying to reconnect first for 8 seconds, if its failed or disconnected it will redirect to lobby (&#x2713;)
 
 ## Question
 - When 100 user hit the join room in the sametime?
@@ -184,6 +183,9 @@ socket.on('joinRoom', (data) => {
 - Error Database
 - Error Server
 
+## Consideration
+- Is it neccessary to save transport in database ? No
+
 ## Database
 - Account :
 -- Username
@@ -209,6 +211,22 @@ socket.on('joinRoom', (data) => {
 - Changing Displayed Video By Collecting Stream First
 - Dont Need To Delete Element To Replace Next or Previus Video
 
+## Bug Log
+### 0.1.0
+- Host title is not displayed when host is changing
+
+## Test Log
+### 0.1.0 (on development)
+- Screen sharing mode when mute and unmute all participants (&#x2713;)
+- Participants cant unmute when Host is locking the mic (&#x2713;)
+- Participants cant unmute / mute all participants (&#x2713;)
+- Host title will change if host leaving room (&#x2713;)
+- Router will be closed when there is no one in room (&#x2713;)
+- Host can mute / unmute all participants (&#x2713;)
+
+### 0.1.1 (on development)
+- Test host title text on username is displayed or not, when host title changing constantly (&#x2713;)
+
 ## Change Log
 ### 0.0.1
 - Starting Development
@@ -216,6 +234,7 @@ socket.on('joinRoom', (data) => {
 - Adding unmute and mute all participants
 - Lock mic when host mute all participants
 - Host title will chane to the erliest participant that joined the room
+- If Host is hanging up/leave room, participant who is join after host will be the new host
 - Router is closed when there is no one in the room
 ### 0.1.1
 - Fixing bug in when Host title is not displayed when changing host
