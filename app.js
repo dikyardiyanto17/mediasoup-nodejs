@@ -50,19 +50,19 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
-const httpsServer = https.createServer(options, app)
-httpsServer.listen(port, () => {
-    console.log('App On : ' + port)
-})
-
-const io = new Server(httpsServer)
-
-// const httpServer = http.createServer(app)
-// httpServer.listen(port, () => {
+// const httpsServer = https.createServer(options, app)
+// httpsServer.listen(port, () => {
 //     console.log('App On : ' + port)
 // })
 
-// const io = new Server(httpServer)
+// const io = new Server(httpsServer)
+
+const httpServer = http.createServer(app)
+httpServer.listen(port, () => {
+    console.log('App On : ' + port)
+})
+
+const io = new Server(httpServer)
 
 let worker
 let rooms = {}
