@@ -28857,12 +28857,14 @@ socket.on('change-host', ({newHost}) => {
 // Receive Signaling To Change Mic Icon User (Off / On)
 socket.on('mic-config', (data) => {
     let videoId = document.querySelector('#td-' + data.videoProducerId);
-    allStream[data.socketId].audio.track.enabled = data.isMicActive
-    for (const firstKey in allStream) {
-        for (const secondKey in allStream[firstKey]) {
-            if (allStream[firstKey][secondKey].id == data.audioProducerId) {
-                allStream[firstKey][secondKey].track.enabled = data.isMicActive
-                allStream[firstKey][secondKey].status = data.isMicActive
+    if (allStream[data.socketId].audio){
+        allStream[data.socketId].audio.track.enabled = data.isMicActive
+        for (const firstKey in allStream) {
+            for (const secondKey in allStream[firstKey]) {
+                if (allStream[firstKey][secondKey].id == data.audioProducerId) {
+                    allStream[firstKey][secondKey].track.enabled = data.isMicActive
+                    allStream[firstKey][secondKey].status = data.isMicActive
+                }
             }
         }
     }

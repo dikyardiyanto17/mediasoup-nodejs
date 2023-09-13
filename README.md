@@ -214,9 +214,11 @@ socket.on('joinRoom', (data) => {
 ## Bug Log
 ### 0.1.0
 - Host title is not displayed when host is changing
+### 0.1.1
+- Bug on socket.on('mic-config', .....) audio track is null
 
 ## Test Log
-### 0.1.0 (on development)
+### 0.1.0
 - Screen sharing mode when mute and unmute all participants (&#x2713;)
 - Participants cant unmute when Host is locking the mic (&#x2713;)
 - Participants cant unmute / mute all participants (&#x2713;)
@@ -224,7 +226,7 @@ socket.on('joinRoom', (data) => {
 - Router will be closed when there is no one in room (&#x2713;)
 - Host can mute / unmute all participants (&#x2713;)
 
-### 0.1.1 (on development)
+### 0.1.1
 - Test host title text on username is displayed or not, when host title changing constantly (&#x2713;)
 
 ## Change Log
@@ -238,3 +240,5 @@ socket.on('joinRoom', (data) => {
 - Router is closed when there is no one in the room
 ### 0.1.1
 - Fixing bug in when Host title is not displayed when changing host
+- Changing minimum bitrate video to 500 kbps - 900 kbps
+### 0.1.2
