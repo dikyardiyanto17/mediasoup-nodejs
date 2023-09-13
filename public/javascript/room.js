@@ -1469,9 +1469,12 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                             audioVisualTrack = allStream[firstKey].audio.track
                             videoId = allStream[firstKey].video.id
                             audioId = allStream[firstKey].audio.id
+                            break
                         }
                     }
-                    createAudioVisualizer(audioVisualTrack, audioId, videoId)
+                    if (videoId){
+                        createAudioVisualizer(audioVisualTrack, audioId, videoId)
+                    }
                 }
         
                 // If Its Not In Screen Share Mode To Adjust Template

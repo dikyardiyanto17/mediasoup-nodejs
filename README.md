@@ -216,6 +216,7 @@ socket.on('joinRoom', (data) => {
 - Host title is not displayed when host is changing
 ### 0.1.1
 - Bug on socket.on('mic-config', .....) audio track is null
+- Bug when append video visualization on screensharing mode is error
 
 ## Test Log
 ### 0.1.0
