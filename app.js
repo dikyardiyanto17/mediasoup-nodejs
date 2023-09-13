@@ -183,11 +183,6 @@ io.on('connection', async socket => {
 
         if (peers[socket.id]) {
             const { roomName } = peers[socket.id]
-            peers[socket.id].producers.forEach((producerId) => {
-                socket.emit('producer-closed', { remoteProducerId: producerId })
-            })
-            delete peers[socket.id]
-
             roomsSocketCollection[roomName] = roomsSocketCollection[roomName].filter(item => item.socketId !== socket.id)
             rooms[roomName] = {
                 router: rooms[roomName].router,
@@ -210,6 +205,10 @@ io.on('connection', async socket => {
                 rooms[roomName].router.close()
                 delete rooms[roomName]
             }
+            peers[socket.id].producers.forEach((producerId) => {
+                socket.emit('producer-closed', { remoteProducerId: producerId })
+            })
+            delete peers[socket.id]
         }
 
         // console.log("- Room Participant : ", roomsSocketCollection)
