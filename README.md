@@ -212,8 +212,10 @@ socket.on('joinRoom', (data) => {
 ## Change Log
 ### 0.0.1
 - Starting Development
-### 0.0.2
+### 0.1.0
 - Adding unmute and mute all participants
 - Lock mic when host mute all participants
 - Host title will chane to the erliest participant that joined the room
 - Router is closed when there is no one in the room
+### 0.1.1
+- Fixing bug in when Host title is not displayed when changing host
