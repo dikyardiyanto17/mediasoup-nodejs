@@ -215,8 +215,9 @@ socket.on('joinRoom', (data) => {
 ### 0.1.0
 - Host title is not displayed when host is changing
 ### 0.1.1
-- Bug on socket.on('mic-config', .....) audio track is null
-- Bug when append video visualization on screensharing mode is error
+- Bug on socket.on('mic-config', .....) audio track is null (&#x2713;)
+- Bug when append video visualization on screensharing mode is error, sometime screensharing is not displayed or audio is not working properly (A is screen sharing mode and new user is joining) (&#x2713;)
+- Bug when screen share mode sometime its user video changed to screensharing (&#x2713;)
 
 ## Test Log
 ### 0.1.0
@@ -228,6 +229,7 @@ socket.on('joinRoom', (data) => {
 - Host can mute / unmute all participants (&#x2713;)
 
 ### 0.1.1
+- Repetitive when user A and B in screen sharing mode and new user joining room to check the audio is normal and screen sharing mode is displaying properly  (&#x2713;)
 - Test host title text on username is displayed or not, when host title changing constantly (&#x2713;)
 
 ## Change Log
@@ -243,3 +245,16 @@ socket.on('joinRoom', (data) => {
 - Fixing bug in when Host title is not displayed when changing host
 - Changing minimum bitrate video to 500 kbps - 900 kbps
 ### 0.1.2
+- Mute all button only displayed in host interface
+- Chat button removed
+- Fixed bug when in screen sharing mode and new user join, it wont display the screensharing
+- Fixed bug audio sometimes is not working properly when in screen sharing mode
+- Fixed bug screensharing mode and user camera sometime switched when other user leaving room
+- Adding padding to name tag
+- Change recording text and background
+
+## Note
+- Font recording disesuaikan (&#x2713;)
+- Nama dikasih jarak (&#x2713;)
+- Fitur unmute all participant hanya ada di host (&#x2713;)
+- Tampilan home dan lobby perlu improvement

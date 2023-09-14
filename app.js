@@ -2,8 +2,8 @@ const express = require('express')
 const cors = require('cors')
 const router = require('./routes/index.js')
 const app = express()
-// const port = 3001
-const port = 80
+const port = 3001
+// const port = 80
 const http = require('http')
 const path = require('path');
 const https = require('httpolyglot')
@@ -30,9 +30,9 @@ const webRtcTransport_options = {
             // ip: '127.0.0.1',
             // ip: '192.168.206.123',
             // ip: '192.168.205.229',
-            // ip: '192.168.18.68', // Laptop Jaringan 5G
+            ip: '192.168.18.68', // Laptop Jaringan 5G
             // ip: '203.194.113.166', // VPS Mr. Indra IP
-            ip: '203.175.10.29' // My VPS
+            // ip: '203.175.10.29' // My VPS
             // ip: '192.168.3.135' // IP Kost
             // announcedIp: "88.12.10.41"
         }
@@ -50,19 +50,19 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// const httpsServer = https.createServer(options, app)
-// httpsServer.listen(port, () => {
-//     console.log('App On : ' + port)
-// })
-
-// const io = new Server(httpsServer)
-
-const httpServer = http.createServer(app)
-httpServer.listen(port, () => {
+const httpsServer = https.createServer(options, app)
+httpsServer.listen(port, () => {
     console.log('App On : ' + port)
 })
 
-const io = new Server(httpServer)
+const io = new Server(httpsServer)
+
+// const httpServer = http.createServer(app)
+// httpServer.listen(port, () => {
+//     console.log('App On : ' + port)
+// })
+
+// const io = new Server(httpServer)
 
 let worker
 let rooms = {}
@@ -139,7 +139,15 @@ io.on('connection', async socket => {
         return items
     }
 
-    const removeScreenSharingProducer = (items, socketId, type, producerId) => {
+    const removeScreenSharingProducer = (items, socketId, type, producerId, room) => {
+        // roomsSocketCollection[room]
+        roomsSocketCollection[room].map((data) => {
+            if (data.socketId == socketId){
+                data.screenSharingProducerId = null
+            }
+            return data
+        })
+
         items.forEach(item => {
             if (item.socketId == socket.id && item[type].id == producerId){
                 item[type].close()
@@ -154,7 +162,7 @@ io.on('connection', async socket => {
         // consumers.forEach(consumer => {
         //     console.log('- Consumer : ', consumer.consumer)
         // })
-        console.log(JSON.stringify(rooms, null, 4));
+        // console.log(JSON.stringify(rooms, null, 4));
         // console.log(rooms)
         // console.log('- All Workers : ', allWorkers)
         // console.log('- Producers : ', producers)
@@ -165,14 +173,15 @@ io.on('connection', async socket => {
 
 
         // callback({worker})
+        console.log('- Room Collection : ', roomsSocketCollection)
     })
 
     socket.on('screen-sharing', ({ videoProducerId, audioProducerId, socketId, isSharing, producerId }) => {
         socket.to(socketId).emit('screen-sharing', ({ videoProducerId, audioProducerId, isSharing, remoteProducerId: producerId }))
     })
 
-    socket.on('screen-sharing-producer', ({ videoProducerId, audioProducerId, socketId, isSharing, producerId }) => {
-        producers = removeScreenSharingProducer(producers, socketId, 'producer', producerId)
+    socket.on('screen-sharing-producer', ({ videoProducerId, audioProducerId, socketId, isSharing, producerId, room }) => {
+        producers = removeScreenSharingProducer(producers, socketId, 'producer', producerId, room)
     })
 
     socket.on('disconnect', () => {
@@ -212,7 +221,7 @@ io.on('connection', async socket => {
         }
 
         // console.log("- Room Participant : ", roomsSocketCollection)
-        console.log('- Room : ', rooms)
+        // console.log('- Room : ', rooms)
     })
 
     socket.on('joinRoom', async (data, callback) => {
@@ -434,19 +443,9 @@ io.on('connection', async socket => {
         const producer = await getTransport(socket.id).produce({
             kind,
             rtpParameters,
+            appData
         })
-
         const { roomName } = peers[socket.id]
-
-        addProducer(producer, roomName)
-
-        informConsumers(roomName, socket.id, producer.id)
-
-
-        producer.on('transportclose', () => {
-            producer.close()
-        })
-
 
         roomsSocketCollection[roomName].map(data => {
             if (data.socketId == socket.id && kind == 'video') {
@@ -463,11 +462,13 @@ io.on('connection', async socket => {
             return data
         })
 
-        // console.log("- Room Socket Collection : ", roomsSocketCollection)
+        addProducer(producer, roomName)
 
-        // let updatingRoom = roomsSocketCollection[roomName].find(data => data.socketId == socket.id)
-        // console.log('- My Socket Id : ', socket.id, " - Producer Id : ", producer.id, " - Updated : ", updatingRoom)
+        informConsumers(roomName, socket.id, producer.id)
 
+        producer.on('transportclose', () => {
+            producer.close()
+        })
 
         callback({
             id: producer.id,
@@ -506,6 +507,28 @@ io.on('connection', async socket => {
                     rtpCapabilities,
                     paused: true,
                 })
+                
+                let params = {
+                    id: consumer.id,
+                    producerId: remoteProducerId,
+                    kind: consumer.kind,
+                    rtpParameters: consumer.rtpParameters,
+                    serverConsumerId: consumer.id,
+                }
+
+                
+                if (consumer.kind == 'video') {
+                    const { roomName } = peers[socket.id]
+                    let getUserData = roomsSocketCollection[roomName].find((data) => data.producerId == remoteProducerId)
+                    let screenSharingData = roomsSocketCollection[roomName].find((data) => data.screenSharingProducerId == remoteProducerId)
+                    // console.log("- Get User Data : ", getUserData, " - Socket Id : ", socket.id)
+                    if (screenSharingData){
+                        params.username = screenSharingData.name + " is Sharing Screen"
+                    }
+                    if (getUserData){
+                        params.username = getUserData.name
+                    }
+                }
 
                 consumer.on('transportclose', () => {
                     console.log('transport close from consumer')
@@ -521,14 +544,6 @@ io.on('connection', async socket => {
                 })
 
                 addConsumer(consumer, roomName)
-
-                let params = {
-                    id: consumer.id,
-                    producerId: remoteProducerId,
-                    kind: consumer.kind,
-                    rtpParameters: consumer.rtpParameters,
-                    serverConsumerId: consumer.id,
-                }
 
                 for (const key in peers) {
                     peers[key].producers.forEach((producer) => {
@@ -554,23 +569,6 @@ io.on('connection', async socket => {
                     })
                 }
 
-                if (consumer.kind == 'video') {
-                    const { roomName } = peers[socket.id]
-                    let screenSharing = false
-                    let getUserData = roomsSocketCollection[roomName].find((data) => data.producerId == remoteProducerId)
-                    // console.log("- Get User Data : ", getUserData, " - Socket Id : ", socket.id)
-                    if (!getUserData) {
-                        getUserData = roomsSocketCollection[roomName].find((data) => data.screenSharingProducerId == remoteProducerId)
-                        screenSharing = true
-                    }
-                    if (!params.username) {
-                        params.username = getUserData.name
-                        if (screenSharing) {
-                            params.username = getUserData.name + " is Sharing Screen"
-
-                        }
-                    }
-                }
 
                 callback({ params })
             }

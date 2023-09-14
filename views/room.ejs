@@ -124,13 +124,14 @@
         }
 
         .username {
+            border-radius: 4px;
             position: absolute;
-            bottom: 0;
-            left: 0;
+            bottom: 10px;
+            left: 10px;
             color: white;
             font-size: 11px;
             background: rgba(0, 0, 0, 0.4);
-            padding: 2px;
+            padding: 4px;
         }
 
         .icons-mic {
@@ -219,9 +220,9 @@
             align-items: center;
             top: 10px;
             left: 10px;
-            background-color: rgba(255, 0, 0, 0.4);
+            background-color: rgba(239, 235, 235, 0.541);
             border-radius: 10px;
-            font-size: 15px;
+            font-size: 12px;
             padding: 10px;
         }
 
@@ -822,9 +823,9 @@
             <button disabled class="btn button-small-custom" id="user-list-button">
                 <i class="fas fa-users" style="color: #ffffff;"></i>
             </button>
-            <button disabled class="btn button-small-custom" id="user-chat-button">
+            <!-- <button disabled class="btn button-small-custom" id="user-chat-button">
                 <i class="fas fa-comment-dots" style="color: white;"></i>
-            </button>
+            </button> -->
             <button disabled class="btn button-small-custom" id="share-link-button">
                 <i class="far fa-share-square" style="color: white;"></i>
                 <span id="snackbar">Successfully Copied</span>
@@ -832,14 +833,15 @@
             <button class="btn button-small-custom" id="option-button">
                 <i class="fas fa-ellipsis-v" style="color: white;"></i>
                 <div id="option-menu" class="invisible">
-                    <ul>
-                        <li id="mute-all" style="font-size: 13px;">Mute All Participants</li>
+                    <ul id="all-option-menu">
+                        <!-- <li id="mute-all" style="font-size: 13px;">Mute All Participants</li> -->
+                        <li id="stay-tuned" style="font-size: 13px;">Stay Tuned For New Feature</li>
                     </ul>
                 </div>
             </button>
-            <!-- <button class="btn button-small-custom" id="console-log-button" style="color: white;">
+            <button class="btn button-small-custom" id="console-log-button" style="color: white;">
                 Log
-            </button> -->
+            </button>
         </div>
     </div>
 

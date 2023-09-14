@@ -28219,38 +28219,40 @@ const createAudioVisualizer = (track, id, appendTo) => {
     newElement.className = 'audio-visualizer'
     newElement.id = 'av-' + id
     const attachTo = document.getElementById(`td-${appendTo}`)
-    attachTo.appendChild(newElement)
-
-    const canvas = document.getElementById(`av-${id}`);
-    const ctx = canvas.getContext('2d');
-
-    // Access the microphone audio stream (replace with your stream source)
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 256;
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    let newTheAudio = new MediaStream([track])
-
-    const audioSource = audioContext.createMediaStreamSource(newTheAudio);
-    audioSource.connect(analyser);
-
-    // Function to draw the single audio bar
-    function drawBar() {
-        analyser.getByteFrequencyData(dataArray);
-
-        const barHeight = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
-        canvas.style.boxShadow = `inset 0 0 0 ${barHeight/10}px green, 0 0 0 ${barHeight/10}px green`
-        // console.log('- Volume : ', barHeight)
-        // ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // ctx.fillStyle = `rgb(${barHeight + 100}, 255, 100)`;
-        // ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight);
-
-        requestAnimationFrame(drawBar);
+    if (attachTo){
+        attachTo.appendChild(newElement)
+    
+        const canvas = document.getElementById(`av-${id}`);
+        const ctx = canvas.getContext('2d');
+    
+        // Access the microphone audio stream (replace with your stream source)
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        let newTheAudio = new MediaStream([track])
+    
+        const audioSource = audioContext.createMediaStreamSource(newTheAudio);
+        audioSource.connect(analyser);
+    
+        // Function to draw the single audio bar
+        function drawBar() {
+            analyser.getByteFrequencyData(dataArray);
+    
+            const barHeight = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
+            canvas.style.boxShadow = `inset 0 0 0 ${barHeight/10}px green, 0 0 0 ${barHeight/10}px green`
+            // console.log('- Volume : ', barHeight)
+            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // ctx.fillStyle = `rgb(${barHeight + 100}, 255, 100)`;
+            // ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight);
+    
+            requestAnimationFrame(drawBar);
+        }
+    
+        // Start drawing the single bar
+        drawBar();
     }
-
-    // Start drawing the single bar
-    drawBar();
 }
 
 // Starting Video Local
@@ -28457,7 +28459,7 @@ const getScreenSharing = async () => {
                     socket.emit('screen-sharing', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: key, isSharing: false, producerId: screenSharingProducer.id }))
                 }
                 // Closing Screen Sharing Producer
-                socket.emit('screen-sharing-producer', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: socket.id, isSharing: false, producerId: screenSharingProducer.id }))
+                socket.emit('screen-sharing-producer', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: socket.id, isSharing: false, producerId: screenSharingProducer.id, room: localStorage.getItem('room_id') }))
                 // Set Screen Sharing is False
                 isScreenSharing = false
                 // Change Layout To Normal Mode
@@ -28510,7 +28512,7 @@ const getScreenSharing = async () => {
             for (const key in producersDetails) {
                 socket.emit('screen-sharing', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: key, isSharing: false, producerId: screenSharingProducer.id }))
             }
-            socket.emit('screen-sharing-producer', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: socket.id, isSharing: false, producerId: screenSharingProducer.id }))
+            socket.emit('screen-sharing-producer', ({ videoProducerId: screenSharingProducer.id, audioProducerId: audioProducer.id, socketId: socket.id, isSharing: false, producerId: screenSharingProducer.id, room: localStorage.getItem('room_id') }))
             screenSharingParams = { params }
 
             screenSharingStreamsGlobal = null
@@ -28659,7 +28661,7 @@ const createSendTransport = () => {
             let buttonSwitchCamera = document.getElementById('user-switch-camera-button')
             // let buttonTurnOffCamera = document.getElementById('user-turn-on-off-camera-button')
             let buttonScreenShare = document.getElementById('user-screen-share-button')
-            let buttonChat = document.getElementById('user-chat-button')
+            // let buttonChat = document.getElementById('user-chat-button')
             let buttonShare = document.getElementById('share-link-button')
             let buttonUserList = document.getElementById('user-list-button')
             // Enabling Button When Producer Is Connecting
@@ -28676,7 +28678,7 @@ const createSendTransport = () => {
                 buttonSwitchCamera.removeAttribute('disabled', 'false')
                 // buttonTurnOffCamera.removeAttribute('disabled', 'false')
                 buttonScreenShare.removeAttribute('disabled', 'false')
-                buttonChat.removeAttribute('disabled', 'false')
+                // buttonChat.removeAttribute('disabled', 'false')
                 buttonShare.removeAttribute('disabled', 'false')
                 buttonUserList.removeAttribute('disabled', 'false')
             } 
@@ -28690,7 +28692,7 @@ const createSendTransport = () => {
                 buttonSwitchCamera.setAttribute('disabled', 'true')
                 // buttonTurnOffCamera.setAttribute('disabled', 'true')
                 buttonScreenShare.setAttribute('disabled', 'true')
-                buttonChat.setAttribute('disabled', 'true')
+                // buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
             } 
             const url = window.location.pathname;
@@ -28707,7 +28709,7 @@ const createSendTransport = () => {
                 buttonSwitchCamera.setAttribute('disabled', 'true')
                 // buttonTurnOffCamera.setAttribute('disabled', 'true')
                 buttonScreenShare.setAttribute('disabled', 'true')
-                buttonChat.setAttribute('disabled', 'true')
+                // buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
                 const newURL = window.location.origin + "/" + goTo;
                 window.location.href = newURL;
@@ -28722,7 +28724,7 @@ const createSendTransport = () => {
                 buttonSwitchCamera.setAttribute('disabled', 'true')
                 // buttonTurnOffCamera.setAttribute('disabled', 'true')
                 buttonScreenShare.setAttribute('disabled', 'true')
-                buttonChat.setAttribute('disabled', 'true')
+                // buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
                 // const newURL = window.location.origin + "/" + goTo;
                 // window.location.href = newURL;
@@ -28742,6 +28744,7 @@ const connectSendTransport = async () => {
 
     socket.emit('am-i-host', {socketId: socket.id, roomName: localStorage.getItem('room_id')}, (data) => {
         if (data.authority == 'Host'){
+            addMuteAllButton()
             document.getElementById('my-username').innerHTML = localStorage.getItem('username') + ' ( Host )'
             console.log('- Authority : ', data.authority)
             host = socket.id
@@ -28851,6 +28854,7 @@ socket.on('mute-all', (data) => {
 socket.on('change-host', ({newHost}) => {
     host = newHost
     lockedMic = false
+    addMuteAllButton()
 })
 
 // Mic Configuration
@@ -29127,6 +29131,11 @@ const getProducers = () => {
 
 // Create Video
 const createVideo = (remoteId, kind, track, username, micIcon, authority) => {
+    let checkConnection = document.getElementById('td-' + remoteId)
+    if (checkConnection){
+        console.log('- Reconnecting')
+        return
+    }
     const newElem = document.createElement('div')
     newElem.setAttribute('id', `td-${remoteId}`)
     let newUsername = username
@@ -29414,31 +29423,9 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
             },
         ]
 
-
-
-        // console.log("- Producer Socket : ", params.producerOwnerSocket, " - Producer Name : ", params.producerName, " - Kind : ", params.kind, " - Producer Id : ", params.id)
-
-
-
         if (!currentTemplate) {
             currentTemplate = 'user-video-container'
         }
-
-        console.log("- Producers Details : ", producersDetails)
-
-        // console.log("- Customer Transports : ", consumerTransports, " - Remote Producer Id : ", remoteProducerId, " - My Socket Id : ", socket.id, " - Username : ", params?.username)
-
-        // const newElem = document.createElement('div')
-        // newElem.setAttribute('id', `td-${remoteProducerId}`)
-
-        // if (params.kind == 'audio') {
-        //     newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
-        // } else {
-        //     newElem.setAttribute('class', currentTemplate)
-        //     newElem.innerHTML = '<img src="/assets/pictures/micOn.png" class="icons-mic" /><video id="' + remoteProducerId + '" autoplay class="user-video" ></video><div class="username">' + params?.username + '</div>'
-        // }
-
-        // videoContainer.appendChild(newElem)
 
         const { track } = consumer
 
@@ -29449,17 +29436,12 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
             // If Consumer State is Connected
             if (e == 'connected') {
                 // Check If User With 
-                let checkConnection = document.getElementById('td-' + remoteProducerId)
                 let check = false
                 
                 // Check if Video Is Screen Share
+                console.log('- Username : ', params?.username)
                 if (params.username) {
                     check = isScreenSharingType(params.username)
-                }
-                // Check If Its Reconnectiong Or Not
-                if (!check && (checkConnection || (allStream[params.producerOwnerSocket]?.video && allStream[params.producerOwnerSocket]?.audio))){
-                    console.log('Reconnecting : ', remoteProducerId)
-                    return
                 }
                 
                 // Make a List For Every User
@@ -29488,8 +29470,44 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                 }
 
                 // Fill All Stream Object With Audio Or Video Stream
-                if (!allStream[params.producerOwnerSocket][params.kind]) {
+                if (!allStream[params.producerOwnerSocket][params.kind] && !check) {
                     allStream[params.producerOwnerSocket][params.kind] = { track, id: remoteProducerId, username: params?.username, kind: params.kind, status: true, serverConsumerId: params.serverConsumerId }
+                }
+
+                // If It Is Audio Stream, Then Create Audio Element And Collect It To One Div
+                if (params.kind == 'audio') {
+                    let audioContainer = document.getElementById('audio-collection')
+                    const newElem = document.createElement('div')
+                    newElem.setAttribute('id', `td-${remoteProducerId}`)
+                    // If This Is Current User Id (It Will Running When Pagination is Active / User Is More Than Limited Per Page)
+                    if (remoteProducerId == 'current-user-audio') {
+                        // Get Audio Stream From Local
+                        let stream = store.getState()
+                        track = stream.localStream.getAudioTracks()[0]
+                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
+                    } else {
+                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
+                    }
+                    audioContainer.appendChild(newElem)
+                    document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
+                }
+
+                // Resuming Consumer Screen Sharing or Audio
+                if (check || params.kind == 'audio'){
+                    socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
+                }
+
+                if (check) {
+                    console.log('- Check : ', check)
+                    // If It Is, Add Screen Sharing Stream To All Stream Variable
+                    if (!allStream[params.producerOwnerSocket].screenSharing) {
+                        allStream[params.producerOwnerSocket].screenSharing = { track, id: remoteProducerId, username: params?.username, kind: 'screen-sharing' }
+                    }
+                    // Change to Screen Share Mode
+                    isScreenSharing = true
+                    changeLayout(true)
+                    createScreenSharing(track)
+                    screenSharingInfo = { socketId: params.producerOwnerSocket, producerId: params.producerId }
                 }
         
                 // Make An Initial Data Object For Every Details of Remote Id
@@ -29508,21 +29526,10 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                         producersDetails[params.producerOwnerSocket].name = params.producerName
                     }
                 } else {
-                    // Fill Producer Details With Audio/Video and Check if Video Is Screen Share Or Not
-                    // Checking If The Stream Is Screen Sharing
                     if (check) {
-                        // If It Is, Add Screen Sharing Stream To All Stream Variable
-                        if (!allStream[params.producerOwnerSocket].screenSharing) {
-                            allStream[params.producerOwnerSocket].screenSharing = { track, id: remoteProducerId, username: params?.username, kind: 'screen-sharing' }
-                        }
                         // And Add It To Producer Details
                         if (!producersDetails[params.producerOwnerSocket].screenSharing) {
-                            // Change to Screen Share Mode
-                            isScreenSharing = true
-                            changeLayout(true)
                             producersDetails[params.producerOwnerSocket].screenSharing = params.producerId
-                            createScreenSharing(track)
-                            screenSharingInfo = { socketId: params.producerOwnerSocket, producerId: params.producerId }
                         }
                     }
 
@@ -29576,36 +29583,13 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     // recordedStream.addTrack(audioDestination.stream.getAudioTracks()[0]);
                 }
 
-                // If It Is Audio Stream, Then Create Audio Element And Collect It To One Div
-                if (params.kind == 'audio') {
-                    let audioContainer = document.getElementById('audio-collection')
-                    const newElem = document.createElement('div')
-                    newElem.setAttribute('id', `td-${remoteProducerId}`)
-                    // If This Is Current User Id (It Will Running When Pagination is Active / User Is More Than Limited Per Page)
-                    if (remoteProducerId == 'current-user-audio') {
-                        // Get Audio Stream From Local
-                        let stream = store.getState()
-                        track = stream.localStream.getAudioTracks()[0]
-                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
-                    } else {
-                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
-                    }
-                    audioContainer.appendChild(newElem)
-                    document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
-                }
-
                 if (!check && allStream[params.producerOwnerSocket].video && allStream[params.producerOwnerSocket].audio){
-                    let audioVisualTrack
-                    let videoId
-                    let audioId
                     for (const firstKey in allStream){
                         if (firstKey == params.producerOwnerSocket){
-                            audioVisualTrack = allStream[firstKey].audio.track
-                            videoId = allStream[firstKey].video.id
-                            audioId = allStream[firstKey].audio.id
+                            createAudioVisualizer(allStream[firstKey].audio.track, allStream[firstKey].audio.id, allStream[firstKey].video.id)
+                            break
                         }
                     }
-                    createAudioVisualizer(audioVisualTrack, audioId, videoId)
                 }
         
                 // If Its Not In Screen Share Mode To Adjust Template
@@ -29622,16 +29606,6 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
         
                 // Resuming Consumer
                 if (params.kind == 'video' && !check && ((currentPage == 0 && totalUsers <= limitedPerPage) || (totalUsers >= limitedPerPage && totalPage == currentPage + 1 && currentPage != 0))){
-                    socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
-                }
-
-                // Resuming Audio
-                if (params.kind == 'audio'){
-                    socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
-                }
-
-                // Resuming Consumer Screen Sharing
-                if (check){
                     socket.emit('consumer-resume', { serverConsumerId: params.serverConsumerId })
                 }
             }
@@ -29935,7 +29909,6 @@ const timerLayout = (trigger) => {
         container.setAttribute('class', 'record-timer')
         container.id = "timer";
         let timerParagraph = document.createElement("span");
-        timerParagraph.textContent = "On Recording : ";
         let span = document.createElement("span");
         span.id = "realtime-timer";
         span.textContent = '00:00:00'
@@ -30099,20 +30072,20 @@ hangUpButton.addEventListener('click', () => {
 })
 
 // Chat Button
-const chatButton = document.getElementById('user-chat-button')
-chatButton.addEventListener('click', () => {
-    const chatContainer = document.getElementById('chat-container')
-    if (chatContainer.className == 'invisible') {
-        chatButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
-        chatContainer.className = 'visible'
-    }
-    else {
-        chatContainer.className = 'invisible'
-        chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
-    }
-})
+// const chatButton = document.getElementById('user-chat-button')
+// chatButton.addEventListener('click', () => {
+//     const chatContainer = document.getElementById('chat-container')
+//     if (chatContainer.className == 'invisible') {
+//         chatButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
+//         chatContainer.className = 'visible'
+//     }
+//     else {
+//         chatContainer.className = 'invisible'
+//         chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+//     }
+// })
 
-// Chat Button
+// User List Button
 const userListButton = document.getElementById('user-list-button')
 userListButton.addEventListener('click', () => {
     const userListContainer = document.getElementById('user-container')
@@ -30166,6 +30139,36 @@ function dragElement(elmnt) {
 const optionButton = document.getElementById("option-button");
 const optionMenu = document.getElementById("option-menu");
 
+const addMuteAllButton = () => {
+    let allOptionMenu = document.getElementById('all-option-menu')
+    const newElement = document.createElement('li')
+    newElement.id = 'mute-all'
+    newElement.style.fontSize = '13px'
+    newElement.innerHTML = "Mute All Participants"
+    allOptionMenu.appendChild(newElement)
+    console.log('- All Option Menu : ', allOptionMenu)
+    newElement.addEventListener('click', () => {
+        if (host == socket.id && newElement.innerHTML == 'Mute All Participants'){
+            isMutedAll = true
+            muteAllParticipants()
+            newElement.innerHTML = 'Unmute All Participants'
+        } else if (host == socket.id && newElement.innerHTML == 'Unmute All Participants'){
+            isMutedAll = false
+            unlockAllMic()
+            newElement.innerHTML = 'Mute All Participants'
+        } else {
+            let ae = document.getElementById("alert-error");
+            ae.className = "show";
+            ae.innerHTML = `You're Not Host`
+            // Show Warning
+            setTimeout(() => { 
+                ae.className = ae.className.replace("show", ""); 
+                ae.innerHTML = ``
+            }, 3000);
+        }
+    })
+}
+
 // Function to show the option menu
 function showOptionMenu() {
     optionMenu.className = "visible";
@@ -30213,27 +30216,27 @@ socket.on('unlock-mic-all', (data) => {
 
 
 // Mute All
-const muteAllButton = document.getElementById('mute-all')
-muteAllButton.addEventListener('click', () => {
-    if (host == socket.id && muteAllButton.innerHTML == 'Mute All Participants'){
-        isMutedAll = true
-        muteAllParticipants()
-        muteAllButton.innerHTML = 'Unmute All Participants'
-    } else if (host == socket.id && muteAllButton.innerHTML == 'Unmute All Participants'){
-        isMutedAll = false
-        unlockAllMic()
-        muteAllButton.innerHTML = 'Mute All Participants'
-    } else {
-        let ae = document.getElementById("alert-error");
-        ae.className = "show";
-        ae.innerHTML = `You're Not Host`
-        // Show Warning
-        setTimeout(() => { 
-            ae.className = ae.className.replace("show", ""); 
-            ae.innerHTML = ``
-        }, 3000);
-    }
-})
+// const muteAllButton = document.getElementById('mute-all')
+// muteAllButton.addEventListener('click', () => {
+//     if (host == socket.id && muteAllButton.innerHTML == 'Mute All Participants'){
+//         isMutedAll = true
+//         muteAllParticipants()
+//         muteAllButton.innerHTML = 'Unmute All Participants'
+//     } else if (host == socket.id && muteAllButton.innerHTML == 'Unmute All Participants'){
+//         isMutedAll = false
+//         unlockAllMic()
+//         muteAllButton.innerHTML = 'Mute All Participants'
+//     } else {
+//         let ae = document.getElementById("alert-error");
+//         ae.className = "show";
+//         ae.innerHTML = `You're Not Host`
+//         // Show Warning
+//         setTimeout(() => { 
+//             ae.className = ae.className.replace("show", ""); 
+//             ae.innerHTML = ``
+//         }, 3000);
+//     }
+// })
 
 // Pagination Button Right
 // const rightPagination = document.getElementById('slide-right')
@@ -30314,54 +30317,55 @@ document.addEventListener('mousemove', () => {
 
 
 // Console Log Button
-// const consoleLogButton = document.getElementById('console-log-button')
-// consoleLogButton.addEventListener('click', () => {
-//     consumerTransports.forEach((transport) => {
-//         transport.consumer.getStats().then((stat) => {
-//             [...stat.entries()].forEach((data, index) => {
-//                 if (index == [...stat.entries()].length - 1) {
-//                     console.log('- Data : ', data)
-//                 }
-//             })
-//             stat.forEach((report) => {
-//                 if (report.type === 'inbound-rtp' && report.kind === 'video') {
-//                     console.log('- Received Bit Rate : ', report)
-//                 }
-//             })
-//             console.log('- Stat : ', stat)
-//         })
-//     })
-//     socket.emit('get-peers', (consumerTransports))
-//     console.log("- Producer : ", producerTransport)
-//     console.log("- Video Producer : ", videoProducer)
-//     producerTransport.getStats().then((data) => {
-//         console.log(data)
-//     })
-//     console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
-//     console.log("- Producer Details : ", producersDetails)
-//     console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
-//     console.log("- Screen Sharing Producers : ", screenSharingProducer)
-//     console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
+const consoleLogButton = document.getElementById('console-log-button')
+consoleLogButton.addEventListener('click', () => {
+    // consumerTransports.forEach((transport) => {
+    //     transport.consumer.getStats().then((stat) => {
+    //         [...stat.entries()].forEach((data, index) => {
+    //             if (index == [...stat.entries()].length - 1) {
+    //                 console.log('- Data : ', data)
+    //             }
+    //         })
+    //         stat.forEach((report) => {
+    //             if (report.type === 'inbound-rtp' && report.kind === 'video') {
+    //                 console.log('- Received Bit Rate : ', report)
+    //             }
+    //         })
+    //         console.log('- Stat : ', stat)
+    //     })
+    // })
+    // socket.emit('get-peers', (consumerTransports))
+    // console.log("- Producer : ", producerTransport)
+    // console.log("- Video Producer : ", videoProducer)
+    // producerTransport.getStats().then((data) => {
+    //     console.log(data)
+    // })
+    // console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
+    // console.log("- Producer Details : ", producersDetails)
+    // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
+    // console.log("- Screen Sharing Producers : ", screenSharingProducer)
+    // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
 
-//     let allAudio = []
+    // let allAudio = []
 
-//     for (const key in allStream){
-//         allAudio.push(allStream[key].audio)
-//     }
+    // for (const key in allStream){
+    //     allAudio.push(allStream[key].audio)
+    // }
 
-//     let allAudioFlat = allAudio.flatMap(stream => stream);
-//     console.log('- All Audio Flat : ', allAudioFlat)
+    // let allAudioFlat = allAudio.flatMap(stream => stream);
+    // console.log('- All Audio Flat : ', allAudioFlat)
 
-//     console.log('- All Stream : ', allStream)
-//     socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
-//         console.log(data)
-//     })
+    // console.log('- All Stream : ', allStream)
+    socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
+        console.log(data)
+    })
 
-//     console.log('- Total User : ', totalUsers)
-//     let stream = store.getState()
-//     console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
-//     console.log('- Host : ', host)
-// })
+    // console.log('- Total User : ', totalUsers)
+    // let stream = store.getState()
+    // console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
+    // console.log('- Host : ', host)
+    console.log('- All Stream : ', allStream)
+})
 
 },{"./store":85,"mediasoup-client":62,"recordrtc":69,"socket.io-client":75}],85:[function(require,module,exports){
 let state = {
