@@ -1342,20 +1342,24 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 
                 // If It Is Audio Stream, Then Create Audio Element And Collect It To One Div
                 if (params.kind == 'audio') {
-                    let audioContainer = document.getElementById('audio-collection')
-                    const newElem = document.createElement('div')
-                    newElem.setAttribute('id', `td-${remoteProducerId}`)
-                    // If This Is Current User Id (It Will Running When Pagination is Active / User Is More Than Limited Per Page)
-                    if (remoteProducerId == 'current-user-audio') {
-                        // Get Audio Stream From Local
-                        let stream = store.getState()
-                        track = stream.localStream.getAudioTracks()[0]
-                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
-                    } else {
-                        newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
+                    let checkAudio = document.getElementById(`td-${remoteProducerId}`)
+                    let checkAudio2 = document.getElementById(remoteProducerId)
+                    if (!checkAudio){
+                        let audioContainer = document.getElementById('audio-collection')
+                        const newElem = document.createElement('div')
+                        newElem.setAttribute('id', `td-${remoteProducerId}`)
+                        // If This Is Current User Id (It Will Running When Pagination is Active / User Is More Than Limited Per Page)
+                        if (remoteProducerId == 'current-user-audio') {
+                            // Get Audio Stream From Local
+                            let stream = store.getState()
+                            track = stream.localStream.getAudioTracks()[0]
+                            newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
+                        } else {
+                            newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
+                        }
+                        audioContainer.appendChild(newElem)
+                        document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
                     }
-                    audioContainer.appendChild(newElem)
-                    document.getElementById(remoteProducerId).srcObject = new MediaStream([track])
                 }
 
                 // Resuming Consumer Screen Sharing or Audio

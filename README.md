@@ -213,7 +213,7 @@ socket.on('joinRoom', (data) => {
 
 ## Bug Log
 ### 0.1.0
-- Host title is not displayed when host is changing
+- Host title is not displayed when host is changing (&#x2713;)
 ### 0.1.1
 - Bug on socket.on('mic-config', .....) audio track is null (&#x2713;)
 - Bug when append video visualization on screensharing mode is error, sometime screensharing is not displayed or audio is not working properly (A is screen sharing mode and new user is joining) (&#x2713;)
@@ -238,7 +238,7 @@ socket.on('joinRoom', (data) => {
 ### 0.1.0
 - Adding unmute and mute all participants
 - Lock mic when host mute all participants
-- Host title will chane to the erliest participant that joined the room
+- Host title will change to the earliest participant that joined the room
 - If Host is hanging up/leave room, participant who is join after host will be the new host
 - Router is closed when there is no one in the room
 ### 0.1.1
