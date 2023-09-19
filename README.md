@@ -218,6 +218,14 @@ socket.on('joinRoom', (data) => {
 - Bug on socket.on('mic-config', .....) audio track is null (&#x2713;)
 - Bug when append video visualization on screensharing mode is error, sometime screensharing is not displayed or audio is not working properly (A is screen sharing mode and new user is joining) (&#x2713;)
 - Bug when screen share mode sometime its user video changed to screensharing (&#x2713;)
+### 0.1.3
+- Screen sharing video fps is not good / lagging
+- Sometimes user mic is not working properly
+- Bug in switch camera (Not sure) (Reported by Mr. Yoga)
+- Bug mute-all button is appending even though current user is not Host (&#x2713;)
+- Bug in mic icons (&#x2713;)
+- Displayed video format sometimes is wrong, example, if there is 3 users in room, the video class name should be container-3 but its container 4 (Testing is needed) (&#x2713;)
+- Error when screensharing producer is reconnecting  (&#x2713;) (Testing is needed) (Reported by Mr. Sabdho)
 
 ## Test Log
 ### 0.1.0
@@ -231,6 +239,9 @@ socket.on('joinRoom', (data) => {
 ### 0.1.1
 - Repetitive when user A and B in screen sharing mode and new user joining room to check the audio is normal and screen sharing mode is displaying properly  (&#x2713;)
 - Test host title text on username is displayed or not, when host title changing constantly (&#x2713;)
+
+### 0.1.2
+- Audio feedback bug
 
 ## Change Log
 ### 0.0.1
@@ -252,9 +263,36 @@ socket.on('joinRoom', (data) => {
 - Fixed bug screensharing mode and user camera sometime switched when other user leaving room
 - Adding padding to name tag
 - Change recording text and background
+### 0.1.3
+- Fixed bug audio feedback
+### 0.2.1
+- Lobby and Home UI improvement
+- Fixed bug when screensharing stream producer is reconnecting
+- Fixed bug on counting total users that cause displayed wrong class video
+- Fixed bug mic icons sometimes not working properly
+- Fixed bug mute-all button option displayed on participants
+- Added feature turn on / off camera
+- Added generate random id
+
 
 ## Note
+### Testing (9-15-2023) (v-0.1.2)
+- Agak jeda
+- Sharescreen agak jeda
+- Audio ada yang tidak masuk
+- Handle rekoneksi jangan ke lobby
+- Bug di mute-all tombol
+- Lagging karena jaringan?
+- Bug di switch camera?
+- Bug di mic-icons
+- Tampilan layout kadang tidak sesuai, misal ada user 4 join, yang harusnya menggunakan kelas container-4 malah container-12
+- Screen sharing saat reconnecting jadi double. perlu dihandel
+
+## Keterangan
 - Font recording disesuaikan (&#x2713;)
 - Nama dikasih jarak (&#x2713;)
 - Fitur unmute all participant hanya ada di host (&#x2713;)
+- Mirrror video (&#x2713;)
 - Tampilan home dan lobby perlu improvement
+- Tampilan mobile browser
+- Matikan camera hanya mempause video

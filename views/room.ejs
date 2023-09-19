@@ -62,6 +62,10 @@
         }
 
         .user-video-container-screen-sharing {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: black;
             margin: 10px;
             height: 20%;
             width: 40%;
@@ -83,6 +87,9 @@
 
         .user-video-container {
             margin: 10px;
+            display: flex;
+            justify-content: center;
+            background-color: black;
             height: 80%;
             width: 45%;
             position: relative;
@@ -90,6 +97,9 @@
 
         .user-video-container-3 {
             margin: 10px;
+            display: flex;
+            justify-content: center;
+            background-color: black;
             height: 70%;
             width: 30%;
             position: relative;
@@ -97,6 +107,9 @@
 
         .user-video-container-6 {
             margin: 10px;
+            display: flex;
+            justify-content: center;
+            background-color: black;
             height: 45%;
             width: 30%;
             position: relative;
@@ -104,6 +117,9 @@
 
         .user-video-container-8 {
             margin: 10px;
+            display: flex;
+            justify-content: center;
+            background-color: black;
             height: 40%;
             width: 23%;
             position: relative;
@@ -111,6 +127,9 @@
 
         .user-video-container-12 {
             margin: 10px;
+            display: flex;
+            justify-content: center;
+            background-color: black;
             height: 30%;
             width: 20%;
             position: relative;
@@ -118,9 +137,13 @@
 
         .user-video {
             width: 100%;
-            height: 100%;
-            object-fit: fill;
+            max-height: 100%;
+            /* object-fit: fill; */
             border-radius: 10px;
+            transform: rotateY(180deg);
+            -webkit-transform:rotateY(180deg); /* Safari and Chrome */
+            -moz-transform:rotateY(180deg); /* Firefox */
+            z-index: 2;
         }
 
         .username {
@@ -132,6 +155,7 @@
             font-size: 11px;
             background: rgba(0, 0, 0, 0.4);
             padding: 4px;
+            z-index: 10;
         }
 
         .icons-mic {
@@ -685,12 +709,13 @@
 
         .audio-visualizer {
             position: absolute;
-            background-color: #333;
+            background-color: #33333300;
             width: 20px;
             height: 20px;
             right: 10px;
             top: 10px;
             border-radius: 50%;
+            z-index: 999;
         }
 
         #option-menu {
@@ -715,6 +740,20 @@
 
         #option-menu > ul > li:hover {
             background-color: rgba(68, 71, 74, 1);
+        }
+
+        .video-off {
+            z-index: 3;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
+
+        .video-on {
+            width: 100%;
+            z-index: 0;
+            position: absolute;
+            display: none;
         }
         </style>
 </head>
@@ -795,6 +834,7 @@
                         <img src="/assets/pictures/micOn.png" class="mic-image" id="local-mic" />
                     </div>
                     <video id="local-video" poster="/assets/pictures/unknown.jpg" preload="auto" autoplay class="user-video" muted></video>
+                    <img src="/assets/pictures/unknown.jpg" class="video-on" id="img-current-user-video"/>
                     <div class="username" id="my-username"></div>
                 </div>
                 <div class="screen-sharing-container"></div>
@@ -807,9 +847,9 @@
             <button disabled class="btn button-small-custom" id="user-switch-camera-button">
                 <img src="/assets/pictures/switchCamera.png" />
             </button>
-            <!-- <button disabled class="button-small-custom" id="user-turn-on-off-camera-button">
+            <button disabled class="btn button-small-custom" id="user-turn-on-off-camera-button">
                 <i class="fas fa-video" style="color: #ffffff;" id="turn-on-off-camera-icons"></i>
-            </button> -->
+            </button>
             <button disabled class="btn button-small-custom" id="user-screen-share-button">
                 <img src="/assets/pictures/share.png" />
             </button>
@@ -839,9 +879,9 @@
                     </ul>
                 </div>
             </button>
-            <!-- <button class="btn button-small-custom" id="console-log-button" style="color: white;">
+            <button class="btn button-small-custom" id="console-log-button" style="color: white;">
                 Log
-            </button> -->
+            </button>
         </div>
     </div>
 

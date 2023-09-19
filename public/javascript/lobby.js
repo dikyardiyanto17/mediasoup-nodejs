@@ -157,6 +157,12 @@ videoOptions.addEventListener("click", (e) => {
 
 const usernameForm = document.getElementById('username')
 usernameForm.addEventListener('input', (e) => {
+    let buttonSubmit = document.getElementById('submit-button')
+    if (!e.target.value){
+        buttonSubmit.style.backgroundColor = 'grey'
+    } else {
+        buttonSubmit.style.backgroundColor = '#2c99ed'
+    }
     localStorage.setItem('username', e.target.value);
 })
 
