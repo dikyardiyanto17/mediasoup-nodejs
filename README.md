@@ -226,6 +226,8 @@ socket.on('joinRoom', (data) => {
 - Bug in mic icons (&#x2713;)
 - Displayed video format sometimes is wrong, example, if there is 3 users in room, the video class name should be container-3 but its container 4 (Testing is needed) (&#x2713;)
 - Error when screensharing producer is reconnecting  (&#x2713;) (Testing is needed) (Reported by Mr. Sabdho)
+### 0.2.1
+- Camera indicator is still flashing even though camera is off
 
 ## Test Log
 ### 0.1.0
@@ -267,13 +269,16 @@ socket.on('joinRoom', (data) => {
 - Fixed bug audio feedback
 ### 0.2.1
 - Lobby and Home UI improvement
+- Displayed video from stretch to aspect ratio
 - Fixed bug when screensharing stream producer is reconnecting
 - Fixed bug on counting total users that cause displayed wrong class video
 - Fixed bug mic icons sometimes not working properly
 - Fixed bug mute-all button option displayed on participants
 - Added feature turn on / off camera
 - Added generate random id
-
+### 0.2.2
+- Changing design in lobby
+- Stop track when camera is off so indicator is turning off
 
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)

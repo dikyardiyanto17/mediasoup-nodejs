@@ -8,6 +8,9 @@ const parts = url.split('/');
 const roomName = parts[2];
 const goTo = 'room/' + roomName;
 let isReady = {video: false, audio: false}
+let isAudioActive = true
+let isVideoActive = true
+let videoImage = document.getElementById('video-image')
 
 const init = async () => {
     try {
@@ -33,6 +36,7 @@ const init = async () => {
 const micOptions = document.getElementById('mic-options')
 const getMyMic = async () => {
     try {
+        localStorage.setItem('is_audio_active', true)
         let audioDevices = (await navigator.mediaDevices.enumerateDevices()).filter(
             (device) => device.kind === "audioinput"
         );
@@ -49,6 +53,14 @@ const getMyMic = async () => {
         isReady.audio = true
     
         if (isReady.audio && isReady.video){
+            let audioButton = document.getElementById('select-audio-button')
+            let videoButton = document.getElementById('select-video-button')
+            let videoDropdownButton = document.getElementById('dropdownMenuButton-video')
+            let audioDropdownButton = document.getElementById('dropdownMenuButton-audio')
+            videoDropdownButton.removeAttribute('disabled')
+            audioDropdownButton.removeAttribute('disabled')
+            videoButton.removeAttribute('disabled')
+            audioButton.removeAttribute('disabled')
             let submitButton = document.getElementById('submit-button')
             submitButton.removeAttribute('disabled')
         }
@@ -73,6 +85,12 @@ const getMyMic = async () => {
 
 micOptions.addEventListener("click", (e) => {
     if (e.target.tagName === "P") {
+        let audioButton = document.getElementById('select-audio-button')
+        let audioIcon = document.getElementById('select-audio')
+        audioIcon.className = 'fas fa-microphone'
+        isAudioActive = true
+        audioButton.style.backgroundColor = ''
+
         const clickedValue = e.target.getAttribute("value");
         const selectedVideoDevices = localStorage.getItem('selectedVideoDevices')
         let config = {
@@ -81,9 +99,11 @@ micOptions.addEventListener("click", (e) => {
         }
         localStorage.setItem("selectedAudioDevices", clickedValue)
         navigator.mediaDevices.getUserMedia(config).then((stream) => {
-            localVideo.srcObject.getTracks().forEach((track) => {
-                track.stop();
-            });
+            if (localVideo.srcObject){
+                localVideo.srcObject.getTracks().forEach((track) => {
+                    track.stop();
+                });
+            }
             localVideo.srcObject = null;
             store.setLocalStream(stream)
             localVideo.srcObject = stream;
@@ -94,12 +114,12 @@ micOptions.addEventListener("click", (e) => {
 const videoOptions = document.getElementById('camera-options')
 const getMyDevices = async (config) => {
     try {
+        localStorage.setItem('is_video_active', true)
         let videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter(
             (device) => device.kind === "videoinput"
         );
     
         videoDevices.forEach((video, index) => {
-            // console.log('- Video : ', index, " - Total : ", videoDevices.length)
             let newElement = document.createElement("p");
             newElement.className = "dropdown-item dropdown-select-options";
             newElement.textContent = video.label;
@@ -111,6 +131,14 @@ const getMyDevices = async (config) => {
         isReady.video = true
     
         if (isReady.audio && isReady.video){
+            let audioButton = document.getElementById('select-audio-button')
+            let videoButton = document.getElementById('select-video-button')
+            let videoDropdownButton = document.getElementById('dropdownMenuButton-video')
+            let audioDropdownButton = document.getElementById('dropdownMenuButton-audio')
+            videoDropdownButton.removeAttribute('disabled')
+            audioDropdownButton.removeAttribute('disabled')
+            videoButton.removeAttribute('disabled')
+            audioButton.removeAttribute('disabled')
             let submitButton = document.getElementById('submit-button')
             submitButton.removeAttribute('disabled')
         }
@@ -135,6 +163,11 @@ const getMyDevices = async (config) => {
 
 videoOptions.addEventListener("click", (e) => {
     if (e.target.tagName === "P") {
+        let videoButton = document.getElementById('select-video-button')
+        let videoIcon = document.getElementById('select-video')
+        videoIcon.className = 'fas fa-video'
+        isAudioActive = true
+        videoButton.style.backgroundColor = ''
         const clickedValue = e.target.getAttribute("value");
         const selectedAudioDevices = localStorage.getItem('selectedAudioDevices')
         let config = {
@@ -144,9 +177,12 @@ videoOptions.addEventListener("click", (e) => {
 
         localStorage.setItem('selectedVideoDevices', clickedValue)
         navigator.mediaDevices.getUserMedia(config).then((stream) => {
-            localVideo.srcObject.getTracks().forEach((track) => {
-                track.stop();
-            });
+            if (localVideo.srcObject){
+                localVideo.srcObject.getTracks().forEach((track) => {
+                    track.stop();
+                });
+            }
+            videoImage.className = 'video-on'
             localVideo.srcObject = null
             store.setLocalStream(stream)
             localVideo.srcObject = stream;
@@ -190,7 +226,176 @@ joinRoom.addEventListener('submit', (e) => {
 
 });
 
+let audioButton = document.getElementById('select-audio-button')
+audioButton.addEventListener('click', (e) => {
+    let audioIcon = document.getElementById('select-audio')
+    if (isAudioActive){
+        audioButton.style.backgroundColor = 'red'
+        localStorage.setItem('is_audio_active', false)
+        isAudioActive = false
+        audioIcon.className = 'fas fa-microphone-slash'
+        if (isVideoActive){
+            const selectedVideoDevices = localStorage.getItem('selectedVideoDevices')
+            let config = {
+                video: { deviceId: { exact: selectedVideoDevices } }
+            }
+            navigator.mediaDevices.getUserMedia(config).then((stream) => {
+                if (localVideo.srcObject){
+                    localVideo.srcObject.getTracks().forEach((track) => {
+                        track.stop();
+                    });
+                }
+                videoImage.className = 'video-on'
+                localVideo.srcObject = null;
+                store.setLocalStream(stream)
+                localVideo.srcObject = stream;
+            })
+        } else {
+            if (localVideo.srcObject){
+                localVideo.srcObject.getTracks().forEach((track) => {
+                    track.stop();
+                });
+            }
+            videoImage.className = 'video-off'
+            localVideo.srcObject = null;
+            store.setLocalStream(null)
+        }
+    } else {
+        audioButton.style.backgroundColor = ''
+        localStorage.setItem('is_audio_active', true)
+        isAudioActive = true
+        audioIcon.className = 'fas fa-microphone'
+        if (isVideoActive){
+            const selectedVideoDevices = localStorage.getItem('selectedVideoDevices')
+            const selectedAudioDevices = localStorage.getItem('selectedAudioDevices')
+            let config = {
+                audio: { deviceId: { exact: selectedAudioDevices } },
+                video: { deviceId: { exact: selectedVideoDevices } }
+            }
+            navigator.mediaDevices.getUserMedia(config).then((stream) => {
+                if (localVideo.srcObject){
+                    localVideo.srcObject.getTracks().forEach((track) => {
+                        track.stop();
+                    });
+                }
+                videoImage.className = 'video-on'
+                localVideo.srcObject = null;
+                store.setLocalStream(stream)
+                localVideo.srcObject = stream;
+            })
+        } else {
+            const selectedAudioDevices = localStorage.getItem('selectedAudioDevices')
+            let config = {
+                audio: { deviceId: { exact: selectedAudioDevices } }
+            }
+            navigator.mediaDevices.getUserMedia(config).then((stream) => {
+                if (localVideo.srcObject){
+                    localVideo.srcObject.getTracks().forEach((track) => {
+                        track.stop();
+                    });
+                }
+                videoImage.className = 'video-off'
+                localVideo.srcObject = null;
+                store.setLocalStream(stream)
+                localVideo.srcObject = stream;
+            })
+        }
+    }
+})
 
+let videoButton = document.getElementById('select-video-button')
+videoButton.addEventListener('click', (e) => {
+    let videoIcon = document.getElementById('select-video')
+    if (isVideoActive){
+        videoButton.style.backgroundColor = 'red'
+        localStorage.setItem('is_video_active', false)
+        isVideoActive = false
+        videoIcon.className = 'fas fa-video-slash'
+        if (isAudioActive){
+            const selectedAudioDevices = localStorage.getItem('selectedAudioDevices')
+            let config = {
+                audio: { deviceId: { exact: selectedAudioDevices } }
+            }
+            navigator.mediaDevices.getUserMedia(config).then((stream) => {
+                if (localVideo.srcObject){
+                    localVideo.srcObject.getTracks().forEach((track) => {
+                        track.stop();
+                    });
+                }
+                videoImage.className = 'video-off'
+                localVideo.srcObject = null;
+                store.setLocalStream(stream)
+                localVideo.srcObject = stream;
+            })
+        } else {
+            if (localVideo.srcObject){
+                localVideo.srcObject.getTracks().forEach((track) => {
+                    track.stop();
+                });
+            }
+            videoImage.className = 'video-off'
+            localVideo.srcObject = null;
+            store.setLocalStream(null)
+        }
+    } else {
+        videoButton.style.backgroundColor = ''
+        localStorage.setItem('is_video_active', true)
+        isVideoActive = true
+        videoIcon.className = 'fas fa-video'
+        if (isAudioActive){
+            const selectedVideoDevices = localStorage.getItem('selectedVideoDevices')
+            const selectedAudioDevices = localStorage.getItem('selectedAudioDevices')
+            let config = {
+                audio: { deviceId: { exact: selectedAudioDevices } },
+                video: { deviceId: { exact: selectedVideoDevices } }
+            }
+            navigator.mediaDevices.getUserMedia(config).then((stream) => {
+                if (localVideo.srcObject){
+                    localVideo.srcObject.getTracks().forEach((track) => {
+                        track.stop();
+                    });
+                }
+                videoImage.className = 'video-on'
+                localVideo.srcObject = null;
+                store.setLocalStream(stream)
+                localVideo.srcObject = stream;
+            })
+        } else {
+            const selectedVideoDevices = localStorage.getItem('selectedVideoDevices')
+            let config = {
+                video: { deviceId: { exact: selectedVideoDevices } }
+            }
+            navigator.mediaDevices.getUserMedia(config).then((stream) => {
+                if (localVideo.srcObject){
+                    localVideo.srcObject.getTracks().forEach((track) => {
+                        track.stop();
+                    });
+                }
+                videoImage.className = 'video-on'
+                localVideo.srcObject = null;
+                store.setLocalStream(stream)
+                localVideo.srcObject = stream;
+            })
+        }
+    }
+})
+let buttonSubmitHover = document.getElementById('submit-button')
+let triggerInput = document.getElementById('username')
+buttonSubmitHover.addEventListener('mouseover', (e) => {
+    console.log(triggerInput.value)
+    if (!triggerInput.value){
+        buttonSubmitHover.style.backgroundColor = 'red'
+    } else {
+        buttonSubmitHover.style.backgroundColor = 'green'
+    }
+})
+buttonSubmitHover.addEventListener('mouseout', (e) => {
+    if (!triggerInput.value){
+        buttonSubmitHover.style.backgroundColor = 'grey'
+    } else {
+        buttonSubmitHover.style.backgroundColor = '#2c99ed'
+    }
+})
 init()
 },{"./store":2}],2:[function(require,module,exports){
 let state = {

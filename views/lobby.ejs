@@ -21,7 +21,9 @@
             width: 100vw;
             height: 100vh;
             display: flex;
-            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            background-color: #111111;
         }
 
         .left-bar {
@@ -55,10 +57,11 @@
         }
 
         .input-custom {
-            color: black !important;
-            background-color: transparent;
+            color: black;
+            background-color: #1E1E1E;
             border: none;
             opacity: 0.85;
+            width: 100% !important;
         }
 
         .input-custom:focus {
@@ -68,25 +71,17 @@
 
         .button-custom {
             width: 100%;
-            height: 45px;
-            margin: 0px;
-            border: none;
             color: white;
             background-color: grey;
             border-radius: 0px 0px 5px 5px !important;
             transition: 0.3s;
-        }
-
-        .button-custom:hover {
-            font-size: 15px;
-            background-color: #2fdd18;
-            color: white;
-            border-color: #2fdd18;
+            border-color: transparent !important;
         }
 
         .dropdown-container {
             display: flex;
             justify-content: center;
+            width: 100%;
         }
 
         .dropdown-select-options{
@@ -95,8 +90,8 @@
 
         .user-video-container {
             margin: 10px;
-            height: 80%;
-            width: 60%;
+            height: 75%;
+            width: 50%;
             position: relative;
             background-color: black;
         }
@@ -176,6 +171,52 @@
             font-size: 20px;
             font-weight: bold;
         }
+
+        .custom-margin {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
+        .dropdown-custom {
+            width: 50%;
+            display: flex;
+        }
+        .dropdown-custom > button {
+            border-radius: 0 !important;
+        }
+        .dropdown-button-custom {
+            width: 100%;
+            background-color: #2B2B2B;
+        }
+        .video-on {
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            display: none;
+        }
+        .video-off {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            object-fit: fill;
+        }
+        .content-container {
+            position: relative;
+            width: 50%;
+            height: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .join-form {
+            width: 50%;
+        }
+        .edit-background-button {
+            background-color: #2B2B2B;
+        }
     </style>
 </head>
 
@@ -183,40 +224,39 @@
     <div class="full-container">
         <span id="alert-username">Enter Your Name!</span>
         <span id="alert-error"></span>
-        <section class="left-bar">
-            <img class="icons-meet" src="/assets/pictures/icons-meeting.png"/>
-            <form id="join-room">
-                <p class="text-content">Ready to Join?</p>
-                <div class="input-wrap">
-                    <input type="text" class="input-custom" placeholder="Enter Your Name..." id="username" style="color: white;" />
-                </div>
-                <div class="dropdown-container">
-                    <div class="dropdown m-2">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <!-- <i class="fas fa-microphone"></i> -->
-                            <i class="fas fa-spinner fa-pulse" id="select-audio"></i>
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="mic-options">
-                        </div>
-                    </div>
-                    <div class="dropdown m-2">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <!-- <i class="fas fa-video"></i> -->
-                            <i class="fas fa-spinner fa-pulse" id="select-video"></i>
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="camera-options">
-                        </div>
-                    </div>
-                </div>
-                <button type="submit" class="button-custom" id="submit-button" disabled> Join </button>
-            </form>
-        </section>
-        <section class="right-bar">
+        <img class="icons-meet" src="/assets/pictures/icons-meeting.png"/>
+        <section class="content-container">
             <div class=" user-video-container">
                 <video id="local-video" poster="/assets/pictures/ZKZg.gif" preload="auto" autoplay class="user-video" muted></video>
+                <img class="video-on" id="video-image" src="/assets/pictures/unknown.jpg"/>
             </div>
+            <form id="join-room" class="join-form">
+                <input type="text" class="form-control input-custom" placeholder="Enter Your Name..." id="username"/>
+                <div class="dropdown-container">
+                    <div class="dropdown m-2 dropdown-custom">
+                        <button disabled class="btn btn-secondary dropdown-button-custom" id="select-audio-button" type="button" style="border-bottom-left-radius: 10px !important; border-top-left-radius: 10px !important;">
+                            <i class="fas fa-spinner fa-pulse" id="select-audio"></i>
+                            <span class="ml-2">Microphone</span>
+                        </button>
+                        <button disabled class="btn btn-secondary dropdown-toggle edit-background-button" type="button" id="dropdownMenuButton-audio" style="border-top-right-radius: 10px !important; border-bottom-right-radius: 10px !important;"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-audio" id="mic-options">
+                        </div>
+                    </div>
+                    <div class="dropdown m-2 dropdown-custom">
+                        <button disabled class="btn btn-secondary dropdown-button-custom" id="select-video-button" type="button" style="border-bottom-left-radius: 10px !important; border-top-left-radius: 10px !important;">
+                            <i class="fas fa-spinner fa-pulse" id="select-video"></i><span class="ml-2">Camera</span>
+                        </button>
+                        <button disabled class="btn btn-secondary dropdown-toggle edit-background-button" type="button" id="dropdownMenuButton-video" style="border-top-right-radius: 10px !important; border-bottom-right-radius: 10px !important;"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-video" id="camera-options">
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary button-custom" id="submit-button" disabled> Join </button>
+            </form>
         </section>
     </div>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
