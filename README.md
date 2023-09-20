@@ -227,7 +227,7 @@ socket.on('joinRoom', (data) => {
 - Displayed video format sometimes is wrong, example, if there is 3 users in room, the video class name should be container-3 but its container 4 (Testing is needed) (&#x2713;)
 - Error when screensharing producer is reconnecting  (&#x2713;) (Testing is needed) (Reported by Mr. Sabdho)
 ### 0.2.1
-- Camera indicator is still flashing even though camera is off
+- Camera indicator is still flashing even though camera is off (&#x2713;)
 
 ## Test Log
 ### 0.1.0
@@ -279,6 +279,7 @@ socket.on('joinRoom', (data) => {
 ### 0.2.2
 - Changing design in lobby
 - Stop track when camera is off so indicator is turning off
+- Fixed bug mute-all many button is appending repeately
 
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)
@@ -286,18 +287,18 @@ socket.on('joinRoom', (data) => {
 - Sharescreen agak jeda
 - Audio ada yang tidak masuk
 - Handle rekoneksi jangan ke lobby
-- Bug di mute-all tombol
 - Lagging karena jaringan?
 - Bug di switch camera?
-- Bug di mic-icons
-- Tampilan layout kadang tidak sesuai, misal ada user 4 join, yang harusnya menggunakan kelas container-4 malah container-12
-- Screen sharing saat reconnecting jadi double. perlu dihandel
+- Bug di mute-all tombol (&#x2713;)
+- Bug di mic-icons (&#x2713;)
+- Tampilan layout kadang tidak sesuai, misal ada user 4 join, yang harusnya menggunakan kelas container-4 malah container-12 (&#x2713;)
+- Screen sharing saat reconnecting jadi double. perlu dihandel (&#x2713;)
 
 ## Keterangan
 - Font recording disesuaikan (&#x2713;)
 - Nama dikasih jarak (&#x2713;)
 - Fitur unmute all participant hanya ada di host (&#x2713;)
 - Mirrror video (&#x2713;)
-- Tampilan home dan lobby perlu improvement
+- Tampilan home dan lobby perlu improvement (&#x2713;)
+- Matikan camera hanya mempause video (&#x2713;)
 - Tampilan mobile browser
-- Matikan camera hanya mempause video
