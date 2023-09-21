@@ -210,6 +210,7 @@ socket.on('joinRoom', (data) => {
 ## Optional
 - Changing Displayed Video By Collecting Stream First
 - Dont Need To Delete Element To Replace Next or Previus Video
+- When creating video, auto create video.
 
 ## Bug Log
 ### 0.1.0
@@ -280,6 +281,10 @@ socket.on('joinRoom', (data) => {
 - Changing design in lobby
 - Stop track when camera is off so indicator is turning off
 - Fixed bug mute-all many button is appending repeately
+## 0.2.3
+- Adding chat feature
+- Adjusting controller button in room
+- Adjusting input in lobby
 
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)

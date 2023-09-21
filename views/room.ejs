@@ -17,6 +17,27 @@
             padding: 0;
         }
 
+        /*
+        *  STYLE 3
+        */
+
+        ::-webkit-scrollbar-track
+        {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+            background-color: #F5F5F5;
+        }
+
+        ::-webkit-scrollbar
+        {
+            width: 6px;
+            background-color: #F5F5F5;
+        }
+
+        ::-webkit-scrollbar-thumb
+        {
+            background-color: #000000;
+        }
+
         .outside-container {
             width: 100vw;
             height: 100vh;
@@ -27,7 +48,7 @@
         .full-container {
             background-color: #1e1f20;
             width: 100vw;
-            height: 93%;
+            height: 90%;
             position: relative;
             display: flex;
             overflow: hidden;
@@ -37,7 +58,7 @@
             /* position: absolute; */
             bottom: 20px;
             width: 100%;
-            height: 7%;
+            height: 10%;
             display: flex;
             justify-content: center;
         }
@@ -436,14 +457,13 @@
             max-width: 100%;
             min-height: 200px;
             overflow-y: auto;
-            padding-bottom: 50px;
+            padding-bottom: 10px;
             position: relative;
         }
 
         .chat-footer {
-            bottom: 0;
-            position: absolute;
             width: 100%;
+            background-color: grey;
         }
 
         .chat-send {
@@ -490,10 +510,11 @@
             max-width: 50%;
             background-color: white;
             border-radius: 10px;
-            padding: 1px;
+            padding: 5px;
             overflow: hidden;
             display: flex;
             flex-wrap: wrap;
+            word-break: break-all;
         }
 
         .received-messages {
@@ -782,39 +803,17 @@
                 <div class="chat-bar" id="chat-bar">
                     <div id="chat-bar-header">In Call Message</div>
                     <div class="chat-container">
-                        <div class="chat-messages">
-                            <div class="received-messages">
-                                <p class="sender">Brother</p>
-                                <div class="received-message">
-                                    <div class="inside-message"><span>Message</span></div>
-                                </div>
-                            </div>
-                            <div class="received-messages">
-                                <p class="sender">M</p>
-                                <div class="received-message">
-                                    <div class="inside-message"><span>Is</span></div>
-                                </div>
-                            </div>
-                            <div class="received-messages">
-                                <p class="sender">Dika</p>
-                                <div class="received-message">
-                                    <div class="inside-message"><span>On</span></div>
-                                </div>
-                            </div>
-                            <div class="received-messages">
-                                <p class="sender">Triyanto</p>
-                                <div class="received-message">
-                                    <div class="inside-message"><span>Development</span></div>
-                                </div>
-                            </div>
+                        <div class="chat-messages" id="chat-messages-id">
                         </div>
                     </div>
                     <div class="chat-footer">
                         <div class="chat-send">
-                            <input class="type-box" />
-                            <button class="send-button">
-                                <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                            </button>
+                            <form id="sending-message">
+                                <input class="type-box" id="message-input"/>
+                                <button class="send-button" id="send-message-button" type="submit">
+                                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -864,9 +863,9 @@
             <button disabled class="btn button-small-custom" id="user-list-button">
                 <i class="fas fa-users" style="color: #ffffff;"></i>
             </button>
-            <!-- <button disabled class="btn button-small-custom" id="user-chat-button">
+            <button disabled class="btn button-small-custom" id="user-chat-button">
                 <i class="fas fa-comment-dots" style="color: white;"></i>
-            </button> -->
+            </button>
             <button disabled class="btn button-small-custom" id="share-link-button">
                 <i class="far fa-share-square" style="color: white;"></i>
                 <span id="snackbar">Successfully Copied</span>

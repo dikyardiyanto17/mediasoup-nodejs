@@ -558,7 +558,7 @@ const createSendTransport = () => {
             let buttonSwitchCamera = document.getElementById('user-switch-camera-button')
             let buttonTurnOffCamera = document.getElementById('user-turn-on-off-camera-button')
             let buttonScreenShare = document.getElementById('user-screen-share-button')
-            // let buttonChat = document.getElementById('user-chat-button')
+            let buttonChat = document.getElementById('user-chat-button')
             let buttonShare = document.getElementById('share-link-button')
             let buttonUserList = document.getElementById('user-list-button')
             // Enabling Button When Producer Is Connecting
@@ -575,13 +575,9 @@ const createSendTransport = () => {
                 buttonSwitchCamera.removeAttribute('disabled', 'false')
                 buttonTurnOffCamera.removeAttribute('disabled', 'false')
                 buttonScreenShare.removeAttribute('disabled', 'false')
-                // buttonChat.removeAttribute('disabled', 'false')
+                buttonChat.removeAttribute('disabled', 'false')
                 buttonShare.removeAttribute('disabled', 'false')
                 buttonUserList.removeAttribute('disabled', 'false')
-                // if (localStorage.getItem('is_video_active') == 'false'){
-                //     allStream[socket.id].video.status = false
-                //     allStream[socket.id].video.track.stop()
-                // }
             } 
             if (e == 'connecting'){
                 showLoadingScreen()
@@ -593,7 +589,7 @@ const createSendTransport = () => {
                 buttonSwitchCamera.setAttribute('disabled', 'true')
                 buttonTurnOffCamera.setAttribute('disabled', 'true')
                 buttonScreenShare.setAttribute('disabled', 'true')
-                // buttonChat.setAttribute('disabled', 'true')
+                buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
             } 
             const url = window.location.pathname;
@@ -610,7 +606,7 @@ const createSendTransport = () => {
                 buttonSwitchCamera.setAttribute('disabled', 'true')
                 buttonTurnOffCamera.setAttribute('disabled', 'true')
                 buttonScreenShare.setAttribute('disabled', 'true')
-                // buttonChat.setAttribute('disabled', 'true')
+                buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
                 const newURL = window.location.origin + "/" + goTo;
                 window.location.href = newURL;
@@ -625,7 +621,7 @@ const createSendTransport = () => {
                 buttonSwitchCamera.setAttribute('disabled', 'true')
                 buttonTurnOffCamera.setAttribute('disabled', 'true')
                 buttonScreenShare.setAttribute('disabled', 'true')
-                // buttonChat.setAttribute('disabled', 'true')
+                buttonChat.setAttribute('disabled', 'true')
                 buttonShare.setAttribute('disabled', 'true')
                 // const newURL = window.location.origin + "/" + goTo;
                 // window.location.href = newURL;
@@ -2160,18 +2156,58 @@ hangUpButton.addEventListener('click', () => {
 })
 
 // Chat Button
-// const chatButton = document.getElementById('user-chat-button')
-// chatButton.addEventListener('click', () => {
-//     const chatContainer = document.getElementById('chat-container')
-//     if (chatContainer.className == 'invisible') {
-//         chatButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
-//         chatContainer.className = 'visible'
-//     }
-//     else {
-//         chatContainer.className = 'invisible'
-//         chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
-//     }
-// })
+const chatButton = document.getElementById('user-chat-button')
+chatButton.addEventListener('click', () => {
+    const chatContainer = document.getElementById('chat-container')
+    if (chatContainer.className == 'invisible') {
+        chatButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
+        chatContainer.className = 'visible'
+    }
+    else {
+        chatContainer.className = 'invisible'
+        chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+    }
+})
+
+const receiveMessage = (message, sender) => {
+    let chatMessagesContainer = document.getElementById('chat-messages-id')
+    let messageElement = document.createElement('div')
+    messageElement.innerHTML = `<div class="received-messages"><p class="sender">${sender}</p><div class="received-message"><div class="inside-message"><span>${message}</span></div></div></div>`
+    chatMessagesContainer.appendChild(messageElement)
+}
+
+const sendMessage = (message, sender) => {
+    let chatMessagesContainer = document.getElementById('chat-messages-id')
+    let messageElement = document.createElement('div')
+    messageElement.innerHTML = `<div class="your-messages"><p class="sender">${sender}</p><div class="your-message"><div class="inside-message"><span>${message}</span></div></div></div>`
+    chatMessagesContainer.appendChild(messageElement)
+}
+
+let sendMessageButton = document.getElementById('sending-message')
+sendMessageButton.addEventListener('submit', (e) => {
+    e.preventDefault()
+    let inputMessage = document.getElementById('message-input').value
+    let sender = localStorage.getItem('username')
+    if (!inputMessage){
+        let ae = document.getElementById("alert-error");
+        ae.className = "show";
+        ae.innerHTML = `You cannot send empty message`
+        // Show Warning
+        setTimeout(() => { 
+            ae.className = ae.className.replace("show", ""); 
+            ae.innerHTML = ``
+        }, 3000);
+    }
+    for (const key in producersDetails){
+        socket.emit('send-message', {message: inputMessage, sendTo: key, sender })
+    }
+    document.getElementById('message-input').value = ''
+    sendMessage(inputMessage, sender)
+})
+
+socket.on('receive-message', ({message, sender}) => {
+    receiveMessage(message, sender)
+})
 
 // User List Button
 const userListButton = document.getElementById('user-list-button')
