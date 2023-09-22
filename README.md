@@ -229,6 +229,10 @@ socket.on('joinRoom', (data) => {
 - Error when screensharing producer is reconnecting  (&#x2713;) (Testing is needed) (Reported by Mr. Sabdho)
 ### 0.2.1
 - Camera indicator is still flashing even though camera is off (&#x2713;)
+### 0.2.3
+- Bug when participants leave at the same time
+- Bug audio visualizer not working when change page
+- Bug video that displayed 3 became 4
 
 ## Test Log
 ### 0.1.0
@@ -285,6 +289,13 @@ socket.on('joinRoom', (data) => {
 - Adding chat feature
 - Adjusting controller button in room
 - Adjusting input in lobby
+### 0.2.4
+- Form autocomplete off in message text
+- Optimizing delete element user when they leave
+- Custom button for mobile
+- Fixed bug when participants leave at the same time
+- Updating for mobile display
+- Remove configuration for screensharing video
 
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)
@@ -307,3 +318,4 @@ socket.on('joinRoom', (data) => {
 - Tampilan home dan lobby perlu improvement (&#x2713;)
 - Matikan camera hanya mempause video (&#x2713;)
 - Tampilan mobile browser
+- Saat user lain leave, jangan reset stream
