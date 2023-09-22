@@ -899,6 +899,166 @@
         #optional-button-trigger {
             display: none;
         }
+
+        #user-mic-button {
+            position: relative;
+        }
+        #user-mic-button:hover >  #user-mic-button-tooltip {
+            visibility: visible;
+        }
+        #user-mic-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #user-turn-on-off-camera-button {
+            position: relative;
+        }
+        #user-turn-on-off-camera-button:hover >  #user-turn-on-off-camera-button-tooltip {
+            visibility: visible;
+        }
+        #user-turn-on-off-camera-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #user-hang-up-button {
+            position: relative;
+        }
+        #user-hang-up-button:hover >  #user-hang-up-button-tooltip {
+            visibility: visible;
+        }
+        #user-hang-up-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #user-switch-camera-button {
+            position: relative;
+        }
+        #user-switch-camera-button:hover >  #user-switch-camera-button-tooltip {
+            visibility: visible;
+        }
+        #user-switch-camera-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #user-screen-share-button {
+            position: relative;
+        }
+        #user-screen-share-button:hover >  #user-screen-share-button-tooltip {
+            visibility: visible;
+        }
+        #user-screen-share-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #user-record-button {
+            position: relative;
+        }
+        #user-record-button:hover >  #user-record-button-tooltip {
+            visibility: visible;
+        }
+        #user-record-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #user-list-button {
+            position: relative;
+        }
+        #user-list-button:hover >  #user-list-button-tooltip {
+            visibility: visible;
+        }
+        #user-list-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #user-chat-button {
+            position: relative;
+        }
+        #user-chat-button:hover >  #user-chat-button-tooltip {
+            visibility: visible;
+        }
+        #user-chat-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+        
+        #share-link-button {
+            position: relative;
+        }
+        #share-link-button:hover >  #share-link-button-tooltip {
+            visibility: visible;
+        }
+        #share-link-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
+
+        #option-button {
+            position: relative;
+        }
+        #option-button:hover >  #option-button-tooltip {
+            visibility: visible;
+        }
+        #option-button-tooltip {
+            background-color: #bbbbbba1;
+            white-space: nowrap;
+            border-radius: 10px;
+            padding: 10px;
+            position: absolute;
+            visibility: hidden;
+            top: -100%;
+        }
         </style>
 </head>
 
@@ -964,12 +1124,15 @@
         </div>
         <div class="controller" id="control-button">
             <button disabled class="btn button-small-custom" id="user-mic-button">
+                <span id="user-mic-button-tooltip">Microphone</span>
                 <img src="/assets/pictures/micOn.png" id="mic-image" />
             </button>
             <button disabled class="btn button-small-custom" id="user-turn-on-off-camera-button">
+                <span id="user-turn-on-off-camera-button-tooltip">Camera</span>
                 <i class="fas fa-video" style="color: #ffffff;" id="turn-on-off-camera-icons"></i>
             </button>
             <button disabled class="btn button-big-custom" id="user-hang-up-button">
+                <span id="user-hang-up-button-tooltip">Hang Up</span>
                 <img src="/assets/pictures/hangUp.png" />
             </button>
             <button class="btn button-small-custom" id="optional-button-trigger">
@@ -977,26 +1140,33 @@
             </button>
             <div class="optional-button-menu hide" id="optional-button-id">
                 <button disabled class="btn button-small-custom" id="user-switch-camera-button">
+                    <span id="user-switch-camera-button-tooltip">Switch Camera</span>
                     <img src="/assets/pictures/switchCamera.png" />
                 </button>
                 <button disabled class="btn button-small-custom" id="user-screen-share-button">
+                    <span id="user-screen-share-button-tooltip">Sharing Screen</span>
                     <img src="/assets/pictures/share.png" />
                 </button>
                 <button disabled class="btn button-small-custom" id="user-record-button">
+                    <span id="user-record-button-tooltip">Record</span>
                     <i class="far fa-dot-circle" id="record-image" style="color: #bbb;"></i>
                 </button>
                 <button disabled class="btn button-small-custom" id="user-list-button">
+                    <span id="user-list-button-tooltip">Participants</span>
                     <i class="fas fa-users" style="color: #ffffff;"></i>
                 </button>
                 <button disabled class="btn button-small-custom" id="user-chat-button">
+                    <span id="user-chat-button-tooltip">Chat</span>
                     <i class="fas fa-comment-dots" style="color: white;"></i>
                 </button>
                 <button disabled class="btn button-small-custom" id="share-link-button">
+                    <span id="share-link-button-tooltip">Share Link</span>
                     <i class="far fa-share-square" style="color: white;"></i>
                     <span id="snackbar">Successfully Copied</span>
                 </button>
             </div>
             <button class="btn button-small-custom" id="option-button">
+                <span id="option-button-tooltip">Settings</span>
                 <i class="fas fa-ellipsis-v" style="color: white;"></i>
                 <div id="option-menu" class="invisible">
                     <ul id="all-option-menu">

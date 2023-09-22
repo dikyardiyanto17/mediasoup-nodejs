@@ -296,6 +296,7 @@ socket.on('joinRoom', (data) => {
 - Fixed bug when participants leave at the same time
 - Updating for mobile display
 - Remove configuration for screensharing video
+- Added tooltip
 
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)
