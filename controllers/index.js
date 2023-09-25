@@ -1,5 +1,4 @@
 const mediasoup = require('mediasoup')
-
 class Controller {
     static room(req, res) {
         try {
@@ -20,6 +19,14 @@ class Controller {
     static lobby (req, res){
         try {
             res.render('lobby')
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    static login (req, res){
+        try {
+            res.render('login')
         } catch (error) {
             console.log(error)
         }

@@ -1794,6 +1794,8 @@ const SwitchingCamera = async () => {
     let audio = stream.getAudioTracks()[0]
     let theAudio
 
+    stream.getVideoTracks()[0].stop()
+    console.log('- Perubahan : ', stream.getVideoTracks()[0])
     // let cameraIcons = document.getElementById('turn-on-off-camera-icons')
     // cameraIcons.classList.add('fa-video');
     // cameraIcons.classList.remove('fa-video-slash');
@@ -1815,10 +1817,12 @@ const SwitchingCamera = async () => {
         let newStream = await navigator.mediaDevices.getUserMedia(config);
         store.setLocalStream(newStream)
         localVideo2.srcObject.getTracks().forEach((track) => {
+            console.log(track)
             track.stop();
         });
         localVideo2.srcObject = null
         localVideo2.srcObject = newStream
+        console.log('- Changed : ',localVideo2.srcObject.getVideoTracks()[0])
         allStream[socket.id].audio.track = newStream.getAudioTracks()[0]
         allStream[socket.id].video.track = newStream.getVideoTracks()[0]
         theAudio = newStream.getAudioTracks()[0]
@@ -1832,7 +1836,7 @@ const SwitchingCamera = async () => {
                     video: { facingMode: "environment" },
                 },
                 audio: audio.enabled
-        }
+            }
             let newStream = await navigator.mediaDevices.getUserMedia(config);
             store.setLocalStream(newStream)
             localVideo3.srcObject.getTracks().forEach((track) => {

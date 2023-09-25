@@ -297,6 +297,8 @@ socket.on('joinRoom', (data) => {
 - Updating for mobile display
 - Remove configuration for screensharing video
 - Added tooltip
+### 0.2.5
+- Fixing z-index in room
 
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)
