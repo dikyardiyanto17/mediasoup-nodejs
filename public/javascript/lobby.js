@@ -175,6 +175,10 @@ videoOptions.addEventListener("click", (e) => {
         }
 
         localStorage.setItem('selectedVideoDevices', clickedValue)
+        let data = store.getState()
+        let oldStream = data.localStream
+        oldStream.getVideoTracks()[0].stop()
+
         navigator.mediaDevices.getUserMedia(config).then((stream) => {
             if (localVideo.srcObject){
                 localVideo.srcObject.getTracks().forEach((track) => {
