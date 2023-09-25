@@ -233,6 +233,8 @@ socket.on('joinRoom', (data) => {
 - Bug when participants leave at the same time
 - Bug audio visualizer not working when change page
 - Bug video that displayed 3 became 4
+### 0.2.4
+- Switch camera is not working on phone
 
 ## Test Log
 ### 0.1.0
@@ -299,6 +301,7 @@ socket.on('joinRoom', (data) => {
 - Added tooltip
 ### 0.2.5
 - Fixing z-index in room
+- Fixing bug switch-camera in handphone
 
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)

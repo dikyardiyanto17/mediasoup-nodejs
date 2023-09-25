@@ -2,8 +2,8 @@ const express = require('express')
 const cors = require('cors')
 const router = require('./routes/index.js')
 const app = express()
-// const port = 3001
-const port = 80
+const port = 3001
+// const port = 80
 const http = require('http')
 const path = require('path');
 const https = require('httpolyglot')
@@ -31,8 +31,8 @@ const webRtcTransport_options = {
             // ip: '192.168.206.123',
             // ip: '192.168.205.229',
             // ip: '192.168.18.68', // Laptop Jaringan 5G
-            // ip: '203.194.113.166', // VPS Mr. Indra IP
-            ip: '203.175.10.29' // My VPS
+            ip: '203.194.113.166', // VPS Mr. Indra IP
+            // ip: '203.175.10.29' // My VPS
             // ip: '192.168.3.135' // IP Kost
             // announcedIp: "88.12.10.41"
         }
@@ -173,7 +173,7 @@ io.on('connection', async socket => {
 
 
         // callback({worker})
-        console.log('- Room Collection : ', roomsSocketCollection)
+        // console.log('- Room Collection : ', roomsSocketCollection)
     })
 
     socket.on('screen-sharing', ({ videoProducerId, audioProducerId, socketId, isSharing, producerId }) => {
