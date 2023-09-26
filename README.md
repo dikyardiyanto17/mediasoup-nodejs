@@ -303,6 +303,10 @@ socket.on('joinRoom', (data) => {
 - Fixing z-index in room
 - Fixing bug switch-camera in handphone
 
+### 0.2.6
+- Adding new message notification
+- Change chat design
+
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)
 - Agak jeda
