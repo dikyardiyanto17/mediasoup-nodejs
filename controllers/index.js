@@ -1,50 +1,50 @@
 const mediasoup = require('mediasoup')
 class Controller {
-    static room(req, res) {
+    static room(req, res, next) {
         try {
             res.render('room')
         } catch (error) {
-            console.log(error)
+            next(error)
         }
     }
 
-    static home (req, res){
+    static home (req, res, next){
         try {
             res.render('home')
         } catch (error) {
-            console.log(error)
+            next(error)
         }
     }
 
-    static lobby (req, res){
+    static lobby (req, res, next){
         try {
             res.render('lobby')
         } catch (error) {
-            console.log(error)
+            next(error)
         }
     }
 
-    static login (req, res){
+    static login (req, res, next){
         try {
             res.render('login')
         } catch (error) {
-            console.log(error)
+            next(error)
         }
     }
 
-    static register (req, res) {
+    static register (req, res, next) {
         try {
             res.render('register')
         } catch (error) {
-            console.log(error)
+            next(error)
         }
     }
 
-    static testing (req, res){
+    static testing (req, res, next){
         try {
             res.render('testing')
         } catch (error) {
-            console.log(error)
+            next(error)
         }
     }
 }

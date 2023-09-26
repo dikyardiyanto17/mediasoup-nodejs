@@ -1,3 +1,6 @@
+require('dotenv').config()
+const mongoose = require('mongoose');
+const connect = require('./config/mongodb')
 const express = require('express')
 const cors = require('cors')
 const router = require('./routes/index.js')
@@ -12,6 +15,7 @@ const fs = require('fs')
 const certificatePath = './server.crt';
 const { Server } = require('socket.io')
 const mediasoup = require('mediasoup')
+const errorHandler = require('./middlewares/errorHandlers.js')
 
 
 // const credentials = {
@@ -30,8 +34,8 @@ const webRtcTransport_options = {
             // ip: '127.0.0.1',
             // ip: '192.168.206.123',
             // ip: '192.168.205.229',
-            // ip: '192.168.18.68', // Laptop Jaringan 5G
-            ip: '203.194.113.166', // VPS Mr. Indra IP
+            ip: '192.168.18.68', // Laptop Jaringan 5G
+            // ip: '203.194.113.166', // VPS Mr. Indra IP
             // ip: '203.175.10.29' // My VPS
             // ip: '192.168.3.135' // IP Kost
             // announcedIp: "88.12.10.41"
@@ -42,27 +46,32 @@ const webRtcTransport_options = {
     preferUdp: true,
 }
 
+connect()
+
 app.use(cors())
 app.set('view engine', 'ejs')
 app.use(express.static(path.join(__dirname, 'views')));
 app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// const httpsServer = https.createServer(options, app)
-// httpsServer.listen(port, () => {
+const httpsServer = https.createServer(options, app)
+mongoose.connection.once('open', () => {
+    httpsServer.listen(port, () => {
+        console.log('App On : ' + port)
+    })
+})
+
+const io = new Server(httpsServer)
+
+// const httpServer = http.createServer(app)
+// httpServer.listen(port, () => {
 //     console.log('App On : ' + port)
 // })
 
-// const io = new Server(httpsServer)
-
-const httpServer = http.createServer(app)
-httpServer.listen(port, () => {
-    console.log('App On : ' + port)
-})
-
-const io = new Server(httpServer)
+// const io = new Server(httpServer)
 
 let worker
 let rooms = {}
@@ -638,3 +647,4 @@ const createWebRtcTransport = async (router) => {
 }
 
 app.use(router)
+app.use(errorHandler)
