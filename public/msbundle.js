@@ -30228,25 +30228,113 @@ chatButton.addEventListener('click', () => {
     if (chatContainer.className == 'invisible') {
         chatButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
         chatContainer.className = 'visible'
-    }
-    else {
+        let iconsNotification = document.getElementById('notification-element-id')
+        iconsNotification.className = 'fas fa-envelope notification invisible'
+        scrollToBottom()
+    } else {
         chatContainer.className = 'invisible'
+        let isLineNewMessageExist = document.getElementById('new-message-notification')
+        if (isLineNewMessageExist){
+            isLineNewMessageExist.remove()
+        }
         chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
     }
 })
 
-const receiveMessage = (message, sender) => {
+const scrollToBottom = () => {
+    let chatMessages = document.getElementById('chat-container-id')
+    chatMessages.scrollTop = chatMessages.scrollHeight
+}
+
+const compareMessageDate = (messageDate) => {
+    const currentDate = new Date();
+    const messageDateObj = new Date(messageDate);
+  
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    const currentDay = currentDate.getDate();
+  
+    const messageYear = messageDateObj.getFullYear();
+    const messageMonth = messageDateObj.getMonth();
+    const messageDay = messageDateObj.getDate();
+    let messageHour = messageDateObj.getHours()
+    let messageMinute = messageDateObj.getMinutes()
+    if (messageMinute < 10){
+        messageMinute = `0${messageMinute}`
+    }
+    if (messageHour < 10){
+        messageHour = `0${messageHour}`
+    }
+  
+    if (currentYear === messageYear && currentMonth === messageMonth && currentDay === messageDay) return `${messageHour}:${messageMinute}`
+    else {
+        const timeDiff = currentDate - messageDateObj;
+        const oneDay = 24 * 60 * 60 * 1000;
+        const oneYear = 365
+        if (timeDiff < oneDay) return `Yesterday ${messageHour}:${messageMinute}`
+        else if (timeDiff < oneYear ) return `${messageMonth}:${messageDay} - ${messageHour}:${messageMinute}`
+        else return `${messageYear}:${messageMonth}:${messageDay} - ${messageHour}:${messageMinute}`
+    }
+}
+
+const messageNotification = () => {
+    const chatContainer = document.getElementById('chat-container')
+    let iconsNotification = document.getElementById('notification-element-id')
+    if (chatContainer.className == 'invisible') {
+        let isLineNewMessageExist = document.getElementById('new-message-notification')
+        if (!isLineNewMessageExist){
+            let chatMessagesContainer = document.getElementById('chat-messages-id')
+            let notificationElement = document.createElement('div')
+            notificationElement.id = 'new-message-notification'
+            let newMessageTemplate = `<p class="new-message-text">New Message</p><div class="new-message-line"></div>`
+            notificationElement.innerHTML = newMessageTemplate
+            chatMessagesContainer.appendChild(notificationElement)
+        }
+        iconsNotification.className = 'fas fa-envelope notification visible'
+    }
+}
+
+const receiveMessage = (message, sender, date) => {
+    messageNotification()
+    const newDate = compareMessageDate(date)
     let chatMessagesContainer = document.getElementById('chat-messages-id')
     let messageElement = document.createElement('div')
-    messageElement.innerHTML = `<div class="received-messages"><p class="sender">${sender}</p><div class="received-message"><div class="inside-message"><span>${message}</span></div></div></div>`
+    let chatContainer = document.getElementById('chat-messages-id')
+
+    let allChat = chatContainer.querySelectorAll('.message-container')
+    let lastChat = allChat[allChat.length-1]
+    let lastChatDetail = lastChat?.firstElementChild
+    let lastChatDetailName = lastChatDetail?.firstElementChild?.innerHTML
+    let lastChatDetailDate = lastChatDetail?.lastElementChild?.innerHTML
+    let customDate = `<span class="message-time">${newDate}</span>`
+    let customName = `<p class="sender">${sender}</p>`
+    if (lastChatDetailDate == newDate && lastChatDetailName == sender && lastChatDetail){
+        customName = `<p class="sender hide-username">${sender}</p>`
+        lastChatDetail.lastElementChild.remove()
+    }
+
+    messageElement.className = 'message-container'
+    messageElement.innerHTML = `<div class="received-messages">${customName}<div class="received-message"><div class="inside-message"><span>${message}</span></div></div>${customDate}</div>`
     chatMessagesContainer.appendChild(messageElement)
 }
 
-const sendMessage = (message, sender) => {
+const sendMessage = (message, sender, date) => {
+    let chatContainer = document.getElementById('chat-messages-id')
+    let allChat = chatContainer.querySelectorAll('.message-container')
+    let lastChat = allChat[allChat.length-1]
+    let lastChatDetail = lastChat?.firstElementChild
+    let lastChatDetailDate = lastChatDetail?.lastElementChild?.innerHTML
+    const newDate = compareMessageDate(date)
+    let customDate = `<span class="message-time">${newDate}</span>`
+    if (lastChatDetailDate == newDate && lastChatDetail){
+        lastChatDetail.lastElementChild.remove()
+    }
     let chatMessagesContainer = document.getElementById('chat-messages-id')
     let messageElement = document.createElement('div')
-    messageElement.innerHTML = `<div class="your-messages"><p class="sender">${sender}</p><div class="your-message"><div class="inside-message"><span>${message}</span></div></div></div>`
+    messageElement.className = 'message-container'
+    messageElement.innerHTML = `<div class="your-messages"><p class="sender">${sender}</p><div class="your-message"><div class="inside-message"><span>${message}</span></div></div>${customDate}</div>`
     chatMessagesContainer.appendChild(messageElement)
+    scrollToBottom()
 }
 
 let sendMessageButton = document.getElementById('sending-message')
@@ -30264,15 +30352,18 @@ sendMessageButton.addEventListener('submit', (e) => {
             ae.innerHTML = ``
         }, 3000);
     }
+
+    const messageDate = new Date()
+
     for (const key in producersDetails){
-        socket.emit('send-message', {message: inputMessage, sendTo: key, sender })
+        socket.emit('send-message', {message: inputMessage, sendTo: key, sender, messageDate })
     }
     document.getElementById('message-input').value = ''
-    sendMessage(inputMessage, sender)
+    sendMessage(inputMessage, sender, messageDate)
 })
 
-socket.on('receive-message', ({message, sender}) => {
-    receiveMessage(message, sender)
+socket.on('receive-message', ({message, sender, messageDate}) => {
+    receiveMessage(message, sender, messageDate)
 })
 
 // User List Button
@@ -30466,64 +30557,72 @@ optionalButtonTrigger.addEventListener('click', (e) => {
 
 
 // Console Log Button
-// const consoleLogButton = document.getElementById('console-log-button')
-// consoleLogButton.addEventListener('click', () => {
-//     consumerTransports.forEach((transport) => {
-//         transport.consumer.getStats().then((stat) => {
-//             [...stat.entries()].forEach((data, index) => {
-//                 if (index == [...stat.entries()].length - 1) {
-//                     console.log('- Data : ', data)
-//                 }
-//             })
-//             stat.forEach((report) => {
-//                 if (report.type === 'inbound-rtp' && report.kind === 'video') {
-//                     console.log('- Received Bit Rate : ', report)
-//                 }
-//             })
-//             console.log('- Stat : ', stat)
-//         })
-//     })
-//     socket.emit('get-peers', (consumerTransports))
-//     console.log("- Producer : ", producerTransport)
-//     console.log("- Video Producer : ", videoProducer)
-//     producerTransport.getStats().then((data) => {
-//         console.log(data)
-//     })
-//     console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
-//     console.log("- Producer Details : ", producersDetails)
-//     console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
-//     console.log("- Screen Sharing Producers : ", screenSharingProducer)
-//     console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
+const consoleLogButton = document.getElementById('console-log-button')
+consoleLogButton.addEventListener('click', () => {
+    // consumerTransports.forEach((transport) => {
+    //     transport.consumer.getStats().then((stat) => {
+    //         [...stat.entries()].forEach((data, index) => {
+    //             if (index == [...stat.entries()].length - 1) {
+    //                 console.log('- Data : ', data)
+    //             }
+    //         })
+    //         stat.forEach((report) => {
+    //             if (report.type === 'inbound-rtp' && report.kind === 'video') {
+    //                 console.log('- Received Bit Rate : ', report)
+    //             }
+    //         })
+    //         console.log('- Stat : ', stat)
+    //     })
+    // })
+    // socket.emit('get-peers', (consumerTransports))
+    // console.log("- Producer : ", producerTransport)
+    // console.log("- Video Producer : ", videoProducer)
+    // producerTransport.getStats().then((data) => {
+    //     console.log(data)
+    // })
+    // console.log('- Current Template : ', currentTemplate, " - Total Users : ", totalUsers)
+    // console.log("- Producer Details : ", producersDetails)
+    // console.log('- Local Video : ', localVideo.srcObject.getAudioTracks()[0].enabled)
+    // console.log("- Screen Sharing Producers : ", screenSharingProducer)
+    // console.log('- My Socket Id : ', socket.id,' - All Stream : ', allStream)
 
-//     let allAudio = []
+    // let allAudio = []
 
-//     for (const key in allStream){
-//         allAudio.push(allStream[key].audio)
-//     }
+    // for (const key in allStream){
+    //     allAudio.push(allStream[key].audio)
+    // }
 
-//     let allAudioFlat = allAudio.flatMap(stream => stream);
-//     console.log('- All Audio Flat : ', allAudioFlat)
+    // let allAudioFlat = allAudio.flatMap(stream => stream);
+    // console.log('- All Audio Flat : ', allAudioFlat)
 
-//     console.log('- All Stream : ', allStream)
-//     socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
-//         console.log(data)
-//     })
+    // console.log('- All Stream : ', allStream)
+    // socket.emit('console-log-server', { message: 'hello world!' }, (data) => {
+    //     console.log(data)
+    // })
 
-//     console.log('- Total User : ', totalUsers)
-//     let stream = store.getState()
-//     console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
-//     console.log('- Host : ', host)
-//     console.log('- All Stream : ', allStream)
-//     let queryVideo = videoContainer.querySelectorAll("[id*='td']")
-//     let firstVideo = queryVideo[0]
-//     let idFirstVideo = firstVideo.id.substring(3)
-//     console.log(idFirstVideo)
-//     console.log('- Video Container : ', videoContainer)
-//     const videoElements = document.querySelectorAll('#video-container video');
-//     videoElements.forEach((data) => {
-//         console.log("- Src Object : ", data.srcObject.getVideoTracks()[0])
-//     })
-// })
+    // console.log('- Total User : ', totalUsers)
+    // let stream = store.getState()
+    // console.log('- Stream : ', stream.localStream.getVideoTracks()[0])
+    // console.log('- Host : ', host)
+    // console.log('- All Stream : ', allStream)
+    // let queryVideo = videoContainer.querySelectorAll("[id*='td']")
+    // let firstVideo = queryVideo[0]
+    // let idFirstVideo = firstVideo.id.substring(3)
+    // console.log(idFirstVideo)
+    // console.log('- Video Container : ', videoContainer)
+    // const videoElements = document.querySelectorAll('#video-container video');
+    // videoElements.forEach((data) => {
+    //     console.log("- Src Object : ", data.srcObject.getVideoTracks()[0])
+    // })
+    let chatContainer = document.getElementById('chat-messages-id')
+    let allChat = chatContainer.querySelectorAll('.message-container')
+    let lastChat = allChat[allChat.length-1]
+    let lastChatDetail = lastChat.firstElementChild
+    let lastChatDetailName = lastChatDetail.firstElementChild.innerHTML
+    let lastChatDetailDate = lastChatDetail.lastElementChild.innerHTML
+    // let lastChatDetailNameElement = lastChatDetail.firstElementChild
+    console.log('- All Chat : ', lastChatDetailName, lastChatDetailDate)
+})
 
 },{"./store":85,"mediasoup-client":62,"recordrtc":69,"socket.io-client":75}],85:[function(require,module,exports){
 let state = {

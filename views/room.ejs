@@ -460,7 +460,7 @@
         }
 
         .chat-container {
-            background-color: grey;
+            background-color: white;
             font-size: 13px;
             max-height: 200px;
             max-width: 100%;
@@ -472,7 +472,7 @@
 
         .chat-footer {
             width: 100%;
-            background-color: grey;
+            background-color: white;
         }
 
         .chat-send {
@@ -486,10 +486,21 @@
             width: 100%;
         }
 
+        #sending-message {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+        }
+
         .send-button {
-            border-radius: 50px;
-            width: 27px;
-            height: 27px;
+            width: 15% !important;
+            height: 90%;
+            background-color: #C2C2C2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .your-messages {
@@ -499,6 +510,10 @@
 
         .sender {
             margin: 0;
+        }
+
+        .your-messages > .sender {
+            display: none;
         }
 
         .your-message {
@@ -515,16 +530,31 @@
             justify-content: left;
         }
 
-        .inside-message {
+        .received-message > .inside-message {
             max-width: 50%;
-            background-color: white;
+            background-color: #525252;
+            color: white;
             border-radius: 10px;
+            border-top-left-radius: 5px !important;
             padding: 5px;
             overflow: hidden;
             display: flex;
             flex-wrap: wrap;
             word-break: break-all;
         }
+
+        .your-message > .inside-message {
+            max-width: 50%;
+            background-color: #525252;
+            color: white;
+            border-radius: 10px;
+            border-top-right-radius: 5px !important;
+            padding: 5px;
+            overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+            word-break: break-all;
+        } 
 
         .received-messages {
             text-align: left;
@@ -533,11 +563,13 @@
 
         .type-box {
             height: 90%;
-            color: black;
+            width: 70% !important;
+            color: white;
             width: 75% !important;
-            background-color: white;
-            border-radius: 10px;
+            background-color: #3D3D3D;
+            border-radius: 5px;
             padding: 5px;
+            margin-right: 5px;
         }
 
         .button-v2 {
@@ -821,6 +853,13 @@
             transition: opacity 2s ease;
         }
 
+        .hide-username {
+            visibility: hidden;
+            height: 0;
+            padding: 0;
+            margin: 0;
+        }
+
         .hidden {
             opacity: 0;
         }
@@ -1063,6 +1102,30 @@
         #video-container {
             transition: 1s;
         }
+
+        .message-container {
+            margin: 10px;
+        }
+
+        .message-time {
+            font-size: 10px;
+        }
+
+        .notification {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        .new-message-text {
+            text-align: center;
+        }
+        .new-message-line {
+            height: 1px;
+            background-color: #ccc;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
         </style>
 </head>
 
@@ -1088,15 +1151,15 @@
             <div class="invisible" id="chat-container">
                 <div class="chat-bar" id="chat-bar">
                     <div id="chat-bar-header">In Call Message</div>
-                    <div class="chat-container">
+                    <div class="chat-container" id="chat-container-id">
                         <div class="chat-messages" id="chat-messages-id">
                         </div>
                     </div>
                     <div class="chat-footer">
                         <div class="chat-send">
                             <form id="sending-message" autocomplete="off">
-                                <input class="type-box" id="message-input"/>
-                                <button class="send-button" id="send-message-button" type="submit">
+                                <input class="form-control type-box" id="message-input"/>
+                                <button class="btn send-button" id="send-message-button" type="submit">
                                     <i class="fas fa-paper-plane" aria-hidden="true"></i>
                                 </button>
                             </form>
@@ -1161,6 +1224,7 @@
                 </button>
                 <button disabled class="btn button-small-custom" id="user-chat-button">
                     <span id="user-chat-button-tooltip">Chat</span>
+                    <i class="fas fa-envelope notification invisible" style="color: red;" id="notification-element-id"></i>
                     <i class="fas fa-comment-dots" style="color: white;"></i>
                 </button>
                 <button disabled class="btn button-small-custom" id="share-link-button">
@@ -1178,9 +1242,9 @@
                     </ul>
                 </div>
             </button>
-            <!-- <button class="btn button-small-custom" id="console-log-button" style="color: white;">
+            <button class="btn button-small-custom" id="console-log-button" style="color: white;">
                 Log
-            </button> -->
+            </button>
         </div>
     </div>
 
