@@ -32,6 +32,14 @@ class Controller {
         }
     }
 
+    static register (req, res) {
+        try {
+            res.render('register')
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     static testing (req, res){
         try {
             res.render('testing')

@@ -70,7 +70,6 @@ function startCarousel() {
     setInterval(nextSlide, 5000); // Change slide every 5 seconds (adjust the interval as needed)
 }
 
-// Start the carousel
 startCarousel();
 },{"./store":2}],2:[function(require,module,exports){
 let state = {

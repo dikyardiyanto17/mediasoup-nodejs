@@ -24,7 +24,6 @@ const init = async () => {
         let ae = document.getElementById("alert-error");
         ae.className = "show";
         ae.innerHTML = `Error : ${error.message}`
-        // Show Warning
         setTimeout(() => { 
             ae.className = ae.className.replace("show", ""); 
             ae.innerHTML = ``
