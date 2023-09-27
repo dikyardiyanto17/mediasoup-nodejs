@@ -439,6 +439,7 @@
         }
 
         .chat-bar {
+            border-radius: 5px;
             background-color: #f1f1f1;
             border: 1px solid #d3d3d3;
             max-width: 300px;
@@ -451,12 +452,15 @@
         }
 
         #chat-bar-header {
+            border-top-right-radius: 5px;
+            border-top-left-radius: 5px;
             background-color: #2196f3;
             color: #fff;
             cursor: move;
             max-width: 300px;
             padding: 10px;
             z-index: 6;
+
         }
 
         .chat-container {
@@ -495,12 +499,16 @@
         }
 
         .send-button {
+            margin-left: 0;
             width: 15% !important;
             height: 90%;
-            background-color: #C2C2C2;
+            background-color: #2196f3;
             display: flex;
             justify-content: center;
             align-items: center;
+            border-radius: 0 !important;
+            border-top-right-radius: 5px !important;
+            border-bottom-right-radius: 5px !important;
         }
 
         .your-messages {
@@ -532,8 +540,8 @@
 
         .received-message > .inside-message {
             max-width: 50%;
-            background-color: #525252;
-            color: white;
+            background-color: #D2D6DE;
+            color: black;
             border-radius: 10px;
             border-top-left-radius: 5px !important;
             padding: 5px;
@@ -545,8 +553,8 @@
 
         .your-message > .inside-message {
             max-width: 50%;
-            background-color: #525252;
-            color: white;
+            background-color: #D2D6DE;
+            color: black;
             border-radius: 10px;
             border-top-right-radius: 5px !important;
             padding: 5px;
@@ -564,12 +572,14 @@
         .type-box {
             height: 90%;
             width: 70% !important;
-            color: white;
+            color: black !important;
             width: 75% !important;
-            background-color: #3D3D3D;
-            border-radius: 5px;
+            background-color: white !important;
+            border-radius: 0 !important;
+            border-bottom-left-radius: 5px !important;
+            border-top-left-radius: 5px !important;
             padding: 5px;
-            margin-right: 5px;
+            margin-right: 0;
         }
 
         .button-v2 {
@@ -774,18 +784,6 @@
 
         .status-connected {
             background-color: green;
-        }
-
-        .chat-bar {
-            background-color: #f1f1f1;
-            border: 1px solid #d3d3d3;
-            max-width: 300px;
-            min-width: 300px;
-            position: absolute;
-            right: 0;
-            text-align: center;
-            top: 100px;
-            z-index: 6;
         }
 
         .user-bar {
@@ -1126,6 +1124,12 @@
             margin-top: 5px;
             margin-bottom: 10px;
         }
+
+        .send-text {
+            font-size: 13px;
+            color: white;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
         </style>
 </head>
 
@@ -1158,9 +1162,10 @@
                     <div class="chat-footer">
                         <div class="chat-send">
                             <form id="sending-message" autocomplete="off">
-                                <input class="form-control type-box" id="message-input"/>
+                                <input class="form-control type-box" id="message-input" placeholder="Type Message..."/>
                                 <button class="btn send-button" id="send-message-button" type="submit">
-                                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                                    <!-- <i class="fas fa-paper-plane" aria-hidden="true"></i> -->
+                                    <span class="send-text">Send</span>
                                 </button>
                             </form>
                         </div>
