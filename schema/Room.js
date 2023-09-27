@@ -7,11 +7,12 @@ const roomSchema = new Schema({
         required: true
     },
     participants: [{
-        user_id: { type: mongoose.ObjectId}
+        type: Schema.Types.ObjectId,
+        ref: 'User'
     }],
     password: {
         type: String,
-        required: true
+        required: false
     }
 })
 

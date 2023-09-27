@@ -21,7 +21,8 @@
             width: 100vw;
             height: 100vh;
             display: flex;
-            flex-wrap: wrap ;
+            flex-wrap: wrap;
+            position: relative;
         }
 
         .left-bar {
@@ -151,11 +152,32 @@
         .button-custom-new-meeting {
             height: 40px;
         }
+
+        #alert-error {
+            visibility: hidden;
+            color: #fff;
+            background-color: #333;
+            margin-left: -125px;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            top: 30px;
+            left: 50%;
+            z-index: 1;
+            position: absolute;
+        }
+
+        #alert-error.show {
+            visibility: visible;
+            -webkit-animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+            animation: fadein-as 0.5s, fadeout-as 0.5s 2.5s;
+        }
     </style>
 </head>
 
 <body>
     <div class="full-container">
+        <span id="alert-error"></span>
         <section class="left-bar text-center">
             <img class="icons-meet" src="/assets/pictures/icons-meeting.png"/>
             <div>

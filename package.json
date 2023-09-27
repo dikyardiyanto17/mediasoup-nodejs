@@ -8,7 +8,9 @@
     "start": "nodemon app.js",
     "watch": "watchify public/javascript/room.js -o public/msbundle.js -v",
     "watch2": "watchify public/javascript/home.js -o public/homebundle.js -v",
-    "watch3": "watchify public/javascript/lobby.js -o public/lobbybundle.js -v"
+    "watch3": "watchify public/javascript/lobby.js -o public/lobbybundle.js -v",
+    "watch4": "watchify public/javascript/login.js -o public/loginbundle.js -v",
+    "watch5": "watchify public/javascript/register.js -o public/registerbundle.js -v"
   },
   "keywords": [],
   "author": "",

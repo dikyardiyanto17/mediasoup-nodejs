@@ -1,15 +1,50 @@
 const store = require('./store')
 const joinForm = document.getElementById('join-form');
 const url = window.location
-joinForm.addEventListener('submit', (e) => {
+const { getUser } = require('../api/user');
+const { createRoom, findRoom } = require('../api/room');
+joinForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const roomId = document.getElementById('room-id').value
-    const goTo = url+'lobby/'+roomId
-    store.setRoom(roomId)
-    window.location.href = goTo;
+    try {
+        const roomId = document.getElementById('room-id').value
+        const data = { roomName: roomId }
+        const response = await findRoom(data)
+        if (response.status){
+            const goTo = url+'lobby/'+roomId
+            store.setRoom(roomId)
+            window.location.href = goTo;
+        } else throw response
+        
+    } catch (error) {
+        console.log(error)
+        let ae = document.getElementById("alert-error");
+        ae.className = "show";
+        ae.innerHTML = `Error : ${error.message}`
+        setTimeout(() => { 
+            ae.className = ae.className.replace("show", ""); 
+            ae.innerHTML = ``
+        }, 3000);
+        console.log(error.message)
+    }
 });
 
-function generateRandomId(length, separator = '-', separatorInterval = 4) {
+const initialization = async () => {
+    try {
+        const data = await getUser()
+        if (data.status){
+            console.log('do nothing')
+        } else throw data
+    } catch (error) {
+        console.log(error)
+        if (error?.name == 'JsonWebTokenError'){
+            const goTo = url+'login'
+            window.location.href = goTo;
+        }
+    }
+}
+initialization()
+
+const generateRandomId = (length, separator = '-', separatorInterval = 4) => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let randomId = '';
 
@@ -28,10 +63,12 @@ function generateRandomId(length, separator = '-', separatorInterval = 4) {
 const newMeetingButton = document.getElementById('new-meeting')
 newMeetingButton.addEventListener('click', (e) => {
     const id = generateRandomId(12)
-    localStorage.setItem('room-id', id);
-    const goTo = url+'lobby/'+id
-    store.setRoom(roomId)
-    window.location.href = goTo;
+    const data = { roomName: id }
+    createRoom(data)
+    // localStorage.setItem('room-id', id);
+    // const goTo = url+'lobby/'+id
+    // store.setRoom(roomId)
+    // window.location.href = goTo;
 })
 
 

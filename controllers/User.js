@@ -49,6 +49,16 @@ class Users {
 			next(error)
 		}
 	}
+
+	static async getUser (req, res, next) {
+		try {
+			const { id } = req.user
+			const user = await User.findById(id)
+			res.status(200).json(user)
+		} catch (error) {
+			next(error)
+		}
+	}
 }
 
 module.exports = { Users }

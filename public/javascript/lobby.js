@@ -1,3 +1,4 @@
+const { getUser } = require('../api/user');
 const store = require('./store')
 let localVideo = document.getElementById('local-video')
 
@@ -11,7 +12,26 @@ let isAudioActive = true
 let isVideoActive = true
 let videoImage = document.getElementById('video-image')
 
-const init = async () => {
+const initialization = async () => {
+    try {
+        const data = await getUser()
+        if (data.status){
+            console.log('do nothing')
+        } else throw data
+    } catch (error) {
+        const redirect = window.location
+        console.log('redirect : ', redirect)
+        console.log(error)
+
+        // if (error?.name == 'JsonWebTokenError'){
+        //     const goTo = url+'login'
+        //     window.location.href = goTo;
+        // }
+    }
+}
+initialization()
+
+const initStream = async () => {
     try {
         localStorage.setItem('room_id', roomName)
         const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true})
@@ -27,7 +47,7 @@ const init = async () => {
             ae.className = ae.className.replace("show", ""); 
             ae.innerHTML = ``
         }, 3000);
-        console.log(error.message)
+        console.log(error)
     }
 }
 
@@ -398,4 +418,4 @@ buttonSubmitHover.addEventListener('mouseout', (e) => {
         buttonSubmitHover.style.backgroundColor = '#2c99ed'
     }
 })
-init()
+initStream()

@@ -1,4 +1,29 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const getUser = async () => {
+    try {
+        const api = 'https://192.168.18.68:3001/api/user'
+        const response = await fetch(api, {
+            method: "get",
+            headers: {
+                "Content-Type": "application/json",
+                'access_token': localStorage.getItem('access_token')
+            },
+        })
+        if (!response.ok){
+            const error = await response.json()
+            throw { name : error.name, message: error.message, status: false }
+        } else {
+            let responseData = await response.json()
+            return data = {...responseData, status: true}
+        }
+    } catch (error) {
+        return error
+    }
+}
+
+module.exports = { getUser }
+},{}],2:[function(require,module,exports){
+const { getUser } = require('../api/user');
 const store = require('./store')
 let localVideo = document.getElementById('local-video')
 
@@ -12,7 +37,26 @@ let isAudioActive = true
 let isVideoActive = true
 let videoImage = document.getElementById('video-image')
 
-const init = async () => {
+const initialization = async () => {
+    try {
+        const data = await getUser()
+        if (data.status){
+            console.log('do nothing')
+        } else throw data
+    } catch (error) {
+        const redirect = window.location
+        console.log('redirect : ', redirect)
+        console.log(error)
+
+        // if (error?.name == 'JsonWebTokenError'){
+        //     const goTo = url+'login'
+        //     window.location.href = goTo;
+        // }
+    }
+}
+initialization()
+
+const initStream = async () => {
     try {
         localStorage.setItem('room_id', roomName)
         const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true})
@@ -28,7 +72,7 @@ const init = async () => {
             ae.className = ae.className.replace("show", ""); 
             ae.innerHTML = ``
         }, 3000);
-        console.log(error.message)
+        console.log(error)
     }
 }
 
@@ -399,8 +443,8 @@ buttonSubmitHover.addEventListener('mouseout', (e) => {
         buttonSubmitHover.style.backgroundColor = '#2c99ed'
     }
 })
-init()
-},{"./store":2}],2:[function(require,module,exports){
+initStream()
+},{"../api/user":1,"./store":3}],3:[function(require,module,exports){
 let state = {
     localStream: null,
     room: ''
@@ -425,4 +469,4 @@ const getState = () => {
 }
 
 module.exports = { setLocalStream, getState, setRoom }
-},{}]},{},[1]);
+},{}]},{},[2]);
