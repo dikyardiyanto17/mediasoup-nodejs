@@ -307,6 +307,12 @@ socket.on('joinRoom', (data) => {
 - Adding new message notification
 - Change chat design
 
+### 0.2.7
+- Adding close chat button and change notification new message color icons
+- Change chat design
+- Adding mic and camera in participants list
+- Fixed bug user display messed up when screensharing
+
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)
 - Agak jeda

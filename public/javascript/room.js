@@ -473,12 +473,30 @@ const createDevice = async () => {
 }
 
 // Create User Online List
-const createUserList = (username) => {
+const createUserList = (username, socketId, cameraTrigger = true) => {
     let userList = document.getElementById('user-list')
-    let myUsername = document.createElement('p')
-    myUsername.innerHTML = username
-    myUsername.id = 'user-'+username
-    userList.appendChild(myUsername)
+    let isExist = document.getElementById('user-'+socketId)
+    let cameraInitSetting = ''
+    if (cameraTrigger){
+        cameraInitSetting = 'fas fa-video'
+    } else {
+        cameraInitSetting = 'fas fa-video-slash'
+    }
+    if (!isExist){
+        let elementUser = document.createElement('div')
+        elementUser.id = 'user-' + socketId
+        elementUser.className = 'user-list-container'
+        userList.appendChild(elementUser)
+        let myUsername = document.createElement('span')
+        myUsername.innerHTML = username
+        myUsername.id = 'ulu-'+ socketId
+        elementUser.appendChild(myUsername)
+        let icons = document.createElement('div')
+        icons.className = 'user-list-icons-container'
+        icons.id = 'uli-' + socketId
+        icons.innerHTML = `<section class="user-list-microphone"><img src="/assets/pictures/micOn.png" id="ulim-${socketId}"/></section><section class="user-list-camera"><i class="${cameraInitSetting}" id="ulic-${socketId}" style="color: #ffffff;"></i></section>`
+        elementUser.appendChild(icons)
+    }
 }
 
 const showLoadingScreen = () => {
@@ -557,7 +575,7 @@ const createSendTransport = () => {
             if (e == 'connected'){
                 hideLoadingScreen()
                 producerStatus.innerHTML = 'Connected'
-                createUserList(localStorage.getItem('username'))
+                createUserList(localStorage.getItem('username'), socket.id, isCameraOn)
                 // console.log('- Status Element : ', )
                 connectionStatusElement.style.color = 'green'
 
@@ -782,13 +800,16 @@ function checkIfUserIsDisplayed(videoProducerId, audioProducerId, isMicActive, m
             }
         } else {
 
+            let micIconUserList = document.getElementById('ulim-'+socketId)
             let micPicture = videoId.querySelector('img');
             let audioId = document.getElementById(audioProducerId);
             audioId.srcObject.getAudioTracks()[0].enabled = isMicActive;
 
             if (!isMicActive) {
+                micIconUserList.src = '/assets/pictures/micOff.png'
                 micPicture.src = "/assets/pictures/micOff.png";
             } else {
+                micIconUserList.src = '/assets/pictures/micOn.png'
                 micPicture.src = "/assets/pictures/micOn.png";
             }
         }
@@ -899,7 +920,7 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
                 // Deleting Producers
                 if (producersDetails[firstKey][secondKey] == remoteProducerId) {
                     // console.log('- Deleting : ', producersDetails[firstKey])
-                    let deleteUser = document.getElementById('user-'+producersDetails[firstKey].name)
+                    let deleteUser = document.getElementById('user-'+firstKey)
                     deleteUser.remove()
                     delete producersDetails[firstKey]
                     break
@@ -1394,7 +1415,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                 
                 // Make a List For Every User
                 if (params.kind == 'video' && !check){
-                    createUserList(params?.username)
+                    createUserList(params?.username, params.producerOwnerSocket)
                     totalUsers++
                 }
 
@@ -1579,6 +1600,7 @@ const micImage = document.getElementById("mic-image");
 micButton.addEventListener("click", () => {
     let localMic = document.getElementById('local-mic')
     let stream = store.getState()
+    let userMicIconUserList = document.getElementById('ulim-'+socket.id)
 
     if (lockedMic) {
         let ae = document.getElementById("alert-error");
@@ -1601,6 +1623,7 @@ micButton.addEventListener("click", () => {
         micImage.src = "/assets/pictures/micOff.png";
         localStorage.setItem('is_mic_active', false)
         isMicOn = false
+        userMicIconUserList.src = '/assets/pictures/micOff.png'
     } else {
         for (const key in producersDetails) {
             socket.emit('mic-config', ({ videoProducerId: videoProducer.id, audioProducerId: audioProducer.id, socketId: key, isMicActive: true }))
@@ -1613,6 +1636,7 @@ micButton.addEventListener("click", () => {
         micButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
         localStorage.setItem('is_mic_active', true)
         isMicOn = true
+        userMicIconUserList.src = '/assets/pictures/micOn.png'
     }
 });
 
@@ -1747,6 +1771,12 @@ const SwitchingCamera = async () => {
 const isVideoDisplayed = async (data) => {
     let maxAttempts = 10
     let attempts = 0
+    let videoUserListIcons = document.getElementById('ulic-'+data.videoStreamId)
+    if (data.isCameraActive){
+        videoUserListIcons.className = 'fas fa-video'
+    } else {
+        videoUserListIcons.className = 'fas fa-video-slash'
+    }
     const checkVideoId = () => {
         let imageId = document.getElementById('img-' + data.videoProducerId);
 
@@ -1781,11 +1811,13 @@ const turnOffCamera = async () => {
     allStream[socket.id].video.status = false
     stream.getVideoTracks()[0].enabled = true
     isCameraOn = false
+    let cameraIconsUserList = document.getElementById('ulic-'+socket.id)
     let cameraIcons = document.getElementById('turn-on-off-camera-icons')
     let cameraButtons = document.getElementById('user-turn-on-off-camera-button')
     cameraButtons.className = 'btn button-small-custom-clicked'
     cameraIcons.classList.remove('fa-video');
     cameraIcons.classList.add('fa-video-slash');
+    cameraIconsUserList.className = 'fas fa-video-slash'
     let displayedVideo = document.getElementById('img-current-user-video')
     if (displayedVideo){
         displayedVideo.className = 'video-off'
@@ -1803,11 +1835,13 @@ const turnOnCamera = async () => {
     allStream[socket.id].video.status = true
     stream.getVideoTracks()[0].enabled = true
     isCameraOn = true
+    let cameraIconsUserList = document.getElementById('ulic-'+socket.id)
     let cameraIcons = document.getElementById('turn-on-off-camera-icons')
     let cameraButtons = document.getElementById('user-turn-on-off-camera-button')
     cameraButtons.className = 'btn button-small-custom'
     cameraIcons.classList.add('fa-video');
     cameraIcons.classList.remove('fa-video-slash');
+    cameraIconsUserList.className = 'fas fa-video'
     let displayedVideo = document.getElementById('img-current-user-video')
     if (displayedVideo){
         displayedVideo.className = 'video-on'
@@ -2105,6 +2139,17 @@ chatButton.addEventListener('click', () => {
         }
         chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
     }
+})
+
+const chatButtonClose = document.getElementById('close-chat-button')
+chatButtonClose.addEventListener('click', () => {
+    const chatContainer = document.getElementById('chat-container')
+    chatContainer.className = 'invisible'
+    let isLineNewMessageExist = document.getElementById('new-message-notification')
+    if (isLineNewMessageExist){
+        isLineNewMessageExist.remove()
+    }
+    chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
 })
 
 const scrollToBottom = () => {

@@ -452,6 +452,7 @@
         }
 
         #chat-bar-header {
+            position: relative;
             border-top-right-radius: 5px;
             border-top-left-radius: 5px;
             background-color: #2196f3;
@@ -753,6 +754,11 @@
                 margin-left: 5px;
                 margin-right: 5px;
             } */
+
+            .user-video-container-screen-sharing {
+                width: 30%;
+                height: 15%;
+            }
         }
 
         .connection-status {
@@ -800,7 +806,7 @@
         }
 
         #user-bar-header {
-            background: #44474A;
+            background: #2196f3;
             color: #fff;
             cursor: move;
             max-width: 300px;
@@ -1130,6 +1136,37 @@
             color: white;
             font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
         }
+
+        .user-list-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px;
+        }
+
+        .user-list-icons-container{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .user-list-microphone {
+            border-radius: 50%;
+            background-color: #44474A;
+            padding: 5px;
+            margin: 5px;
+        }
+        .user-list-camera {
+            border-radius: 50%;
+            background-color: #44474A;
+            padding: 5px;
+            margin: 5px;
+        }
+        #close-chat-button {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+        }
         </style>
 </head>
 
@@ -1154,7 +1191,7 @@
             </div> -->
             <div class="invisible" id="chat-container">
                 <div class="chat-bar" id="chat-bar">
-                    <div id="chat-bar-header">In Call Message</div>
+                    <div id="chat-bar-header"> <span>In Call Message</span><i class="far fa-times-circle" style="background-color: red; border-radius: 50%; cursor: pointer;" id="close-chat-button"></i></div>
                     <div class="chat-container" id="chat-container-id">
                         <div class="chat-messages" id="chat-messages-id">
                         </div>
@@ -1229,7 +1266,7 @@
                 </button>
                 <button disabled class="btn button-small-custom" id="user-chat-button">
                     <span id="user-chat-button-tooltip">Chat</span>
-                    <i class="fas fa-envelope notification invisible" style="color: red;" id="notification-element-id"></i>
+                    <i class="fas fa-envelope notification invisible" style="color: yellow;" id="notification-element-id"></i>
                     <i class="fas fa-comment-dots" style="color: white;"></i>
                 </button>
                 <button disabled class="btn button-small-custom" id="share-link-button">
