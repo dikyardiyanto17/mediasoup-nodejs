@@ -24,5 +24,6 @@ router.use(authentication)
 router.get('/api/user', Users.getUser)
 router.post('/api/room',Rooms.createRoom)
 router.get('/api/room/:roomId',Rooms.findRoom)
+router.put('/api/room', Rooms.joinRoom)
 
 module.exports = router

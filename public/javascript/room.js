@@ -3,6 +3,9 @@ const RecordRTC = require('recordrtc')
 const io = require('socket.io-client')
 const socket = io('/')
 const store = require('./store')
+const { getUser } = require("../api/user")
+const { findRoom, joinOrQuitRoomParticipants } = require("../api/room")
+const { checkInLobbyRoom } = require("../function")
 // console.log('- Document : ', document)
 
 // Get Room Id
@@ -716,10 +719,18 @@ socket.on('error-server', (error) => {
 })
 
 // Initiating When Socket is Estabilished
-socket.on('connection-success', ({ socketId }) => {
+socket.on('connection-success', async ({ socketId }) => {
     console.log(socketId)
-    checkLocalStorage()
-    getLocalStream()
+    const isValid = await checkInLobbyRoom()
+    if (isValid){
+        const isJoin = await joinOrQuitRoomParticipants('Join')
+        if (isJoin.status){
+            console.log(isJoin)
+            await checkLocalStorage()
+            await getLocalStream()
+
+        }
+    }
 })
 
 // Mute All
@@ -2084,6 +2095,7 @@ shareButton.addEventListener('click', () => {
 // Hang Up Button
 const hangUpButton = document.getElementById('user-hang-up-button')
 hangUpButton.addEventListener('click', () => {
+    joinOrQuitRoomParticipants('Quit')
     window.location.href = window.location.origin
 })
 

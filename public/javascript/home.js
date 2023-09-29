@@ -1,8 +1,8 @@
 const store = require('./store')
 const joinForm = document.getElementById('join-form');
 const url = window.location
-const { getUser } = require('../api/user');
 const { createRoom, findRoom } = require('../api/room');
+const { checkUserInHomePage } = require('../function');
 joinForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
@@ -16,7 +16,7 @@ joinForm.addEventListener('submit', async (e) => {
         } else throw response
         
     } catch (error) {
-        console.log(error)
+        console.log('- Error : ', error)
         let ae = document.getElementById("alert-error");
         ae.className = "show";
         ae.innerHTML = `Error : ${error.message}`
@@ -28,21 +28,7 @@ joinForm.addEventListener('submit', async (e) => {
     }
 });
 
-const initialization = async () => {
-    try {
-        const data = await getUser()
-        if (data.status){
-            console.log('do nothing')
-        } else throw data
-    } catch (error) {
-        console.log(error)
-        if (error?.name == 'JsonWebTokenError'){
-            const goTo = url+'login'
-            window.location.href = goTo;
-        }
-    }
-}
-initialization()
+checkUserInHomePage()
 
 const generateRandomId = (length, separator = '-', separatorInterval = 4) => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

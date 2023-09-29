@@ -19,7 +19,7 @@ class Users {
 			}
 			const hashPasswordUser = hashPassword(password)
 			await User.create({ email, password: hashPasswordUser, authority: 'Participants' })
-			return res.status(201).json({ message: "Successfully Register" })
+			await res.status(201).json({ message: "Successfully Register" })
 		} catch (error) {
 			next(error)
 		}
@@ -44,7 +44,7 @@ class Users {
 			}
 			const encodedToken = { id: user._id }
 			const access_token = encodeToken(encodedToken)
-			res.status(201).json({ access_token })
+			await res.status(201).json({ access_token })
 		} catch (error) {
 			next(error)
 		}
@@ -54,7 +54,7 @@ class Users {
 		try {
 			const { id } = req.user
 			const user = await User.findById(id)
-			res.status(200).json(user)
+			await res.status(200).json(user)
 		} catch (error) {
 			next(error)
 		}

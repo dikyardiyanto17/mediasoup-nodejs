@@ -1,17 +1,10 @@
-const { getUser } = require("../api/user")
+const { checkUser } = require("../function");
+const { goToHomePage } = require("../function/url");
 
 document.addEventListener("DOMContentLoaded", function () {
-	const initialization = async () => {
-		try {
-			const data = await getUser()
-			if (data.status){
-				window.location.href = window.location.origin;
-			} else throw data
-		} catch (error) {
-			console.log(error)
-		}
-	}
-	initialization()
+
+	checkUser()
+	
 	const loginForm = document.getElementById("login-form")
 
 	loginForm.addEventListener("submit", async (event) => {
@@ -38,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
 				const responseData = await response.json()
 				console.log('- Login Success')
 				localStorage.setItem("access_token", responseData.access_token)
-				window.location.href = window.location.origin
+				goToHomePage()
 			} else {
 				const error = await response.json()
 				throw { error }

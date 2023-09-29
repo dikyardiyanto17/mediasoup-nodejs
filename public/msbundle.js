@@ -28132,11 +28132,190 @@ exports.hasBinary = hasBinary;
 })(typeof window === 'object' ? window : this);
 
 },{}],84:[function(require,module,exports){
+const { getRoomName } = require("../function/url")
+
+const createRoom = async (data) => {
+	try {
+		const api = "https://192.168.18.68:3001/api/room"
+		const response = await fetch(api, {
+			method: "post",
+			headers: {
+				"Content-Type": "application/json",
+				access_token: localStorage.getItem("access_token"),
+			},
+			body: JSON.stringify(data),
+		})
+		if (!response.ok) {
+			const error = await response.json()
+			throw { name: error.name, message: error.message, status: false }
+		} else {
+			let responseData = await response.json()
+			return (data = { ...responseData, status: true })
+		}
+	} catch (error) {
+		return error
+	}
+}
+
+const findRoom = async (data) => {
+	try {
+		const api = "https://192.168.18.68:3001/api/room/" + data.roomName
+		const response = await fetch(api, {
+			method: "get",
+			headers: {
+				"Content-Type": "application/json",
+				access_token: localStorage.getItem("access_token"),
+			},
+		})
+		if (!response.ok) {
+			const error = await response.json()
+			throw { name: error.name, message: error.message, status: false }
+		} else {
+			let responseData = await response.json()
+			return data = { ...responseData, status: true }
+		}
+	} catch (error) {
+		return error
+	}
+}
+
+const joinOrQuitRoomParticipants = async (type) => {
+	try {
+		const roomName = await getRoomName()
+		const data = { roomName, type }
+		const api = "https://192.168.18.68:3001/api/room"
+		const response = await fetch(api, {
+			method: "put",
+			headers: {
+				"Content-Type": "application/json",
+				access_token: localStorage.getItem("access_token"),
+			},
+			body: JSON.stringify(data),
+		})
+		if (!response.ok) {
+			const error = await response.json()
+			throw { name: error.name, message: error.message, status: false }
+		} else {
+			let responseData = await response.json()
+			return { ...responseData, status: true }
+		}
+	} catch (error) {
+		return error
+	}
+}
+
+module.exports = { createRoom, findRoom, joinOrQuitRoomParticipants }
+
+},{"../function/url":87}],85:[function(require,module,exports){
+const getUser = async () => {
+    try {
+        const api = 'https://192.168.18.68:3001/api/user'
+        const response = await fetch(api, {
+            method: "get",
+            headers: {
+                "Content-Type": "application/json",
+                'access_token': localStorage.getItem('access_token')
+            },
+        })
+        if (!response.ok){
+            const error = await response.json()
+            throw { name : error.name, message: error.message, status: false }
+        } else {
+            let responseData = await response.json()
+            return data = {...responseData, status: true}
+        }
+    } catch (error) {
+        return error
+    }
+}
+
+module.exports = { getUser }
+},{}],86:[function(require,module,exports){
+const { findRoom } = require("../api/room")
+const { getUser } = require("../api/user")
+const { goToHomePage, goToLoginPage, getRoomName } = require("./url")
+
+const checkUser = async () => {
+	try {
+		const data = await getUser()
+		if (data.status) {
+			goToHomePage()
+		} else throw data
+	} catch (error) {
+		console.log(error)
+	}
+}
+
+const checkUserInHomePage = async () => {
+	try {
+		const data = await getUser()
+		if (!data.status) {
+            goToLoginPage()
+		} else return data
+	} catch (error) {
+		console.log('- Error : ',error)
+	}
+}
+
+const checkInLobbyRoom = async () => {
+    try {
+        const userData = await getUser()
+        if (!userData.status) throw userData
+        const roomName = await getRoomName()
+        const data = { roomName }
+        const roomData = await findRoom(data)
+        if (!roomData.status) throw roomData
+        return true
+    } catch (error) {
+        console.log('- Error : ',error)
+        if (error?.name == 'JsonWebTokenError'){
+            goToLoginPage()
+        } else if (error?.name == 'Invalid') {
+            let ae = document.getElementById("alert-error");
+            ae.className = "show";
+            ae.innerHTML = `Error : ${error.message}`
+            setTimeout(() => { 
+                ae.className = ae.className.replace("show", ""); 
+                ae.innerHTML = ``
+                goToHomePage()
+            }, 3000);
+        }
+    }
+}
+
+module.exports = { checkUser, checkUserInHomePage, checkInLobbyRoom }
+
+},{"../api/room":84,"../api/user":85,"./url":87}],87:[function(require,module,exports){
+const origin = window.location.origin
+const getRoomName = () => {
+	const url = window.location.pathname
+	const parts = url.split("/")
+	const roomName = parts[2]
+    return roomName
+}
+
+const goToLoginPage = () => {
+    window.location.href = origin + '/login'
+}
+
+const goToRegisterPage = () => {
+    window.location.href = origin + '/register'
+}
+
+const goToHomePage = () => {
+    window.location.href = origin
+}
+
+module.exports = { getRoomName, goToHomePage, goToLoginPage, goToRegisterPage }
+},{}],88:[function(require,module,exports){
 const mediasoupClient = require("mediasoup-client")
 const RecordRTC = require('recordrtc')
 const io = require('socket.io-client')
 const socket = io('/')
 const store = require('./store')
+const { getUser } = require("../api/user")
+const { findRoom, joinOrQuitRoomParticipants } = require("../api/room")
+const { checkInLobbyRoom } = require("../function")
 // console.log('- Document : ', document)
 
 // Get Room Id
@@ -28850,10 +29029,18 @@ socket.on('error-server', (error) => {
 })
 
 // Initiating When Socket is Estabilished
-socket.on('connection-success', ({ socketId }) => {
+socket.on('connection-success', async ({ socketId }) => {
     console.log(socketId)
-    checkLocalStorage()
-    getLocalStream()
+    const isValid = await checkInLobbyRoom()
+    if (isValid){
+        const isJoin = await joinOrQuitRoomParticipants('Join')
+        if (isJoin.status){
+            console.log(isJoin)
+            await checkLocalStorage()
+            await getLocalStream()
+
+        }
+    }
 })
 
 // Mute All
@@ -30218,6 +30405,7 @@ shareButton.addEventListener('click', () => {
 // Hang Up Button
 const hangUpButton = document.getElementById('user-hang-up-button')
 hangUpButton.addEventListener('click', () => {
+    joinOrQuitRoomParticipants('Quit')
     window.location.href = window.location.origin
 })
 
@@ -30525,7 +30713,7 @@ optionalButtonTrigger.addEventListener('click', (e) => {
 //     })
 // })
 
-},{"./store":85,"mediasoup-client":62,"recordrtc":69,"socket.io-client":75}],85:[function(require,module,exports){
+},{"../api/room":84,"../api/user":85,"../function":86,"./store":89,"mediasoup-client":62,"recordrtc":69,"socket.io-client":75}],89:[function(require,module,exports){
 let state = {
     localStream: null,
     room: ''
@@ -30550,4 +30738,4 @@ const getState = () => {
 }
 
 module.exports = { setLocalStream, getState, setRoom }
-},{}]},{},[84]);
+},{}]},{},[88]);

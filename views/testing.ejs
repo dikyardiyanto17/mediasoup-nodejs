@@ -4,38 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cursor Movement Detection</title>
-    <link rel="stylesheet" href="styles.css">
     <style>
-        /* Style for the element */
-        #element-to-control {
-            position: fixed;
-            width: 200px;
-            height: 100px;
-            background-color: #3498db;
-            color: #fff;
-            padding: 10px;
-            transition: opacity 0.5s ease;
-            pointer-events: none; /* Allows clicks to go through the element */
+        * {
+            margin: 0;
+            padding: 0;
         }
-
-        .hidden {
-            opacity: 0;
-        }
-
-        .audio-visualizer {
-            border-radius: 50%;
-            height: 20px;
-            width: 20px;
-            background-color: blue; /* Set the background to transparent */
-            box-shadow: inset 0 0 0 0px blue, 0 0 0 10px red;
+        .full-container {
+            width: 100vw;
+            height: 100vh;
+            background-color: #1F1F1F;
         }
     </style>
 </head>
 <body>
-    <!-- Element to be hidden/showed -->
-    <div id="element-to-control" class="hidden">This is the element</div>
-    <button>Hello World</button>
-    <canvas class="audio-visualizer" id="av-current-user-audio"></canvas>
+    <div class="full-container">
+        <button>Hello World</button>
+    </div>
     <script src="/testing.js"></script>
 </body>
 </html>

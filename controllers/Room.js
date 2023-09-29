@@ -9,9 +9,9 @@ class Rooms {
             }
 			const room = await Room.findOne({ name: roomId })
             if (!room){
-                throw { name: 'Invalid', message: "Invalid Room/Password"}
+                throw { name: 'Invalid', message: "Invalid Room"}
             }
-			res.status(200).json(room)
+			await res.status(200).json(room)
 		} catch (error) {
 			next(error)
 		}
@@ -29,7 +29,37 @@ class Rooms {
 				participants: [id]
 			});
 
-			res.status(201).json(room);
+			await res.status(201).json(room);
+		} catch (error) {
+			next(error)
+		}
+	}
+
+	static async joinRoom (req, res, next) {
+		try {
+			const { roomName, type } = req.body
+			const { id } = req.user
+			if (!roomName){
+				throw { name: 'Bad Request', message: "Room ID Is Required" }
+            }
+
+			const room = await Room.find({name: roomName})
+			if (type == 'Join'){
+				const isExist = room[0].participants.find(data => data == id)
+				if (!isExist) {
+					room[0].participants.push(id)
+					room[0].save()
+					await res.status(200).json({message: 'Join Success'})
+				} else {
+					await res.status(200).json({message: 'Already Joined'})
+				}
+			} else {
+				console.log('- QUIT : ', id)
+				const newParticipants = room[0].participants.filter(data => data != id)
+				room[0].participants = newParticipants
+				room[0].save()
+				await res.status(204)
+			}
 		} catch (error) {
 			next(error)
 		}

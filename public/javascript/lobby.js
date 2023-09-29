@@ -1,4 +1,4 @@
-const { getUser } = require('../api/user');
+const { checkInLobbyRoom } = require('../function');
 const store = require('./store')
 let localVideo = document.getElementById('local-video')
 
@@ -14,19 +14,10 @@ let videoImage = document.getElementById('video-image')
 
 const initialization = async () => {
     try {
-        const data = await getUser()
-        if (data.status){
-            console.log('do nothing')
-        } else throw data
+        const isValid = await checkInLobbyRoom()
+        if (isValid) await initStream()
     } catch (error) {
-        const redirect = window.location
-        console.log('redirect : ', redirect)
-        console.log(error)
-
-        // if (error?.name == 'JsonWebTokenError'){
-        //     const goTo = url+'login'
-        //     window.location.href = goTo;
-        // }
+        console.log('- Error : ',error)
     }
 }
 initialization()
@@ -418,4 +409,3 @@ buttonSubmitHover.addEventListener('mouseout', (e) => {
         buttonSubmitHover.style.backgroundColor = '#2c99ed'
     }
 })
-initStream()
