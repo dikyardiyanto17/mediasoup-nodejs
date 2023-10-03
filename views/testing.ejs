@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cursor Movement Detection</title>
-    <link rel="stylesheet" href="styles.css">
     <style>
         /* Style for the element */
         #element-to-control {
@@ -29,13 +28,38 @@
             background-color: blue; /* Set the background to transparent */
             box-shadow: inset 0 0 0 0px blue, 0 0 0 10px red;
         }
+        .video-container {
+            position: relative;
+            height: 500px;
+            width: 750px;
+            display: flex;
+        }
+
+        .face-recognition {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body>
+    <!-- <video id="video" width="600" height="450" autoplay></video> -->
     <!-- Element to be hidden/showed -->
-    <div id="element-to-control" class="hidden">This is the element</div>
+    <div class="video-container" id="video-container">
+        <video id="video"autoplay></video>
+        <div class="face-recognition" id="face-recognition"></div>
+    </div>
+    <!-- <div id="element-to-control" class="hidden">This is the element</div>
     <button>Hello World</button>
-    <canvas class="audio-visualizer" id="av-current-user-audio"></canvas>
-    <script src="/testing.js"></script>
+    <canvas class="audio-visualizer" id="av-current-user-audio"></canvas> -->
+    <script defer src="/testing/face-api/face-api.min.js"></script>
+    <script defer src="/testing/testing.js"></script>
 </body>
 </html>

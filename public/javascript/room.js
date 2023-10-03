@@ -192,7 +192,7 @@ const streamSuccess = async (stream) => {
         analyser.getByteFrequencyData(dataArray);
 
         const barHeight = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
-        canvas.style.boxShadow = `inset 0 0 0 ${barHeight/10}px green, 0 0 0 ${barHeight/10}px green`
+        canvas.style.boxShadow = `inset 0 0 0 ${barHeight/20}px green, 0 0 0 ${barHeight/20}px green`
 
         requestAnimationFrame(drawBar);
     }
