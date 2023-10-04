@@ -52,11 +52,10 @@
             position: relative;
             display: flex;
             overflow: hidden;
+            transition: 1s ease-in-out;
         }
 
         .controller {
-            /* position: absolute; */
-            /* bottom: 20px; */
             position: relative;
             width: 100%;
             height: 10%;
@@ -68,23 +67,26 @@
         }
 
         #video-container {
-            width: 100%;
+            min-width: 100%;
             height: 100%;
             display: flex;
             justify-content: center;
             /* align-items: center; */
             align-content: center;
             flex-wrap: wrap;
+            transition: 1s;
+            position: relative;
         }
 
         #video-container-screen-sharing {
-            width: 25%;
+            min-width: 25%;
             height: 100%;
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
             align-content: center;
             position: relative;
+            transition: 1s ease-in-out;
         }
 
         .user-video-container-screen-sharing {
@@ -99,20 +101,22 @@
         }
 
         #screen-sharing-container {
-            width: 75%;
+            min-width: 75%;
             height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
             padding-left: 20px;
+            position: relative;
         }
 
         #screen-sharing {
-            width: 100%;
-            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
             transform: rotateY(0deg);
             -webkit-transform:rotateY(0deg); /* Safari and Chrome */
             -moz-transform:rotateY(0deg); /* Firefox */
+            position: relative;
         }
 
         .user-video-container {
@@ -452,24 +456,29 @@
         }
 
         #chat-bar-header {
+            text-align: center;
             position: relative;
             border-top-right-radius: 5px;
             border-top-left-radius: 5px;
             background-color: #2196f3;
             color: #fff;
-            cursor: move;
-            max-width: 300px;
+            width: 100%;
+            height: 5%;
             padding: 10px;
             z-index: 6;
-
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .chat-container {
             background-color: white;
             font-size: 13px;
-            max-height: 200px;
+            width: 100%;
+            height: 88%;
+            /* max-height: 200px;
             max-width: 100%;
-            min-height: 200px;
+            min-height: 200px; */
             overflow-y: auto;
             padding-bottom: 10px;
             position: relative;
@@ -478,12 +487,15 @@
         .chat-footer {
             width: 100%;
             background-color: white;
+            height: 7%;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
         }
 
         .chat-send {
             bottom: 0;
             display: flex;
-            height: 40px;
+            height: 100%;
             justify-content: center;
             padding: 5px;
             position: -webkit-sticky;
@@ -581,6 +593,7 @@
             border-top-left-radius: 5px !important;
             padding: 5px;
             margin-right: 0;
+            font-size: 7px;
         }
 
         .button-v2 {
@@ -759,6 +772,27 @@
                 width: 30%;
                 height: 15%;
             }
+
+            .username {
+                font-size: 5px;
+                bottom: 0;
+                left: 0;
+                padding: 1px;
+            }
+
+            .icons-mic {
+                top: 0px;
+                right: 0px;
+                width: 10px;
+                height: 10px;
+            }
+
+            .audio-visualizer {
+                width: 10px !important;
+                height: 10px !important;
+                right: 0px !important;
+                top: 0px !important;
+            }
         }
 
         @media (max-width: 950px) {
@@ -803,20 +837,17 @@
             border-radius: 10px;
             background-color: #f1f1f1;
             border: 1px solid #d3d3d3;
-            max-width: 300px;
-            min-width: 300px;
-            position: absolute;
-            left: 20px;
+            min-width: 25%;
+            height: 100%;
             text-align: center;
-            top: 100px;
-            z-index: 6 !important;
+            display: none;
         }
 
         #user-bar-header {
             background: #2196f3;
             color: #fff;
             cursor: move;
-            max-width: 300px;
+            width: 100%;
             padding: 10px;
             z-index: 6 !important;
             border-top-left-radius: 10px;
@@ -1110,9 +1141,6 @@
             visibility: hidden;
             top: -100%;
         }
-        #video-container {
-            transition: 1s;
-        }
 
         .message-container {
             margin: 10px;
@@ -1174,6 +1202,26 @@
             top: 3px;
             right: 3px;
         }
+
+        .side-bar-container {
+            width: 25%;
+            height: 100%;
+            transition: 1s ease-in-out;
+            padding: 10px;
+        }
+
+        .chat-bar-box {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            background-color: white;
+            display: none;
+        }
+
+        .slide-right {
+            transition: all 1s ease;
+            transform: translateX(100%);
+        }
         </style>
 </head>
 
@@ -1183,49 +1231,12 @@
             <div class="loader"></div>
         </div>
         <div class="full-container" id="full-container-id">
-            <div class="connection-status"><i class="far fa-dot-circle" id="connection-status-id" style="color: #bbb;"></i>
-                <span id="producer-status">Waiting...</span></div>
-            <div id="audio-collection" autoplay></div>
-            <!-- <div class="pagination-left">
-                <button class="pagination-button" id="slide-left">
-                    <i class="fas fa-arrow-circle-left fa-lg" style="cursor: pointer;"></i>
-                </button>
-            </div>
-            <div class="pagination-right">
-                <button class="pagination-button" id="slide-right">
-                    <i class="fas fa-arrow-circle-right fa-lg" style="cursor: pointer;"></i>
-                </button>
-            </div> -->
-            <div class="invisible" id="chat-container">
-                <div class="chat-bar" id="chat-bar">
-                    <div id="chat-bar-header"> <span>In Call Message</span><i class="far fa-times-circle" style="background-color: red; border-radius: 50%; cursor: pointer;" id="close-chat-button"></i></div>
-                    <div class="chat-container" id="chat-container-id">
-                        <div class="chat-messages" id="chat-messages-id">
-                        </div>
-                    </div>
-                    <div class="chat-footer">
-                        <div class="chat-send">
-                            <form id="sending-message" autocomplete="off">
-                                <input class="form-control type-box" id="message-input" placeholder="Type Message..."/>
-                                <button class="btn send-button" id="send-message-button" type="submit">
-                                    <!-- <i class="fas fa-paper-plane" aria-hidden="true"></i> -->
-                                    <span class="send-text">Send</span>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="invisible" id="user-container">
-                <div class="user-bar" id="user-bar">
-                    <div id="user-bar-header"><i class="fas fa-users"></i> User</div>
-                    <div id="user-list">
-                    </div>
-                </div>
-            </div>
             <span id="alert-screensharing">Screensharing is ongoing</span>
             <span id="alert-error"></span>
             <div id="video-container">
+                <div class="connection-status"><i class="far fa-dot-circle" id="connection-status-id" style="color: #bbb;"></i>
+                    <span id="producer-status">Waiting...</span></div>
+                <div id="audio-collection" autoplay></div>
                 <div class="user-video-container" id="td-current-user-video">
                     <canvas class="audio-visualizer" id="av-current-user-audio"></canvas>
                     <div class="icons-mic">
@@ -1235,7 +1246,33 @@
                     <img src="/assets/pictures/unknown.jpg" class="video-on" id="img-current-user-video"/>
                     <div class="username" id="my-username"></div>
                 </div>
-                <div class="screen-sharing-container"></div>
+            </div>
+            <div class="side-bar-container" id="side-bar-container">
+                <div class="user-bar" id="user-bar">
+                    <div id="user-bar-header"><i class="fas fa-users"></i> User</div>
+                    <div id="user-list">
+                    </div>
+                </div>
+                <div class="chat-bar-box" id="chat-bar-box-id">
+                    <div id="chat-bar-header"> 
+                        <span>In Call Message</span>
+                        <!-- <i class="far fa-times-circle" style="background-color: red; border-radius: 50%; cursor: pointer;" id="close-chat-button"></i> -->
+                    </div>
+                    <div class="chat-container" id="chat-container-id">
+                        <div class="chat-messages" id="chat-messages-id">
+                        </div>
+                    </div>
+                    <div class="chat-footer">
+                        <div class="chat-send">
+                            <form id="sending-message" autocomplete="off">
+                                <input class="form-control type-box" id="message-input" placeholder="Type Message..."/>
+                                <button class="btn send-button" id="send-message-button" type="submit">
+                                    <span class="send-text">Send</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="controller" id="control-button">

@@ -192,7 +192,7 @@ const streamSuccess = async (stream) => {
         analyser.getByteFrequencyData(dataArray);
 
         const barHeight = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
-        canvas.style.boxShadow = `inset 0 0 0 ${barHeight/10}px green, 0 0 0 ${barHeight/10}px green`
+        canvas.style.boxShadow = `inset 0 0 0 ${barHeight/20}px green, 0 0 0 ${barHeight/20}px green`
 
         requestAnimationFrame(drawBar);
     }
@@ -281,10 +281,56 @@ const screenSharingTemplate = () => {
     currentTemplate = 'user-video-container-screen-sharing'
 }
 
+const resetButton = () => {
+    resetButtonUserList()
+    resetButtonChat()
+}
+
+const resetButtonUserList = () => {
+    const userListButton = document.getElementById('user-list-button')
+    let userBarElement = document.getElementById('user-bar')
+    userListButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+    userBarElement.removeAttribute('style')
+}
+
+const resetButtonChat = () => {
+    const chatButton = document.getElementById('user-chat-button')
+    let chatBarBoxElement = document.getElementById('chat-bar-box-id')
+    chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+    chatBarBoxElement.removeAttribute('style')
+}
+
+const videoContainerScreenSharingTrigger = (trigger) => {
+    let videoContainerScreenSharing = document.getElementById('video-container-screen-sharing')
+    if (trigger){
+        videoContainerScreenSharing.style.minWidth = '0%'
+        videoContainerScreenSharing.style.display = 'flex'
+        setTimeout(() => {
+            videoContainerScreenSharing.style.minWidth = '25%'
+        }, 100);
+    } else {
+        videoContainerScreenSharing.style.minWidth = '0%'
+        videoContainerScreenSharing.classList.add('slide-right')
+        setTimeout(() => {
+            videoContainerScreenSharing.classList.remove('slide-right')
+            videoContainerScreenSharing.style.display = 'none'
+        }, 1000);
+    }
+}
+
 // Changing Layout User Video
 const changeLayout = (isSharing) => {
     // Screen Sharing Layout
+    let chatBarBoxElement = document.getElementById('chat-bar-box-id')
+    let userBarElement = document.getElementById('user-bar')
+    // resetButton()
     if (isSharing) {
+        if (userBarElement.style.display == 'block' || chatBarBoxElement.style.display == 'block'){
+            videoContainer.style.display = 'none'
+        }
+        let screenSharingLabel = document.createElement('div')
+        screenSharingLabel.className = 'username'
+        screenSharingLabel.innerHTML = 'Screen Sharing'
         videoContainer.id = 'video-container-screen-sharing'
         const fullContainer = document.getElementById('full-container-id')
         let newDiv = document.createElement("div");
@@ -306,6 +352,8 @@ const changeLayout = (isSharing) => {
 
         let screenSharingElement = document.getElementById('screen-sharing-container')
         screenSharingElement.innerHTML = '<video id="' + 'screen-sharing' + '" autoplay class="user-video" ></video>'
+        let screenSharingVideoElement = document.getElementById('screen-sharing')
+        screenSharingVideoElement.appendChild(screenSharingLabel)
 
         videoContainer = document.getElementById('video-container-screen-sharing')
     } else {
@@ -317,6 +365,10 @@ const changeLayout = (isSharing) => {
         }
         normalTemplate()
         videoContainer = document.getElementById('video-container')
+        if (userBarElement.style.display == 'block' || chatBarBoxElement.style.display == 'block'){
+            videoContainer.removeAttribute('style')
+            videoContainer.style.minWidth = '75%'
+        }
     }
 }
 
@@ -1646,6 +1698,8 @@ switchCamera.addEventListener("click", () => {
 })
 const SwitchingCamera = async () => {
     isCameraOn = true
+    let cameraIconsUserList = document.getElementById('ulic-'+socket.id)
+    cameraIconsUserList.className = 'fas fa-video'
     localStorage.setItem('is_video_active', true)
     let cameraIcons = document.getElementById('turn-on-off-camera-icons')
     cameraIcons.className = 'fas fa-video' 
@@ -2124,33 +2178,80 @@ hangUpButton.addEventListener('click', () => {
 // Chat Button
 const chatButton = document.getElementById('user-chat-button')
 chatButton.addEventListener('click', () => {
-    const chatContainer = document.getElementById('chat-container')
-    if (chatContainer.className == 'invisible') {
+    let sideBarElement = document.getElementById(' id="side-bar-container"')
+    const userListButton = document.getElementById('user-list-button')
+    let userBarElement = document.getElementById('user-bar')
+    let chatBarBoxElement = document.getElementById('chat-bar-box-id')
+    if ((!chatBarBoxElement.style.display || chatBarBoxElement.style.display == 'none') && !isScreenSharing){
+        userBarElement.style.display = 'none'
+        // sideBarElement.style.display = 'block'
+        chatBarBoxElement.style.display = 'block'
+        userListButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
         chatButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
-        chatContainer.className = 'visible'
         let iconsNotification = document.getElementById('notification-element-id')
         iconsNotification.className = 'fas fa-envelope notification invisible'
+        videoContainer.style.minWidth = '75%'
         scrollToBottom()
-    } else {
-        chatContainer.className = 'invisible'
+    } else if (chatBarBoxElement.style.display == 'block' && !isScreenSharing) {
+        // sideBarElement.style.display = 'none'
+        // chatBarBoxElement.style.display = 'none'
+        userBarElement.style.display = 'none'
+        videoContainer.style.minWidth = '100%'
         let isLineNewMessageExist = document.getElementById('new-message-notification')
         if (isLineNewMessageExist){
             isLineNewMessageExist.remove()
         }
         chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+        userListButton.setAttribute('disabled', 'true')
+        chatButton.setAttribute('disabled', 'true')
+        setTimeout(() => {
+            userListButton.removeAttribute('disabled', 'false')
+            chatButton.removeAttribute('disabled', 'false')
+            chatBarBoxElement.style.display = 'none'
+        }, 1000);
+    } else if (isScreenSharing && (!chatBarBoxElement.style.display || chatBarBoxElement.style.display == 'none')){
+        videoContainerScreenSharingTrigger(false)
+        userBarElement.style.display = 'none'
+        // sideBarElement.style.display = 'block'
+        chatBarBoxElement.style.display = 'block'
+        userListButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+        chatButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
+        let iconsNotification = document.getElementById('notification-element-id')
+        iconsNotification.className = 'fas fa-envelope notification invisible'
+        scrollToBottom()
+        userListButton.setAttribute('disabled', 'true')
+        chatButton.setAttribute('disabled', 'true')
+        setTimeout(() => {
+            userListButton.removeAttribute('disabled', 'false')
+            chatButton.removeAttribute('disabled', 'false')
+        }, 1000);
+    } else if (isScreenSharing && chatBarBoxElement.style.display == 'block'){
+        videoContainerScreenSharingTrigger(true)
+        userBarElement.style.display = 'none'
+        let isLineNewMessageExist = document.getElementById('new-message-notification')
+        if (isLineNewMessageExist){
+            isLineNewMessageExist.remove()
+        }
+        chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+        userListButton.setAttribute('disabled', 'true')
+        chatButton.setAttribute('disabled', 'true')
+        setTimeout(() => {
+            userListButton.removeAttribute('disabled', 'false')
+            chatButton.removeAttribute('disabled', 'false')
+            chatBarBoxElement.style.display = 'none'
+        }, 1000);
     }
 })
 
-const chatButtonClose = document.getElementById('close-chat-button')
-chatButtonClose.addEventListener('click', () => {
-    const chatContainer = document.getElementById('chat-container')
-    chatContainer.className = 'invisible'
-    let isLineNewMessageExist = document.getElementById('new-message-notification')
-    if (isLineNewMessageExist){
-        isLineNewMessageExist.remove()
-    }
-    chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
-})
+// const chatButtonClose = document.getElementById('close-chat-button')
+// chatButtonClose.addEventListener('click', () => {
+//     resetButtonChat()
+//     let isLineNewMessageExist = document.getElementById('new-message-notification')
+//     if (isLineNewMessageExist){
+//         isLineNewMessageExist.remove()
+//     }
+//     chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+// })
 
 const scrollToBottom = () => {
     let chatMessages = document.getElementById('chat-container-id')
@@ -2280,53 +2381,75 @@ socket.on('receive-message', ({message, sender, messageDate}) => {
 // User List Button
 const userListButton = document.getElementById('user-list-button')
 userListButton.addEventListener('click', () => {
-    const userListContainer = document.getElementById('user-container')
-    if (userListContainer.className == 'invisible') {
-        userListContainer.className = 'visible'
+    const chatButton = document.getElementById('user-chat-button')
+    // const userListContainer = document.getElementById('user-container')
+    // if (userListContainer.className == 'invisible') {
+    //     userListContainer.className = 'visible'
+    //     userListButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
+    // }
+    // else {
+    //     userListContainer.className = 'invisible'
+    //     userListButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+    // }
+    let sideBarElement = document.getElementById(' id="side-bar-container"')
+    let userBarElement = document.getElementById('user-bar')
+    let chatBarBoxElement = document.getElementById('chat-bar-box-id')
+    if ((!userBarElement.style.display || userBarElement.style.display == 'none') && !isScreenSharing){
+        userBarElement.style.display = 'block'
+        chatBarBoxElement.style.display = 'none'
+        chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
         userListButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
-    }
-    else {
-        userListContainer.className = 'invisible'
+        let iconsNotification = document.getElementById('notification-element-id')
+        iconsNotification.className = 'fas fa-envelope notification invisible'
+        videoContainer.style.minWidth = '75%'
+        scrollToBottom()
+    } else if (userBarElement.style.display == 'block' && !isScreenSharing) {
+        chatBarBoxElement.style.display = 'none'
+        videoContainer.style.minWidth = '100%'
+        let isLineNewMessageExist = document.getElementById('new-message-notification')
+        if (isLineNewMessageExist){
+            isLineNewMessageExist.remove()
+        }
         userListButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+        userListButton.setAttribute('disabled', 'true')
+        chatButton.setAttribute('disabled', 'true')
+        setTimeout(() => {
+            userListButton.removeAttribute('disabled', 'false')
+            chatButton.removeAttribute('disabled', 'false')
+            userBarElement.style.display = 'none'
+        }, 1000);
+    } else if ((!userBarElement.style.display || userBarElement.style.display == 'none') && isScreenSharing){
+        videoContainerScreenSharingTrigger(false)
+        userBarElement.style.display = 'block'
+        chatBarBoxElement.style.display = 'none'
+        chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+        userListButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
+        let iconsNotification = document.getElementById('notification-element-id')
+        iconsNotification.className = 'fas fa-envelope notification invisible'
+        scrollToBottom()
+        userListButton.setAttribute('disabled', 'true')
+        chatButton.setAttribute('disabled', 'true')
+        setTimeout(() => {
+            userListButton.removeAttribute('disabled', 'false')
+            chatButton.removeAttribute('disabled', 'false')
+        }, 1000);
+    } else if (userBarElement.style.display == 'block' && isScreenSharing) {
+        videoContainerScreenSharingTrigger(true)
+        chatBarBoxElement.style.display = 'none'
+        let isLineNewMessageExist = document.getElementById('new-message-notification')
+        if (isLineNewMessageExist){
+            isLineNewMessageExist.remove()
+        }
+        userListButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
+        userListButton.setAttribute('disabled', 'true')
+        chatButton.setAttribute('disabled', 'true')
+        setTimeout(() => {
+            userListButton.removeAttribute('disabled', 'false')
+            chatButton.removeAttribute('disabled', 'false')
+            userBarElement.style.display = 'none'
+        }, 1000);
     }
 })
-
-dragElement(document.getElementById("chat-bar"));
-dragElement(document.getElementById("user-bar"));
-
-function dragElement(elmnt) {
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    if (document.getElementById(elmnt.id + "-header")) {
-        document.getElementById(elmnt.id + "-header").onmousedown = dragMouseDown;
-    } else {
-        elmnt.onmousedown = dragMouseDown;
-    }
-
-    function dragMouseDown(e) {
-        e = e || window.event;
-        e.preventDefault();
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
-    }
-
-    function elementDrag(e) {
-        e = e || window.event;
-        e.preventDefault();
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-    }
-
-    function closeDragElement() {
-        document.onmouseup = null;
-        document.onmousemove = null;
-    }
-}
 
 const optionButton = document.getElementById("option-button");
 const optionMenu = document.getElementById("option-menu");
