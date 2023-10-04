@@ -211,6 +211,98 @@ const streamSuccess = async (stream) => {
     joinRoom()
 }
 
+let isFaceRecognition = false
+let isFaceApiReady = false
+let faceInterval
+
+const faceRecognitionButton = document.getElementById('face-api')
+faceRecognitionButton.addEventListener('click', () => {
+    try {
+        if (!isFaceApiReady){
+            let ae = document.getElementById("alert-error");
+            ae.className = "show";
+            ae.innerHTML = 'Face Api Is Not Ready'
+            // Show Warning
+            setTimeout(() => { 
+                ae.className = ae.className.replace("show", ""); 
+                ae.innerHTML = ``
+            }, 3000);
+        } else {
+            console.log('- Click - Is Api Ready : ', isFaceApiReady, ' - Is Active : ', isFaceRecognition)
+            if (!isFaceRecognition){
+                faceRecognitionButton.style.backgroundColor = '#fc5d5b'
+                isFaceRecognition = true
+                attachFaceApi()
+            } else {
+                faceRecognitionButton.removeAttribute('style')
+                isFaceRecognition = false
+                deleteFaceApi()
+            }
+        }
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+const deleteFaceApi = () => {
+    clearInterval(faceInterval)
+    let faceapiElement = document.getElementById('face-recognition')
+    if (faceapiElement) faceapiElement.remove()
+    faceInterval = null
+}
+
+const initFaceApi = () => {
+    Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri("../testing/face-api/models"),
+        faceapi.nets.faceLandmark68Net.loadFromUri("../testing/face-api/models"),
+        faceapi.nets.ssdMobilenetv1.loadFromUri("../testing/face-api/models"),
+        faceapi.nets.faceRecognitionNet.loadFromUri("../testing/face-api/models"),
+        faceapi.nets.faceExpressionNet.loadFromUri("../testing/face-api/models"),
+    ]).then((_) => {
+        console.log('Face Api Ready')
+        isFaceApiReady = true
+    })
+}
+
+initFaceApi()
+
+const attachFaceApi = () => {
+    let isFaceApiExist = document.getElementById('face-recognition')
+    if (!isFaceApiExist){
+        let elementFaceRecognition = document.createElement('div')
+        elementFaceRecognition.className = 'face-recognition'
+        elementFaceRecognition.id = "face-recognition"
+        let isExist = document.getElementById('td-current-user-video')
+        let video = document.getElementById('current-user-video')
+        if (!video){
+            video = document.getElementById('local-video')
+        }
+        if (isExist){
+            const canvas = faceapi.createCanvasFromMedia(video)
+            canvas.className = 'rotate'
+            isExist.appendChild(elementFaceRecognition)
+            elementFaceRecognition.append(canvas)
+            faceapi.matchDimensions(canvas, { height: video.videoHeight, width: video.videoWidth })
+            faceInterval = setInterval(() => {
+                animateFaceExpression({video, canvas})   
+            }, 100)
+        }
+    }
+}
+
+
+const animateFaceExpression = async ({video, canvas}) => {
+    const detections = await faceapi.detectAllFaces(video).withFaceLandmarks().withFaceExpressions()
+    const resizedDetections = faceapi.resizeResults(detections, {
+        height: video.videoHeight,
+        width: video.videoWidth,
+    })
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
+    faceapi.draw.drawDetections(canvas, resizedDetections)
+    // faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
+    faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+}
+
 // Check Initial Configuration
 const checkLocalStorage = () => {
     // Set Room Id
@@ -1180,6 +1272,13 @@ const createVideo = (remoteId, kind, track, username, micIcon, authority, isVide
             // Append Element And Set Track
             videoContainer.appendChild(newElem)
             document.getElementById(remoteId).srcObject = track
+            if (isFaceRecognition){
+                attachFaceApi()
+            }
+
+            if (isFaceRecognition){
+                attachFaceApi()
+            }
         } else {
             // Create Video For Other Users
             let isMic

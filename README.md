@@ -315,6 +315,7 @@ socket.on('joinRoom', (data) => {
 
 ### 0.2.8
 - Changing design chat and user list
+- Adding Face Expression Detections
 
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)
