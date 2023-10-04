@@ -313,6 +313,9 @@ socket.on('joinRoom', (data) => {
 - Adding mic and camera in participants list
 - Fixed bug user display messed up when screensharing
 
+### 0.2.8
+- Changing design chat and user list
+
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)
 - Agak jeda

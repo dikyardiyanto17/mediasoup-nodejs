@@ -30,8 +30,8 @@ const webRtcTransport_options = {
             // ip: '127.0.0.1',
             // ip: '192.168.206.123',
             // ip: '192.168.205.229',
-            // ip: '192.168.18.68', // Laptop Jaringan 5G
-            ip: '203.194.113.166', // VPS Mr. Indra IP
+            ip: '192.168.18.68', // Laptop Jaringan 5G
+            // ip: '203.194.113.166', // VPS Mr. Indra IP
             // ip: '203.175.10.29' // My VPS
             // ip: '192.168.3.135' // IP Kost
             // announcedIp: "88.12.10.41"
@@ -50,19 +50,19 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// const httpsServer = https.createServer(options, app)
-// httpsServer.listen(port, () => {
-//     console.log('App On : ' + port)
-// })
-
-// const io = new Server(httpsServer)
-
-const httpServer = http.createServer(app)
-httpServer.listen(port, () => {
+const httpsServer = https.createServer(options, app)
+httpsServer.listen(port, () => {
     console.log('App On : ' + port)
 })
 
-const io = new Server(httpServer)
+const io = new Server(httpsServer)
+
+// const httpServer = http.createServer(app)
+// httpServer.listen(port, () => {
+//     console.log('App On : ' + port)
+// })
+
+// const io = new Server(httpServer)
 
 let worker
 let rooms = {}
@@ -453,6 +453,7 @@ io.on('connection', async socket => {
             rtpParameters,
             appData
         })
+        // console.log('- App Data : ', appData)
         const { roomName } = peers[socket.id]
 
         roomsSocketCollection[roomName].map(data => {
@@ -502,6 +503,11 @@ io.on('connection', async socket => {
                 transportData.consumer && transportData.transport.id == serverConsumerTransportId
             )).transport
 
+            // let consumerTransportExample = transports.find(transportData => (
+            //     transportData.consumer && transportData.transport.id == serverConsumerTransportId
+            // ))
+            // console.log('- Consumer Transport Example : ', consumerTransportExample)
+
             const userData = transports.find(transportData => transportData.consumer && transportData.transport.id == serverConsumerTransportId)
             // console.log("- User Data : ", userData.transport)
             // console.log("- getProducerById() : ", userData.transport.getProducerById(), " - getDataProducedById() : ", userData.transport.getDataProducedById())
@@ -523,13 +529,17 @@ io.on('connection', async socket => {
                     rtpParameters: consumer.rtpParameters,
                     serverConsumerId: consumer.id,
                 }
-
                 
                 if (consumer.kind == 'video') {
                     const { roomName } = peers[socket.id]
                     let getUserData = roomsSocketCollection[roomName].find((data) => data.producerId == remoteProducerId)
                     let screenSharingData = roomsSocketCollection[roomName].find((data) => data.screenSharingProducerId == remoteProducerId)
                     // console.log("- Get User Data : ", getUserData, " - Socket Id : ", socket.id)
+                    // producers.map((producer) => {
+                    //     if (producer.producer.id == remoteProducerId && producer.producer.appData.type == 'Screen-Sharing'){
+                    //         params.username = screenSharingData.name + " is Sharing Screen"
+                    //     }
+                    // })
                     if (screenSharingData){
                         params.username = screenSharingData.name + " is Sharing Screen"
                     }
