@@ -29,119 +29,119 @@
 // hideElement();
 
 // Face Recognition
-// const video = document.getElementById("video")
-
-// Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri("./face-api/models"), faceapi.nets.faceLandmark68Net.loadFromUri("./face-api/models")]).then(
-// 	startWebcam
-// )
-
-// function startWebcam() {
-// 	navigator.mediaDevices
-// 		.getUserMedia({
-// 			video: true,
-// 			audio: false,
-// 		})
-// 		.then((stream) => {
-// 			video.srcObject = stream
-// 		})
-// 		.catch((error) => {
-// 			console.error(error)
-// 		})
-// }
-
-// video.addEventListener("play", () => {
-//     let faceContainer = document.getElementById('face-recognition')
-// 	let videoContainer = document.getElementById("video-container")
-// 	const canvas = faceapi.createCanvasFromMedia(video)
-// 	console.log("- Canvas : ", videoContainer.offsetHeight)
-// 	// document.body.append(canvas)
-//     faceContainer.append(canvas)
-// 	faceapi.matchDimensions(canvas, { height: video.videoHeight, width: video.videoWidth })
-
-// 	setInterval(async () => {
-// 		const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks()
-
-// 		const resizedDetections = faceapi.resizeResults(detections, {
-// 			height: video.videoHeight,
-// 			width: video.videoWidth,
-// 		})
-// 		canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
-// 		faceapi.draw.drawDetections(canvas, resizedDetections)
-// 		faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
-
-// 		console.log(detections)
-// 	}, 100)
-// })
-
-const video = document.getElementById("video");
+const video = document.getElementById("video")
 
 Promise.all([
-  faceapi.nets.ssdMobilenetv1.loadFromUri("./face-api/models"),
-  faceapi.nets.faceRecognitionNet.loadFromUri("./face-api/models"),
-  faceapi.nets.faceLandmark68Net.loadFromUri("./face-api/models"),
-]).then(startWebcam);
+	faceapi.nets.tinyFaceDetector.loadFromUri("./face-api/models"),
+	faceapi.nets.faceLandmark68Net.loadFromUri("./face-api/models"),
+	faceapi.nets.ssdMobilenetv1.loadFromUri("./face-api/models"),
+	faceapi.nets.faceRecognitionNet.loadFromUri("./face-api/models"),
+	faceapi.nets.faceExpressionNet.loadFromUri("./face-api/models"),
+]).then(startWebcam)
 
 function startWebcam() {
-  navigator.mediaDevices
-    .getUserMedia({
-      video: true,
-      audio: false,
-    })
-    .then((stream) => {
-      video.srcObject = stream;
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+	navigator.mediaDevices
+		.getUserMedia({
+			video: true,
+			audio: false,
+		})
+		.then((stream) => {
+			video.srcObject = stream
+		})
+		.catch((error) => {
+			console.error(error)
+		})
 }
 
-function getLabeledFaceDescriptions() {
-  const labels = ["Dika", "Diky"];
-  return Promise.all(
-    labels.map(async (label) => {
-      const descriptions = [];
-      for (let i = 1; i <= 2; i++) {
-        const img = await faceapi.fetchImage(`./face-api/${label}/${i}.jpeg`);
-        const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-        if (detections){
-            descriptions.push(detections.descriptor);
-        }
-      }
-      return new faceapi.LabeledFaceDescriptors(label, descriptions);
-    })
-  );
-}
+video.addEventListener("play", () => {
+	let faceContainer = document.getElementById("face-recognition")
+	const canvas = faceapi.createCanvasFromMedia(video)
+	// document.body.append(canvas)
+	faceContainer.append(canvas)
+	faceapi.matchDimensions(canvas, { height: video.videoHeight, width: video.videoWidth })
+	setInterval(async () => {
+		const detections = await faceapi.detectAllFaces(video).withFaceLandmarks().withFaceExpressions()
 
-video.addEventListener("play", async () => {
-  const labeledFaceDescriptors = await getLabeledFaceDescriptions();
-  let faceContainer = document.getElementById('face-recognition')
-  const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
+		const resizedDetections = faceapi.resizeResults(detections, {
+			height: video.videoHeight,
+			width: video.videoWidth,
+		})
+		canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
+		faceapi.draw.drawDetections(canvas, resizedDetections)
+		faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+	}, 100)
+})
 
-  const canvas = faceapi.createCanvasFromMedia(video);
-  faceContainer.append(canvas);
+// Detect Person
+// const video = document.getElementById("video");
 
-  const displaySize = { width: video.videoWidth, height: video.videoHeight };
-  faceapi.matchDimensions(canvas, displaySize);
+// Promise.all([
+//   faceapi.nets.ssdMobilenetv1.loadFromUri("./face-api/models"),
+//   faceapi.nets.faceRecognitionNet.loadFromUri("./face-api/models"),
+//   faceapi.nets.faceLandmark68Net.loadFromUri("./face-api/models"),
+// ]).then(startWebcam);
 
-  setInterval(async () => {
-    const detections = await faceapi
-      .detectAllFaces(video)
-      .withFaceLandmarks()
-      .withFaceDescriptors();
+// function startWebcam() {
+//   navigator.mediaDevices
+//     .getUserMedia({
+//       video: true,
+//       audio: false,
+//     })
+//     .then((stream) => {
+//       video.srcObject = stream;
+//     })
+//     .catch((error) => {
+//       console.error(error);
+//     });
+// }
 
-    const resizedDetections = faceapi.resizeResults(detections, displaySize);
+// function getLabeledFaceDescriptions() {
+//   const labels = ["Dika", "Diky"];
+//   return Promise.all(
+//     labels.map(async (label) => {
+//       const descriptions = [];
+//       for (let i = 1; i <= 2; i++) {
+//         const img = await faceapi.fetchImage(`./face-api/${label}/${i}.jpeg`);
+//         const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+//         if (detections){
+//             descriptions.push(detections.descriptor);
+//         }
+//       }
+//       return new faceapi.LabeledFaceDescriptors(label, descriptions);
+//     })
+//   );
+// }
 
-    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+// video.addEventListener("play", async () => {
+//   const labeledFaceDescriptors = await getLabeledFaceDescriptions();
+//   let faceContainer = document.getElementById('face-recognition')
+//   const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors);
 
-    const results = resizedDetections.map((d) => {
-      return faceMatcher.findBestMatch(d.descriptor);
-    });
-    results.forEach((result, i) => {
-      const box = resizedDetections[i].detection.box;
-      const drawBox = new faceapi.draw.DrawBox(box, {
-        label: result,
-      });
-      drawBox.draw(canvas);
-    });
-  }, 100);
-});
+//   const canvas = faceapi.createCanvasFromMedia(video);
+//   faceContainer.append(canvas);
+
+//   const displaySize = { width: video.videoWidth, height: video.videoHeight };
+//   faceapi.matchDimensions(canvas, displaySize);
+
+//   setInterval(async () => {
+//     const detections = await faceapi
+//       .detectAllFaces(video)
+//       .withFaceLandmarks()
+//       .withFaceDescriptors();
+
+//     const resizedDetections = faceapi.resizeResults(detections, displaySize);
+
+//     canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+
+//     const results = resizedDetections.map((d) => {
+//       return faceMatcher.findBestMatch(d.descriptor);
+//     });
+//     results.forEach((result, i) => {
+//       const box = resizedDetections[i].detection.box;
+//       const drawBox = new faceapi.draw.DrawBox(box, {
+//         label: result,
+//       });
+//       drawBox.draw(canvas);
+//     });
+//   }, 100);
+// });
