@@ -943,7 +943,6 @@
             bottom: 40px;
             color: #fff;
             border-radius: 10px;
-            width: 100px;
         }
 
         #option-menu > ul {
@@ -954,6 +953,7 @@
 
         #option-menu > ul > li {
             padding: 5px;
+            white-space: nowrap;
         }
 
         #option-menu > ul > li:hover {
@@ -986,6 +986,7 @@
         }
         #user-mic-button:hover >  #user-mic-button-tooltip {
             visibility: visible;
+            z-index: 3;
         }
         #user-mic-button-tooltip {
             background-color: #bbbbbba1;
@@ -1002,6 +1003,7 @@
         }
         #user-turn-on-off-camera-button:hover >  #user-turn-on-off-camera-button-tooltip {
             visibility: visible;
+            z-index: 3;
         }
         #user-turn-on-off-camera-button-tooltip {
             background-color: #bbbbbba1;
@@ -1018,6 +1020,7 @@
         }
         #user-hang-up-button:hover >  #user-hang-up-button-tooltip {
             visibility: visible;
+            z-index: 3;
         }
         #user-hang-up-button-tooltip {
             background-color: #bbbbbba1;
@@ -1034,6 +1037,7 @@
         }
         #user-switch-camera-button:hover >  #user-switch-camera-button-tooltip {
             visibility: visible;
+            z-index: 3;
         }
         #user-switch-camera-button-tooltip {
             background-color: #bbbbbba1;
@@ -1050,6 +1054,7 @@
         }
         #user-screen-share-button:hover >  #user-screen-share-button-tooltip {
             visibility: visible;
+            z-index: 3;
         }
         #user-screen-share-button-tooltip {
             background-color: #bbbbbba1;
@@ -1066,6 +1071,7 @@
         }
         #user-record-button:hover >  #user-record-button-tooltip {
             visibility: visible;
+            z-index: 3;
         }
         #user-record-button-tooltip {
             background-color: #bbbbbba1;
@@ -1082,6 +1088,7 @@
         }
         #user-list-button:hover >  #user-list-button-tooltip {
             visibility: visible;
+            z-index: 3;
         }
         #user-list-button-tooltip {
             background-color: #bbbbbba1;
@@ -1098,6 +1105,7 @@
         }
         #user-chat-button:hover >  #user-chat-button-tooltip {
             visibility: visible;
+            z-index: 3;
         }
         #user-chat-button-tooltip {
             background-color: #bbbbbba1;
@@ -1114,6 +1122,7 @@
         }
         #share-link-button:hover >  #share-link-button-tooltip {
             visibility: visible;
+            z-index: 3;
         }
         #share-link-button-tooltip {
             background-color: #bbbbbba1;
@@ -1130,6 +1139,7 @@
         }
         #option-button:hover >  #option-button-tooltip {
             visibility: visible;
+            z-index: 3;
         }
         #option-button-tooltip {
             background-color: #bbbbbba1;
@@ -1239,6 +1249,32 @@
             -webkit-transform:rotateY(180deg); 
             -moz-transform:rotateY(180deg); 
         } */
+
+        .slide-left-animation {
+            animation-name: slide-left;
+            animation-duration: 1s;
+            position: relative;
+            opacity: 1;
+        }
+
+        @keyframes slide-left {
+            0% {left: 0%; opacity: 1;}
+            50% {left: -25%; opacity: 0.5;}
+            100% {left: -50%; opacity: 0;}
+        }
+
+        .slide-right-animation {
+            animation-name: slide-right;
+            animation-duration: 1s;
+            position: relative;
+            opacity: 1;
+        }
+
+        @keyframes slide-right {
+            0% {left: -50%; opacity: 0;}
+            50% {left: -25%; opacity: 0.5;}
+            100% {left: 0%; opacity: 1;}
+        }
         </style>
 </head>
 
@@ -1251,8 +1287,6 @@
             <span id="alert-screensharing">Screensharing is ongoing</span>
             <span id="alert-error"></span>
             <div id="video-container">
-                <div class="connection-status"><i class="far fa-dot-circle" id="connection-status-id" style="color: #bbb;"></i>
-                    <span id="producer-status">Waiting...</span></div>
                 <div id="audio-collection" autoplay></div>
                 <div class="user-video-container" id="td-current-user-video">
                     <canvas class="audio-visualizer" id="av-current-user-audio"></canvas>
