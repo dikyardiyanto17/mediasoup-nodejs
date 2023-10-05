@@ -236,6 +236,9 @@ socket.on('joinRoom', (data) => {
 ### 0.2.4
 - Switch camera is not working on phone
 
+### 0.2.7
+- Bug in chat / list container
+
 ## Test Log
 ### 0.1.0
 - Screen sharing mode when mute and unmute all participants (&#x2713;)
@@ -316,6 +319,7 @@ socket.on('joinRoom', (data) => {
 ### 0.2.8
 - Changing design chat and user list
 - Adding Face Expression Detections
+- Fixed bug chat / list participants container
 
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)

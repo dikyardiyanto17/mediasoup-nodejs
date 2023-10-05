@@ -292,15 +292,20 @@ const attachFaceApi = () => {
 
 
 const animateFaceExpression = async ({video, canvas}) => {
-    const detections = await faceapi.detectAllFaces(video).withFaceLandmarks().withFaceExpressions()
-    const resizedDetections = faceapi.resizeResults(detections, {
-        height: video.videoHeight,
-        width: video.videoWidth,
-    })
-    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
-    faceapi.draw.drawDetections(canvas, resizedDetections)
-    // faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
-    faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+    let isFaceApiExist = document.getElementById('face-recognition')
+    if (isFaceApiExist){
+        const detections = await faceapi.detectAllFaces(video).withFaceLandmarks().withFaceExpressions()
+        const resizedDetections = faceapi.resizeResults(detections, {
+            height: video.videoHeight,
+            width: video.videoWidth,
+        })
+        canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
+        faceapi.draw.drawDetections(canvas, resizedDetections)
+        // faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
+        faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+    } else {
+        await deleteFaceApi()
+    }
 }
 
 // Check Initial Configuration
@@ -397,14 +402,18 @@ const videoContainerScreenSharingTrigger = (trigger) => {
     if (trigger){
         videoContainerScreenSharing.style.minWidth = '0%'
         videoContainerScreenSharing.style.display = 'flex'
+        videoContainerScreenSharing.classList.add('slide-right-animation')
         setTimeout(() => {
             videoContainerScreenSharing.style.minWidth = '25%'
         }, 100);
+        setTimeout(() => {
+            videoContainerScreenSharing.classList.remove('slide-right-animation')
+        }, 1000);
     } else {
         videoContainerScreenSharing.style.minWidth = '0%'
-        videoContainerScreenSharing.classList.add('slide-right')
+        videoContainerScreenSharing.classList.add('slide-left-animation')
         setTimeout(() => {
-            videoContainerScreenSharing.classList.remove('slide-right')
+            videoContainerScreenSharing.classList.remove('slide-left-animation')
             videoContainerScreenSharing.style.display = 'none'
         }, 1000);
     }
@@ -419,7 +428,7 @@ const changeLayout = (isSharing) => {
     if (isSharing) {
         if (userBarElement.style.display == 'block' || chatBarBoxElement.style.display == 'block'){
             videoContainer.style.display = 'none'
-        }
+        } else videoContainer.style.minWidth = '25%'
         let screenSharingLabel = document.createElement('div')
         screenSharingLabel.className = 'username'
         screenSharingLabel.innerHTML = 'Screen Sharing'
@@ -460,6 +469,9 @@ const changeLayout = (isSharing) => {
         if (userBarElement.style.display == 'block' || chatBarBoxElement.style.display == 'block'){
             videoContainer.removeAttribute('style')
             videoContainer.style.minWidth = '75%'
+        } else {
+            videoContainer.removeAttribute('style')
+            videoContainer.style.minWidth = '100%'
         }
     }
 }
@@ -704,8 +716,6 @@ const createSendTransport = () => {
 
         producerTransport.on('connectionstatechange', async (e) => {
             console.log('- State Change Producer : ', e)
-            let producerStatus = document.getElementById('producer-status')
-            let connectionStatusElement = document.getElementById('connection-status-id')
             let buttonRecord = document.getElementById('user-record-button')
             let buttonMic = document.getElementById('user-mic-button')
             let buttonHangUp = document.getElementById('user-hang-up-button')
@@ -718,11 +728,7 @@ const createSendTransport = () => {
             // Enabling Button When Producer Is Connecting
             if (e == 'connected'){
                 hideLoadingScreen()
-                producerStatus.innerHTML = 'Connected'
                 createUserList(localStorage.getItem('username'), socket.id, isCameraOn)
-                // console.log('- Status Element : ', )
-                connectionStatusElement.style.color = 'green'
-
                 buttonRecord.removeAttribute('disabled', 'false')
                 buttonMic.removeAttribute('disabled', 'false')
                 buttonHangUp.removeAttribute('disabled', 'false')
@@ -735,8 +741,6 @@ const createSendTransport = () => {
             } 
             if (e == 'connecting'){
                 showLoadingScreen()
-                producerStatus.innerHTML = 'Connecting...'
-                connectionStatusElement.style.color = '#bbb'
                 buttonRecord.setAttribute('disabled', 'true')
                 buttonMic.setAttribute('disabled', 'true')
                 buttonHangUp.setAttribute('disabled', 'true')
@@ -752,8 +756,6 @@ const createSendTransport = () => {
             const goTo = 'lobby/' + roomName;
             if (e == 'failed'){
                 showLoadingScreen()
-                producerStatus.innerHTML = 'Failed'
-                connectionStatusElement.style.color = 'red'
                 buttonRecord.setAttribute('disabled', 'true')
                 buttonMic.setAttribute('disabled', 'true')
                 buttonHangUp.setAttribute('disabled', 'true')
@@ -767,8 +769,6 @@ const createSendTransport = () => {
             } 
             if (e == 'disconnected'){
                 showLoadingScreen()
-                producerStatus.innerHTML = 'Disconnected'
-                connectionStatusElement.style.color = 'red'
                 buttonRecord.setAttribute('disabled', 'true')
                 buttonMic.setAttribute('disabled', 'true')
                 buttonHangUp.setAttribute('disabled', 'true')
@@ -2389,9 +2389,10 @@ const compareMessageDate = (messageDate) => {
 }
 
 const messageNotification = () => {
-    const chatContainer = document.getElementById('chat-container')
+    const chatContainer = document.getElementById('chat-bar-box-id')
     let iconsNotification = document.getElementById('notification-element-id')
-    if (chatContainer.className == 'invisible') {
+    console.log('- Chat Container : ', chatContainer)
+    if (chatContainer.style.display == 'none' || !chatContainer.style.display) {
         let isLineNewMessageExist = document.getElementById('new-message-notification')
         if (!isLineNewMessageExist){
             let chatMessagesContainer = document.getElementById('chat-messages-id')
