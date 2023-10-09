@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <title>Cursor Movement Detection</title>
     <style>
         /* Style for the element */
@@ -14,7 +16,8 @@
             color: #fff;
             padding: 10px;
             transition: opacity 0.5s ease;
-            pointer-events: none; /* Allows clicks to go through the element */
+            pointer-events: none;
+            /* Allows clicks to go through the element */
         }
 
         .hidden {
@@ -25,9 +28,11 @@
             border-radius: 50%;
             height: 20px;
             width: 20px;
-            background-color: blue; /* Set the background to transparent */
+            background-color: blue;
+            /* Set the background to transparent */
             box-shadow: inset 0 0 0 0px blue, 0 0 0 10px red;
         }
+
         .video-container {
             position: relative;
             height: 500px;
@@ -49,17 +54,33 @@
         }
     </style>
 </head>
+
 <body>
     <!-- <video id="video" width="600" height="450" autoplay></video> -->
     <!-- Element to be hidden/showed -->
-    <div class="video-container" id="video-container">
+    <!-- <div class="video-container" id="video-container">
         <video id="video"autoplay></video>
         <div class="face-recognition" id="face-recognition"></div>
-    </div>
+    </div> -->
     <!-- <div id="element-to-control" class="hidden">This is the element</div>
     <button>Hello World</button>
     <canvas class="audio-visualizer" id="av-current-user-audio"></canvas> -->
-    <script defer src="/testing/face-api/face-api.min.js"></script>
+    <!-- <script defer src="/testing/face-api/face-api.min.js"></script> -->
+    <!-- <div id="g_id_onload"
+         data-client_id="623403491943-290gkq7bnqtgeprtfaci3u76vtb39bjl.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse"
+         >
+    </div>
+    <div class="g_id_signin" data-type="standard"></div> -->
+    <div id="g_id_onload" data-client_id="623403491943-290gkq7bnqtgeprtfaci3u76vtb39bjl.apps.googleusercontent.com"
+        data-context="signin" data-ux_mode="popup" data-login_uri="https://localhost:3001/google-auth" data-nonce=""
+        data-itp_support="true">
+    </div>
+
+    <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with"
+        data-size="large" data-logo_alignment="left">
+    </div>
     <script defer src="/testing/testing.js"></script>
 </body>
+
 </html>
