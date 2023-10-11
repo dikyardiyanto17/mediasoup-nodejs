@@ -2,8 +2,8 @@ const express = require('express')
 const cors = require('cors')
 const router = require('./routes/index.js')
 const app = express()
-const port = 3001
-// const port = 80
+// const port = 3001
+const port = 80
 const http = require('http')
 const path = require('path');
 const https = require('httpolyglot')
@@ -31,8 +31,8 @@ const webRtcTransport_options = {
             // ip: '192.168.206.123',
             // ip: '192.168.205.229',
             // ip: '192.168.18.68', // Laptop Jaringan 5G
-            ip: '203.194.113.166', // VPS Mr. Indra IP
-            // ip: '203.175.10.29' // My VPS
+            // ip: '203.194.113.166', // VPS Mr. Indra IP
+            ip: '203.175.10.29' // My VPS
             // ip: '192.168.3.135' // IP Kost
             // announcedIp: "88.12.10.41"
         }
@@ -46,6 +46,7 @@ app.use(cors())
 app.set('view engine', 'ejs')
 app.use(express.static(path.join(__dirname, 'views')));
 app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
@@ -453,7 +454,7 @@ io.on('connection', async socket => {
             rtpParameters,
             appData
         })
-        // console.log('- App Data : ', appData)
+        console.log('- App Data : ', appData)
         const { roomName } = peers[socket.id]
 
         roomsSocketCollection[roomName].map(data => {
@@ -463,6 +464,9 @@ io.on('connection', async socket => {
                 }
                 if (!data.producerId) {
                     data.producerId = producer.id
+                    if (!data.picture){
+                        data.picture = appData.picture
+                    }
                 }
                 if (!data.screenSharingProducerId) {
                     data.screenSharingProducerId = null
@@ -545,6 +549,7 @@ io.on('connection', async socket => {
                     }
                     if (getUserData){
                         params.username = getUserData.name
+                        params.picture = getUserData.picture
                     }
                 }
 

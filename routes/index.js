@@ -8,5 +8,6 @@ router.get('/room/:room', Controller.room)
 router.get('/testing', Controller.testing)
 router.get('/login', Controller.login)
 router.get('/register', Controller.register)
+router.post('/google-auth', Controller.googleAuth)
 
 module.exports = router

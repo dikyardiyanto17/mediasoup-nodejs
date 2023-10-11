@@ -321,6 +321,9 @@ socket.on('joinRoom', (data) => {
 - Adding Face Expression Detections
 - Fixed bug chat / list participants container
 
+### 0.2.9
+- Adding to join room using google account
+
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)
 - Agak jeda

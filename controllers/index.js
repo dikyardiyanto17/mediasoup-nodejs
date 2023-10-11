@@ -1,4 +1,6 @@
 const mediasoup = require('mediasoup')
+const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client();
 class Controller {
     static room(req, res) {
         try {
@@ -43,6 +45,21 @@ class Controller {
     static testing (req, res){
         try {
             res.render('testing')
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    
+    static async googleAuth (req, res) {
+        try {
+            console.log('- B : ', req.body)
+            const ticket = await client.verifyIdToken({
+                idToken: req.body.credential,
+                audience: '623403491943-290gkq7bnqtgeprtfaci3u76vtb39bjl.apps.googleusercontent.com',  // Specify the CLIENT_ID of the app that accesses the backend
+            });
+            const payload = ticket.getPayload();
+            res.status(200).json({name: `${payload.given_name} ${payload.family_name}`, picture: payload.picture})
         } catch (error) {
             console.log(error)
         }

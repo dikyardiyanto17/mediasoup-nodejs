@@ -29,48 +29,48 @@
 // hideElement();
 
 // Face Recognition
-const video = document.getElementById("video")
+// const video = document.getElementById("video")
 
-Promise.all([
-	faceapi.nets.tinyFaceDetector.loadFromUri("./face-api/models"),
-	faceapi.nets.faceLandmark68Net.loadFromUri("./face-api/models"),
-	faceapi.nets.ssdMobilenetv1.loadFromUri("./face-api/models"),
-	faceapi.nets.faceRecognitionNet.loadFromUri("./face-api/models"),
-	faceapi.nets.faceExpressionNet.loadFromUri("./face-api/models"),
-]).then(startWebcam)
+// Promise.all([
+// 	faceapi.nets.tinyFaceDetector.loadFromUri("./face-api/models"),
+// 	faceapi.nets.faceLandmark68Net.loadFromUri("./face-api/models"),
+// 	faceapi.nets.ssdMobilenetv1.loadFromUri("./face-api/models"),
+// 	faceapi.nets.faceRecognitionNet.loadFromUri("./face-api/models"),
+// 	faceapi.nets.faceExpressionNet.loadFromUri("./face-api/models"),
+// ]).then(startWebcam)
 
-function startWebcam() {
-	navigator.mediaDevices
-		.getUserMedia({
-			video: true,
-			audio: false,
-		})
-		.then((stream) => {
-			video.srcObject = stream
-		})
-		.catch((error) => {
-			console.error(error)
-		})
-}
+// function startWebcam() {
+// 	navigator.mediaDevices
+// 		.getUserMedia({
+// 			video: true,
+// 			audio: false,
+// 		})
+// 		.then((stream) => {
+// 			video.srcObject = stream
+// 		})
+// 		.catch((error) => {
+// 			console.error(error)
+// 		})
+// }
 
-video.addEventListener("play", () => {
-	let faceContainer = document.getElementById("face-recognition")
-	const canvas = faceapi.createCanvasFromMedia(video)
-	// document.body.append(canvas)
-	faceContainer.append(canvas)
-	faceapi.matchDimensions(canvas, { height: video.videoHeight, width: video.videoWidth })
-	setInterval(async () => {
-		const detections = await faceapi.detectAllFaces(video).withFaceLandmarks().withFaceExpressions()
+// video.addEventListener("play", () => {
+// 	let faceContainer = document.getElementById("face-recognition")
+// 	const canvas = faceapi.createCanvasFromMedia(video)
+// 	// document.body.append(canvas)
+// 	faceContainer.append(canvas)
+// 	faceapi.matchDimensions(canvas, { height: video.videoHeight, width: video.videoWidth })
+// 	setInterval(async () => {
+// 		const detections = await faceapi.detectAllFaces(video).withFaceLandmarks().withFaceExpressions()
 
-		const resizedDetections = faceapi.resizeResults(detections, {
-			height: video.videoHeight,
-			width: video.videoWidth,
-		})
-		canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
-		faceapi.draw.drawDetections(canvas, resizedDetections)
-		faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
-	}, 100)
-})
+// 		const resizedDetections = faceapi.resizeResults(detections, {
+// 			height: video.videoHeight,
+// 			width: video.videoWidth,
+// 		})
+// 		canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height)
+// 		faceapi.draw.drawDetections(canvas, resizedDetections)
+// 		faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+// 	}, 100)
+// })
 
 // Detect Person
 // const video = document.getElementById("video");
@@ -145,3 +145,31 @@ video.addEventListener("play", () => {
 //     });
 //   }, 100);
 // });
+
+const handleCredentialResponse = async (response) => {
+	try {
+		console.log("response", response)
+		// let baseUrl = 'https://localhost:3001/'
+
+		// const result = await fetch (baseUrl + 'google-auth',{
+		// 	method: 'POST',
+		// 	headers: {
+		// 		access_token_google: response.credential,
+		// 	},
+		// })
+
+		// console.log('- Result : ', result)
+
+		// let access_token = result.access_token
+	} catch (error) {
+		console.log("- Error : ", error)
+	}
+}
+
+window.onload = () => {
+	google.accounts.id.initialize({
+		client_id: "623403491943-290gkq7bnqtgeprtfaci3u76vtb39bjl.apps.googleusercontent.com",
+		callback: handleCredentialResponse,
+	})
+	google.accounts.id.prompt() // also display the One Tap dialog
+}

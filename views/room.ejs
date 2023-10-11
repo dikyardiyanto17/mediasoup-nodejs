@@ -966,13 +966,24 @@
             width: 100%;
             height: 100%;
             position: absolute;
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .video-on {
             width: 100%;
             z-index: 0;
             position: absolute;
+            background-color: #000000;
             display: none;
+        }
+
+        .image-turn-off {
+            width: 25%;
+            height: 25%;
+            border-radius: 50%;
         }
 
         .optional-button-menu {
@@ -1295,7 +1306,9 @@
                         <img src="/assets/pictures/micOn.png" class="mic-image" id="local-mic" />
                     </div>
                     <video id="local-video" poster="/assets/pictures/unknown.jpg" preload="auto" autoplay class="user-video" muted></video>
-                    <img src="/assets/pictures/unknown.jpg" class="video-on" id="img-current-user-video"/>
+                    <div class="video-on" id="img-current-user-video">
+                        <img src="/assets/pictures/unknown.jpg" class="image-turn-off" id="image-current-user-video"/>
+                    </div>
                     <div class="username" id="my-username"></div>
                 </div>
             </div>
