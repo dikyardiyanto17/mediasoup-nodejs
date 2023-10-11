@@ -145,6 +145,8 @@ const streamSuccess = async (stream) => {
 
         stream.getAudioTracks()[0].enabled = false
     }
+    const myOwnImage = document.getElementById('image-current-user-video')
+    myOwnImage.src = localStorage.getItem('picture') ? localStorage.getItem('picture') : '/assets/pictures/unknown.jpg'
     if (!isCameraOn){
         const turnOffCamera = await createImageTrack('/assets/pictures/unknown.jpg')
         const videoTrack = await createVideoTrackFromImageTrack(turnOffCamera)
@@ -168,9 +170,10 @@ const streamSuccess = async (stream) => {
     // Add Current Stream To All Stream For Pagination Purpose
     allStream[socket.id] = { video: { track: stream.getVideoTracks()[0], id: 'current-user-video', username: localStorage.getItem('username') ? localStorage.getItem('username') : 'unknown', kind: 'video', status: isCameraOn }, audio: { track: stream.getAudioTracks()[0], id: 'current-user-audio', username: localStorage.getItem('username') ? localStorage.getItem('username') : 'unknown', kind: 'audio', status: isMicOn } }
 
+
     // Preparing For Producing Audio Params And Video Params 
     audioParams = { track: stream.getAudioTracks()[0], ...audioParams };
-    videoParams = { track: stream.getVideoTracks()[0], ...videoParams };
+    videoParams = { track: stream.getVideoTracks()[0], ...videoParams, appData: {picture: localStorage.getItem('picture') ? localStorage.getItem('picture') : '/assets/pictures/unknown.jpg'} };
 
     const canvas = document.getElementById('av-current-user-audio');
     const ctx = canvas.getContext('2d');
@@ -792,8 +795,6 @@ const connectSendTransport = async () => {
     // Producing Audio And Video Transport
     audioProducer = await producerTransport.produce(audioParams);
     videoProducer = await producerTransport.produce(videoParams);
-    console.log('- Device RTP : ', device.codecs)
-
 
     socket.emit('am-i-host', {socketId: socket.id, roomName: localStorage.getItem('room_id')}, (data) => {
         if (data.authority == 'Host'){
@@ -1131,7 +1132,7 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
                             if (firstKey == host){
                                 authority = true
                             }
-                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority, allStream[firstKey].video.status)
+                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority, allStream[firstKey].video.status, allStream[firstKey].video.picture)
                             createAudioVisualizer(allStream[firstKey].audio.track, allStream[firstKey].audio.id, allStream[firstKey].video.id)
                             if (allStream[firstKey][secondKey].serverConsumerId){
                                 socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
@@ -1162,7 +1163,7 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
                             if (firstKey == host){
                                 authority = true
                             }
-                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority, allStream[firstKey].video.status)
+                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority, allStream[firstKey].video.status, allStream[firstKey].video.picture)
                             createAudioVisualizer(allStream[firstKey].audio.track, allStream[firstKey].audio.id, allStream[firstKey].video.id)
                             if (allStream[firstKey][secondKey].serverConsumerId){
                                 socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
@@ -1204,7 +1205,7 @@ socket.on('producer-closed', ({ remoteProducerId }) => {
                             if (firstKey == host){
                                 authority = true
                             }
-                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority, allStream[firstKey].video.status)
+                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority, allStream[firstKey].video.status, allStream[firstKey].video.picture)
                             createAudioVisualizer(allStream[firstKey].audio.track, allStream[firstKey].audio.id, allStream[firstKey].video.id)
                             if (allStream[firstKey][secondKey].serverConsumerId){
                                 socket.emit('consumer-resume', { serverConsumerId: allStream[firstKey][secondKey].serverConsumerId })
@@ -1242,7 +1243,7 @@ const getProducers = () => {
 }
 
 // Create Video
-const createVideo = (remoteId, kind, track, username, micIcon, authority, isVideoActive) => {
+const createVideo = (remoteId, kind, track, username, micIcon, authority, isVideoActive, picture) => {
     const newElem = document.createElement('div')
     newElem.setAttribute('id', `td-${remoteId}`)
     let newUsername = username
@@ -1251,9 +1252,9 @@ const createVideo = (remoteId, kind, track, username, micIcon, authority, isVide
     }
     let isVideo
     if (!isVideoActive || track.canvas){
-        isVideo = `<img src="/assets/pictures/unknown.jpg" class="video-off" id="img-${remoteId}"/>`
+        isVideo = `<div class="video-off" id="img-${remoteId}"><img src="${picture}" class="image-turn-off" id="image-${remoteId}""/></div>`
     } else {
-        isVideo = `<img src="/assets/pictures/unknown.jpg" class="video-on" id="img-${remoteId}"/>`
+        isVideo = `<div class="video-on" id="img-${remoteId}"><img src="${picture}" class="image-turn-off" id="image-${remoteId}""/></div>`
     }
     if (kind == 'video') {
         // If Current User, Get Track From Global Video
@@ -1382,7 +1383,7 @@ const createPaginationRight = () => {
                             if (firstKey == host){
                                 authority = true
                             }
-                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority, allStream[firstKey].video.status)
+                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority, allStream[firstKey].video.status, allStream[firstKey].video.picture)
                             createAudioVisualizer(allStream[firstKey].audio.track, allStream[firstKey].audio.id, allStream[firstKey].video.id)
                             // Resume Displayed Video Consumer
                             if (allStream[firstKey][secondKey].serverConsumerId){
@@ -1465,7 +1466,7 @@ const createPaginationLeft = () => {
                             if (firstKey == host){
                                 authority = true
                             }
-                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority, allStream[firstKey].video.status)
+                            createVideo(allStream[firstKey][secondKey].id, secondKey, allStream[firstKey][secondKey].track, allStream[firstKey][secondKey].username, allStream[firstKey].audio.track.enabled, authority, allStream[firstKey].video.status, allStream[firstKey].video.picture)
                             createAudioVisualizer(allStream[firstKey].audio.track, allStream[firstKey].audio.id, allStream[firstKey].video.id)
                             // Resume Displayed Video Consumer
                             if (allStream[firstKey][secondKey].serverConsumerId){
@@ -1578,7 +1579,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                     if (params.producerOwnerSocket == host){
                         checkAuthority = true
                     }
-                    createVideo(remoteProducerId, params.kind, track, params?.username, true, checkAuthority, true)
+                    createVideo(remoteProducerId, params.kind, track, params?.username, true, checkAuthority, true, params.picture)
                 }
                 
                 // Get Local Stream
@@ -1591,7 +1592,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 
                 // Fill All Stream Object With Audio Or Video Stream
                 if (!allStream[params.producerOwnerSocket][params.kind] && !check) {
-                    allStream[params.producerOwnerSocket][params.kind] = { track, id: remoteProducerId, username: params?.username, kind: params.kind, status: true, serverConsumerId: params.serverConsumerId }
+                    allStream[params.producerOwnerSocket][params.kind] = { track, id: remoteProducerId, username: params?.username, kind: params.kind, status: true, serverConsumerId: params.serverConsumerId, picture: params?.picture }
                 }
 
                 // If It Is Audio Stream, Then Create Audio Element And Collect It To One Div
@@ -1702,6 +1703,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                         if (isMutedAll){
                             muteAllParticipants()
                         }
+                        console.log('- All Stream : ', allStream)
                     }
                 }
         
@@ -1924,12 +1926,29 @@ const SwitchingCamera = async () => {
 const isVideoDisplayed = async (data) => {
     let maxAttempts = 10
     let attempts = 0
-    let videoUserListIcons = document.getElementById('ulic-'+data.videoStreamId)
-    if (data.isCameraActive){
-        videoUserListIcons.className = 'fas fa-video'
-    } else {
-        videoUserListIcons.className = 'fas fa-video-slash'
-    }
+    let maxAttemptsIcon = 10
+    let attemptsIcon = 0
+    
+    const checkVideoIcon = () => {
+        let videoUserListIcons = document.getElementById('ulic-'+data.videoStreamId)
+        if (!videoUserListIcons) {
+            attemptsIcon++;
+
+            if (attemptsIcon < maxAttemptsIcon) {
+                setTimeout(checkVideoIcon, 1000); 
+            } else {
+                console.log('- Error to change camera user list icons')
+            }
+        } else {
+            if (data.isCameraActive){
+                videoUserListIcons.className = 'fas fa-video'
+            } else {
+                videoUserListIcons.className = 'fas fa-video-slash'
+            }
+        }
+    };
+
+
     const checkVideoId = () => {
         let imageId = document.getElementById('img-' + data.videoProducerId);
 
@@ -2271,6 +2290,9 @@ shareButton.addEventListener('click', () => {
 // Hang Up Button
 const hangUpButton = document.getElementById('user-hang-up-button')
 hangUpButton.addEventListener('click', () => {
+    if (localStorage.getItem('picture')){
+        localStorage.removeItem('picture')
+    }
     window.location.href = window.location.origin
 })
 

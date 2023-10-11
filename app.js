@@ -46,6 +46,7 @@ app.use(cors())
 app.set('view engine', 'ejs')
 app.use(express.static(path.join(__dirname, 'views')));
 app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
@@ -453,7 +454,7 @@ io.on('connection', async socket => {
             rtpParameters,
             appData
         })
-        // console.log('- App Data : ', appData)
+        console.log('- App Data : ', appData)
         const { roomName } = peers[socket.id]
 
         roomsSocketCollection[roomName].map(data => {
@@ -463,6 +464,9 @@ io.on('connection', async socket => {
                 }
                 if (!data.producerId) {
                     data.producerId = producer.id
+                    if (!data.picture){
+                        data.picture = appData.picture
+                    }
                 }
                 if (!data.screenSharingProducerId) {
                     data.screenSharingProducerId = null
@@ -545,6 +549,7 @@ io.on('connection', async socket => {
                     }
                     if (getUserData){
                         params.username = getUserData.name
+                        params.picture = getUserData.picture
                     }
                 }
 
