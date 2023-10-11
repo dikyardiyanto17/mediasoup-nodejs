@@ -397,8 +397,7 @@ init()
 
 const handleCredentialResponse = async (response) => {
 	try {
-        console.log('HELLo')
-		let baseUrl = 'https://localhost:3001/'
+		let baseUrl = 'https://meet.dikyardiyanto.site/'
 
 		const result = await fetch (baseUrl + 'google-auth',{
 			method: 'POST',
@@ -433,7 +432,7 @@ window.onload = () => {
 
 window.handleCredentialResponse = async (response) => {
 	try {
-		let baseUrl = 'https://localhost:3001/'
+		let baseUrl = 'https://meet.dikyardiyanto.site/'
 
 		const result = await fetch (baseUrl + 'google-auth',{
 			method: 'POST',
