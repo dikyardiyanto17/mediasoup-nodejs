@@ -471,7 +471,12 @@ const changeLayout = (isSharing) => {
         videoContainer = document.getElementById('video-container')
         if (userBarElement.style.display == 'block' || chatBarBoxElement.style.display == 'block'){
             videoContainer.removeAttribute('style')
-            videoContainer.style.minWidth = '75%'
+            if (window.innerWidth <= 950){
+                videoContainer.style.minWidth = '0%'
+                videoContainer.style.display = 'none'
+            } else {
+                videoContainer.style.minWidth = '75%'
+            }
         } else {
             videoContainer.removeAttribute('style')
             videoContainer.style.minWidth = '100%'
@@ -632,7 +637,8 @@ const createDevice = async () => {
 }
 
 // Create User Online List
-const createUserList = (username, socketId, cameraTrigger = true) => {
+const createUserList = (username, socketId, cameraTrigger = true, picture) => {
+    console.log('picture', picture)
     let userList = document.getElementById('user-list')
     let isExist = document.getElementById('user-'+socketId)
     let cameraInitSetting = ''
@@ -646,9 +652,10 @@ const createUserList = (username, socketId, cameraTrigger = true) => {
         elementUser.id = 'user-' + socketId
         elementUser.className = 'user-list-container'
         userList.appendChild(elementUser)
-        let myUsername = document.createElement('span')
-        myUsername.innerHTML = username
+        let myUsername = document.createElement('div')
+        myUsername.innerHTML = `<img src="${picture}" class="mini-picture"/><span>${username}</span>`
         myUsername.id = 'ulu-'+ socketId
+        myUsername.className = 'profile-list'
         elementUser.appendChild(myUsername)
         let icons = document.createElement('div')
         icons.className = 'user-list-icons-container'
@@ -731,7 +738,7 @@ const createSendTransport = () => {
             // Enabling Button When Producer Is Connecting
             if (e == 'connected'){
                 hideLoadingScreen()
-                createUserList(localStorage.getItem('username'), socket.id, isCameraOn)
+                createUserList(localStorage.getItem('username'), socket.id, isCameraOn, localStorage.getItem('picture') ? localStorage.getItem('picture') : '/assets/pictures/unknown.jpg')
                 buttonRecord.removeAttribute('disabled', 'false')
                 buttonMic.removeAttribute('disabled', 'false')
                 buttonHangUp.removeAttribute('disabled', 'false')
@@ -1567,7 +1574,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
                 
                 // Make a List For Every User
                 if (params.kind == 'video' && !check){
-                    createUserList(params?.username, params.producerOwnerSocket)
+                    createUserList(params?.username, params.producerOwnerSocket, true, params.picture)
                     totalUsers++
                 }
 
@@ -2311,13 +2318,21 @@ chatButton.addEventListener('click', () => {
         chatButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
         let iconsNotification = document.getElementById('notification-element-id')
         iconsNotification.className = 'fas fa-envelope notification invisible'
-        videoContainer.style.minWidth = '75%'
+        if (window.innerWidth <= 950){
+            videoContainer.style.minWidth = '0%'
+            setTimeout(() => {
+                videoContainer.style.display = 'none'
+            }, 1000);
+        } else {
+            videoContainer.style.minWidth = '75%'
+        }
         scrollToBottom()
     } else if (chatBarBoxElement.style.display == 'block' && !isScreenSharing) {
         // sideBarElement.style.display = 'none'
         // chatBarBoxElement.style.display = 'none'
         userBarElement.style.display = 'none'
-        videoContainer.style.minWidth = '100%'
+        videoContainer.style.display = 'flex'
+        videoContainer.style.minWidth = '0%'
         let isLineNewMessageExist = document.getElementById('new-message-notification')
         if (isLineNewMessageExist){
             isLineNewMessageExist.remove()
@@ -2325,6 +2340,7 @@ chatButton.addEventListener('click', () => {
         chatButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
         userListButton.setAttribute('disabled', 'true')
         chatButton.setAttribute('disabled', 'true')
+        videoContainer.style.minWidth = '100%'
         setTimeout(() => {
             userListButton.removeAttribute('disabled', 'false')
             chatButton.removeAttribute('disabled', 'false')
@@ -2523,11 +2539,19 @@ userListButton.addEventListener('click', () => {
         userListButton.classList.replace('button-small-custom', 'button-small-custom-clicked')
         let iconsNotification = document.getElementById('notification-element-id')
         iconsNotification.className = 'fas fa-envelope notification invisible'
-        videoContainer.style.minWidth = '75%'
+        if (window.innerWidth <= 950){
+            videoContainer.style.minWidth = '0%'
+            setTimeout(() => {
+                videoContainer.style.display = 'none'
+            }, 1000);
+        } else {
+            videoContainer.style.minWidth = '75%'
+        }
         scrollToBottom()
     } else if (userBarElement.style.display == 'block' && !isScreenSharing) {
         chatBarBoxElement.style.display = 'none'
-        videoContainer.style.minWidth = '100%'
+        videoContainer.style.display = 'flex'
+        videoContainer.style.minWidth = '0%'
         let isLineNewMessageExist = document.getElementById('new-message-notification')
         if (isLineNewMessageExist){
             isLineNewMessageExist.remove()
@@ -2535,6 +2559,7 @@ userListButton.addEventListener('click', () => {
         userListButton.classList.replace('button-small-custom-clicked', 'button-small-custom')
         userListButton.setAttribute('disabled', 'true')
         chatButton.setAttribute('disabled', 'true')
+        videoContainer.style.minWidth = '100%'
         setTimeout(() => {
             userListButton.removeAttribute('disabled', 'false')
             chatButton.removeAttribute('disabled', 'false')

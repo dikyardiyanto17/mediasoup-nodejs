@@ -4,7 +4,7 @@
 
 
 ### Primary
-- Kamera belakang tidak mau *(handphone) *(Sudah di diperbaiki, belum ditesting)
+- Kamera belakang tidak mau (&#x2713;)
 - Responsive Design *(basic design)
 - Membuat UI yang lebih baik *(on Development)
 - Pause consumer jika tidak sedang digunakan *(sudah di testing untuk case 1 halaman maksimal 3 user dengan total 7 user (3 page))
@@ -323,6 +323,11 @@ socket.on('joinRoom', (data) => {
 
 ### 0.2.9
 - Adding to join room using google account
+
+### 0.2.10
+- Fixing chat and user list UI
+- Adding photo to user list
+
 
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)
