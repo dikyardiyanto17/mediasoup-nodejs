@@ -137,7 +137,7 @@ const streamSuccess = async (stream) => {
 			isMicOn = false
 		}
 		store.setLocalStream(stream)
-		console.log("- Stream Success : ", initialAudio, " ", initialVideo)
+		// console.log("- Stream Success : ", initialAudio, " ", initialVideo)
 
 		if (!isMicOn) {
 			const micImage = document.getElementById("mic-image")
@@ -666,7 +666,7 @@ const joinRoom = () => {
 		// Emitting Signal To Server
 		// Getting RTP Capabilities
 		socket.emit("joinRoom", { roomName, username: localStorage.getItem("username") }, (data) => {
-			console.log(`Router RTP Capabilities... ${data.rtpCapabilities}`)
+			// console.log(`Router RTP Capabilities... ${data.rtpCapabilities}`)
 			rtpCapabilities = data.rtpCapabilities
 			createDevice()
 		})
@@ -713,7 +713,7 @@ const createDevice = async () => {
 			routerRtpCapabilities: rtpCapabilities,
 		})
 
-		console.log("- Device RTP Capabilities", device.rtpCapabilities)
+		// console.log("- Device RTP Capabilities", device.rtpCapabilities)
 
 		// Create Send Transport
 		createSendTransport()
@@ -781,7 +781,7 @@ const createSendTransport = () => {
 				return
 			}
 
-			console.log("- Create Send Transport : ", params)
+			// console.log("- Create Send Transport : ", params)
 
 			// Producing Producer Transport
 			producerTransport = device.createSendTransport(params)
@@ -789,7 +789,7 @@ const createSendTransport = () => {
 			// Get DLTS Parameter
 			producerTransport.on("connect", async ({ dtlsParameters }, callback, errback) => {
 				try {
-					console.log("- Producer Transport Connecting")
+					// console.log("- Producer Transport Connecting")
 					// Signaling To Server and Sending DLTS Parameters
 					await socket.emit("transport-connect", {
 						dtlsParameters,
@@ -803,7 +803,7 @@ const createSendTransport = () => {
 
 			// Producing Transport and Get Parameters
 			producerTransport.on("produce", async (parameters, callback, errback) => {
-				console.log("- Create Web RTC Transport / Producer : ", parameters)
+				// console.log("- Create Web RTC Transport / Producer : ", parameters)
 
 				try {
 					// Signaling to Server And Sending Parameters
@@ -917,7 +917,7 @@ const connectSendTransport = async () => {
 			if (data.authority == "Host") {
 				addMuteAllButton()
 				document.getElementById("my-username").innerHTML = localStorage.getItem("username") + " ( Host )"
-				console.log("- Authority : ", data.authority)
+				// console.log("- Authority : ", data.authority)
 				host = socket.id
 			}
 		})
@@ -1406,7 +1406,7 @@ socket.on("producer-closed", ({ remoteProducerId }) => {
 const getProducers = () => {
 	try {
 		socket.emit("getProducers", (producerIds) => {
-			console.log("- Get Product Id : ", producerIds)
+			// console.log("- Get Product Id : ", producerIds)
 			// Informing Consumer Transport
 			producerIds.forEach(signalNewConsumerTransport)
 		})
