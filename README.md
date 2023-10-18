@@ -328,6 +328,10 @@ socket.on('joinRoom', (data) => {
 - Fixing chat and user list UI
 - Adding photo to user list
 
+### 0.2.11
+- Fixing share screen using sound
+- Add feature when close tab while recording will automatic download record
+
 
 ## Note
 ### Testing (9-15-2023) (v-0.1.2)
@@ -350,4 +354,8 @@ socket.on('joinRoom', (data) => {
 - Tampilan home dan lobby perlu improvement (&#x2713;)
 - Matikan camera hanya mempause video (&#x2713;)
 - Tampilan mobile browser
-- Saat user lain leave, jangan reset stream
+- Saat user lain leave, jangan reset stream (&#x2713;)
+- Recording server side :
+  - Send data (blob) from client to server every 10s?
+  - Send stream using peer from client to server?
+- When user is recording, and suddenly the internet is slow or reconnecting, then it will auto download

@@ -28158,6 +28158,7 @@ let consumerTransports = []
 let audioProducer
 let videoProducer
 let screenSharingProducer
+let screenSharingAudioProducer
 let consumer
 let isProducer = false
 let producersDetails = {}
@@ -28181,6 +28182,7 @@ let isMicOn = true
 let lockedMic = false
 let host
 let isMutedAll
+let screenSharingAudio
 
 // Params for MediaSoup
 let params = {
@@ -28209,6 +28211,7 @@ let params = {
 let audioParams
 let videoParams = { params }
 let screenSharingParams
+let screenSharingAudioParams
 let consumingTransports = []
 let isScreenSharing = false
 let screenSharingInfo
@@ -28637,7 +28640,7 @@ const changeLayout = (isSharing) => {
 			currentTemplate = "user-video-container-screen-sharing"
 
 			let screenSharingElement = document.getElementById("screen-sharing-container")
-			screenSharingElement.innerHTML = '<video id="' + "screen-sharing" + '" autoplay class="user-video" ></video>'
+			screenSharingElement.innerHTML = '<video id="' + "screen-sharing" + '" autoplay class="user-video" muted></video>'
 			let screenSharingVideoElement = document.getElementById("screen-sharing")
 			screenSharingVideoElement.appendChild(screenSharingLabel)
 
@@ -28671,95 +28674,38 @@ const changeLayout = (isSharing) => {
 
 // Screen Sharing
 const getScreenSharing = async () => {
+	let screenShareButton = document.getElementById("user-screen-share-button")
 	try {
-		let screenShareButton = document.getElementById("user-screen-share-button")
-		try {
-			// Check If There Is No One Screen Sharing
-			if (!isScreenSharing) {
-				// Change Layout Based On Which Mode
-				changeLayout(true)
-				// Get Screen Sharing Id
-				let screenSharingVideo = document.getElementById("screen-sharing")
-				// Get Screen Sharing Stram
-				screenSharingStreamsGlobal = await navigator.mediaDevices.getDisplayMedia({
-					video: {
-						cursor: "always",
-						displaySurface: "window",
-						chromeMediaSource: "desktop",
-					},
-				})
-				// Insert Screen Sharing Stream To Element
-				screenSharingVideo.srcObject = screenSharingStreamsGlobal
-				// Preparing Screen Sharing Producer
-				screenSharingParams = { track: screenSharingStreamsGlobal.getVideoTracks()[0] }
-				// Create Screen Sharing Producer
-				screenSharingProducer = await producerTransport.produce(screenSharingParams)
-				// Function When Screen Sharing Ended
-				screenSharingStreamsGlobal.getVideoTracks()[0].onended = function () {
-					// Signaling Other User That Screen Sharing Is Ended
-					for (const key in producersDetails) {
-						socket.emit("screen-sharing", {
-							videoProducerId: screenSharingProducer.id,
-							audioProducerId: audioProducer.id,
-							socketId: key,
-							isSharing: false,
-							producerId: screenSharingProducer.id,
-						})
-					}
-					// Closing Screen Sharing Producer
-					socket.emit("screen-sharing-producer", {
-						videoProducerId: screenSharingProducer.id,
-						audioProducerId: audioProducer.id,
-						socketId: socket.id,
-						isSharing: false,
-						producerId: screenSharingProducer.id,
-						room: localStorage.getItem("room_id"),
-					})
-					// Set Screen Sharing is False
-					isScreenSharing = false
-					// Change Layout To Normal Mode
-					changeLayout(false)
-					// Set Screen Sharing Global to Null
-					screenSharingStreamsGlobal = null
-					// Reset Screen Sharing Params
-					screenSharingParams = {}
-					// Set Who Is Screen Sharing To Null
-					screenSharingInfo = null
-
-					screenShareButton.classList.replace("button-small-custom-clicked", "button-small-custom")
-				}
-
-				screenSharingProducer.on("trackended", () => {
-					console.log("video track ended")
-				})
-
-				screenSharingProducer.on("transportclose", () => {
-					console.log("video transport ended")
-				})
-
-				// Change Current Template
-				if (!currentTemplate) {
-					currentTemplate = "user-video-container"
-				}
-
-				// Add Info Who Is Screen Sharing
-				screenSharingInfo = { socketId: socket.id }
-				isScreenSharing = true
-				screenShareButton.classList.replace("button-small-custom", "button-small-custom-clicked")
-			} else if (isScreenSharing && screenSharingInfo.socketId != socket.id) {
-				// If Someone Is Trying To Sharing Their Screen When Someone Is Already To Screen Share, Warn Them
-				let as = document.getElementById("alert-screensharing")
-				as.className = "show"
-				// Show Warning
-				setTimeout(() => {
-					as.className = as.className.replace("show", "")
-				}, 3000)
-			} else {
-				// Stopping Screen Sharing and Set All Configuration To Normal Mode
-				screenSharingStreamsGlobal.getTracks().forEach((track) => track.stop())
-				screenSharingInfo = null
-				isScreenSharing = false
-				changeLayout(false)
+		// Check If There Is No One Screen Sharing
+		if (!isScreenSharing) {
+			// Change Layout Based On Which Mode
+			changeLayout(true)
+			// Get Screen Sharing Id
+			let screenSharingVideo = document.getElementById("screen-sharing")
+			// Get Screen Sharing Stram
+			screenSharingStreamsGlobal = await navigator.mediaDevices.getDisplayMedia({
+				video: {
+					cursor: "always",
+					displaySurface: "window",
+					chromeMediaSource: "desktop",
+				},
+				audio: true,
+			})
+			if (screenSharingStreamsGlobal.getAudioTracks()[0]) {
+				screenSharingAudioParams = { track: screenSharingStreamsGlobal.getAudioTracks()[0], appData: { label: "Screen Share Audio" } }
+				screenSharingAudioProducer = await producerTransport.produce(screenSharingAudioParams)
+				screenSharingAudio = screenSharingStreamsGlobal.getAudioTracks()[0]
+			}
+			// Insert Screen Sharing Stream To Element
+			screenSharingVideo.srcObject = screenSharingStreamsGlobal
+			// Preparing Screen Sharing Producer
+			screenSharingParams = { track: screenSharingStreamsGlobal.getVideoTracks()[0], appData: { label: "Screen Share Video" } }
+			// Create Screen Sharing Producer
+			screenSharingProducer = await producerTransport.produce(screenSharingParams)
+			// Function When Screen Sharing Ended
+			screenSharingStreamsGlobal.getVideoTracks()[0].onended = function () {
+				screenSharingAudio = null
+				// Signaling Other User That Screen Sharing Is Ended
 				for (const key in producersDetails) {
 					socket.emit("screen-sharing", {
 						videoProducerId: screenSharingProducer.id,
@@ -28769,6 +28715,7 @@ const getScreenSharing = async () => {
 						producerId: screenSharingProducer.id,
 					})
 				}
+				// Closing Screen Sharing Producer
 				socket.emit("screen-sharing-producer", {
 					videoProducerId: screenSharingProducer.id,
 					audioProducerId: audioProducer.id,
@@ -28777,20 +28724,82 @@ const getScreenSharing = async () => {
 					producerId: screenSharingProducer.id,
 					room: localStorage.getItem("room_id"),
 				})
-				screenSharingParams = {}
-
+				// Set Screen Sharing is False
+				isScreenSharing = false
+				// Change Layout To Normal Mode
+				changeLayout(false)
+				// Set Screen Sharing Global to Null
 				screenSharingStreamsGlobal = null
+				// Reset Screen Sharing Params
+				screenSharingParams = {}
+				screenSharingAudioParams = {}
+				// Set Who Is Screen Sharing To Null
+				screenSharingInfo = null
+
 				screenShareButton.classList.replace("button-small-custom-clicked", "button-small-custom")
 			}
-		} catch (error) {
-			changeLayout(false)
-			console.log(error)
+
+			screenSharingProducer.on("trackended", () => {
+				console.log("video track ended")
+			})
+
+			screenSharingProducer.on("transportclose", () => {
+				console.log("video transport ended")
+			})
+
+			// Change Current Template
+			if (!currentTemplate) {
+				currentTemplate = "user-video-container"
+			}
+
+			// Add Info Who Is Screen Sharing
+			screenSharingInfo = { socketId: socket.id }
+			isScreenSharing = true
+			screenShareButton.classList.replace("button-small-custom", "button-small-custom-clicked")
+		} else if (isScreenSharing && screenSharingInfo.socketId != socket.id) {
+			// If Someone Is Trying To Sharing Their Screen When Someone Is Already To Screen Share, Warn Them
+			let as = document.getElementById("alert-screensharing")
+			as.className = "show"
+			// Show Warning
+			setTimeout(() => {
+				as.className = as.className.replace("show", "")
+			}, 3000)
+		} else {
+			// Stopping Screen Sharing and Set All Configuration To Normal Mode
+			screenSharingStreamsGlobal.getTracks().forEach((track) => track.stop())
 			screenSharingInfo = null
+			screenSharingAudio = null
 			isScreenSharing = false
-			screenShareButton.className = "btn button-small-custom"
+			changeLayout(false)
+			for (const key in producersDetails) {
+				socket.emit("screen-sharing", {
+					videoProducerId: screenSharingProducer.id,
+					audioProducerId: audioProducer.id,
+					socketId: key,
+					isSharing: false,
+					producerId: screenSharingProducer.id,
+				})
+			}
+			socket.emit("screen-sharing-producer", {
+				videoProducerId: screenSharingProducer.id,
+				audioProducerId: audioProducer.id,
+				socketId: socket.id,
+				isSharing: false,
+				producerId: screenSharingProducer.id,
+				room: localStorage.getItem("room_id"),
+			})
+			screenSharingParams = {}
+			screenSharingAudioParams = {}
+
+			screenSharingStreamsGlobal = null
+			screenShareButton.classList.replace("button-small-custom-clicked", "button-small-custom")
 		}
 	} catch (error) {
+		changeLayout(false)
 		console.log("- Error Getting Screen Sharing : ", error)
+		screenSharingInfo = null
+		isScreenSharing = false
+		screenShareButton.className = "btn button-small-custom"
 	}
 }
 
@@ -29089,7 +29098,7 @@ const signalNewConsumerTransport = async (remoteProducerId) => {
 				console.log(params.error)
 				return
 			}
-			console.log("- New User Entering With Consumer Id: ", params.id)
+			// console.log("- New User Entering With Consumer Id: ", params.id)
 
 			// Creating Receive Transport
 			let consumerTransport
@@ -29245,6 +29254,7 @@ socket.on("mic-config", (data) => {
 socket.on("screen-sharing", ({ videoProducerId, audioProducerId, isSharing, remoteProducerId }) => {
 	try {
 		if (!isSharing) {
+			screenSharingAudio = null
 			// Closing Consumer Screen Sharing Trannsport
 			const producerToClose = consumerTransports.find((transportData) => transportData.producerId === remoteProducerId)
 			producerToClose.consumerTransport.close()
@@ -29892,7 +29902,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 					return
 				}
 
-				console.log(`- Connect Receive Transport : ${params.kind}`)
+				// console.log(`- Connect Receive Transport : ${params.kind}`)
 				const consumer = await consumerTransport.consume({
 					id: params.id,
 					producerId: params.producerId,
@@ -29926,7 +29936,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 						let check = false
 
 						// Check if Video Is Screen Share
-						console.log("- Username : ", params?.username)
+						// console.log("- Username : ", params?.username)
 						if (params.username) {
 							check = isScreenSharingType(params.username)
 						}
@@ -29982,6 +29992,9 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 
 						// If It Is Audio Stream, Then Create Audio Element And Collect It To One Div
 						if (params.kind == "audio") {
+							if (params?.label == "Screen Share Audio") {
+								screenSharingAudio = track
+							}
 							let checkAudio = document.getElementById(`td-${remoteProducerId}`)
 							let checkAudio2 = document.getElementById(remoteProducerId)
 							if (!checkAudio) {
@@ -30107,7 +30120,7 @@ const connectRecvTransport = async (consumerTransport, remoteProducerId, serverC
 								if (isMutedAll) {
 									muteAllParticipants()
 								}
-								console.log("- All Stream : ", allStream)
+								// console.log("- All Stream : ", allStream)
 							}
 						}
 
@@ -30506,7 +30519,7 @@ const turnOffTheCamera = async () => {
 		const newStream = new MediaStream([videoTrack])
 		newStream.addTrack(audioStream)
 		newStream.getVideoTracks()[0].muted = false
-		console.log("- New Media Stream : ", newStream.getVideoTracks()[0])
+		// console.log("- New Media Stream : ", newStream.getVideoTracks()[0])
 		store.setLocalStream(newStream)
 		if (localVideo2) {
 			localVideo2.srcObject.getVideoTracks().forEach((track) => {
@@ -30605,7 +30618,6 @@ const recordingVideo = async () => {
 	try {
 		if (!isRecording) {
 			const videoStream = await navigator.mediaDevices.getDisplayMedia({
-				audio: true,
 				video: {
 					cursor: "always",
 					displaySurface: "monitor",
@@ -30632,16 +30644,36 @@ const recordingVideo = async () => {
 				audioSource.connect(audioDestination)
 			})
 
+			if (screenSharingAudio) {
+				const audioSource = audioContext.createMediaStreamSource(new MediaStream([screenSharingAudio]))
+				audioSource.connect(audioDestination)
+			}
+
 			screenSharingStream.addTrack(audioDestination.stream.getAudioTracks()[0])
 			recordedStream = screenSharingStream
-			recordedMedia = new RecordRTC(recordedStream, { type: "video", getNativeBlob: true })
+			recordedMedia = new RecordRTC(recordedStream, {
+				type: "video",
+				getNativeBlob: true,
+				timeSlice: 5000,
+				ondataavailable: (blob) => {
+					// socket.send({ type: 'collecting', data: blob })
+					console.log('- Blob : ', blob)
+				},
+			})
 			recordedMedia.startRecording()
+			recordedStream.getAudioTracks()[0].onended = () => {
+				console.log("- Reset Audio Recording")
+				audioContext = null
+				audioDestination = null
+			}
 
 			recordedStream.getVideoTracks()[0].onended = () => {
 				recordedMedia.stopRecording(() => {
+					// socket.send({ type: 'uploading' })
 					timerLayout(false)
 					isRecording = false
 					let blob = recordedMedia.getBlob()
+
 					// require('recordrtc').getSeekableBlob(recordedMediaRef.current.getBlob(), (seekable) => {
 					//     console.log("- SeekableBlob : ", seekable)
 					//     downloadRTC(seekable)
@@ -30671,6 +30703,7 @@ const recordingVideo = async () => {
 			timerLayout(true)
 		} else {
 			recordedMedia.stopRecording(() => {
+				// socket.send({ type: 'uploading' })
 				timerLayout(false)
 				isRecording = false
 				let blob = recordedMedia.getBlob()
@@ -30708,6 +30741,7 @@ const recordingVideo = async () => {
 		}
 		if (recordedMedia) {
 			recordedMedia.stopRecording(() => {
+				// socket.send({ type: 'uploading' })
 				let blob = recordedMedia.getBlob()
 				const currentDate = new Date()
 				const formattedDate = currentDate
@@ -31281,6 +31315,52 @@ optionalButtonTrigger.addEventListener("click", (e) => {
 	}
 })
 
+// window.onbeforeunload = function(e) {
+// 	( e || window.e ).returnValue = 'Dialog text here.'; // For some older browsers
+// 	return 'Dialog text here.';
+//   };
+
+window.addEventListener("beforeunload", function (event) {
+	try {
+		event.preventDefault()
+		if (recordedMedia){
+			recordedMedia.stopRecording(() => {
+				// socket.send({ type: 'uploading' })
+				timerLayout(false)
+				isRecording = false
+				let blob = recordedMedia.getBlob()
+
+				// require('recordrtc').getSeekableBlob(recordedMediaRef.current.getBlob(), (seekable) => {
+				//     console.log("- SeekableBlob : ", seekable)
+				//     downloadRTC(seekable)
+				// })
+				// downloadRTC(blob)
+				const currentDate = new Date()
+				const formattedDate = currentDate
+					.toLocaleDateString("en-GB", {
+						day: "2-digit",
+						month: "2-digit",
+						year: "numeric",
+					})
+					.replace(/\//g, "") // Remove slashes from the formatted date
+
+				const file = new File([blob], formattedDate, {
+					type: "video/mp4",
+				})
+				require("recordrtc").invokeSaveAsDialog(file, file.name)
+				recordedStream.getTracks().forEach((track) => track.stop())
+				recordedStream = null
+				recordedMedia.reset()
+				recordedMedia = null
+			})
+		}
+		( event || window.event ).returnValue = 'Are you sure you want to leave?'; // For some older browsers
+		return 'Are you sure you want to leave?';
+	} catch (error) {
+		console.log('- Error What L ', error)
+	}
+})
+
 // Console Log Button
 // const consoleLogButton = document.getElementById('console-log-button')
 // consoleLogButton.addEventListener('click', () => {
@@ -31347,6 +31427,7 @@ optionalButtonTrigger.addEventListener("click", (e) => {
 //     let lastChatDetailDate = lastChatDetail.lastElementChild.innerHTML
 //     let lastChatDetailNameElement = lastChatDetail.firstElementChild
 //     console.log('- All Chat : ', lastChatDetailName, lastChatDetailDate)
+// 	console.log('- Consumer Transport : ', consumerTransports)
 // })
 
 },{"./store":85,"mediasoup-client":62,"recordrtc":69,"socket.io-client":75}],85:[function(require,module,exports){

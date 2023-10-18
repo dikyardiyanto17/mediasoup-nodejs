@@ -53,7 +53,7 @@ class Controller {
     
     static async googleAuth (req, res) {
         try {
-            console.log('- B : ', req.body)
+            // console.log('- B : ', req.body)
             const ticket = await client.verifyIdToken({
                 idToken: req.body.credential,
                 audience: '623403491943-290gkq7bnqtgeprtfaci3u76vtb39bjl.apps.googleusercontent.com',  // Specify the CLIENT_ID of the app that accesses the backend

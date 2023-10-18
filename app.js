@@ -2,8 +2,8 @@ const express = require('express')
 const cors = require('cors')
 const router = require('./routes/index.js')
 const app = express()
-const port = 3001
-// const port = 80
+// const port = 3001
+const port = 80
 const http = require('http')
 const path = require('path');
 const https = require('httpolyglot')
@@ -31,8 +31,8 @@ const webRtcTransport_options = {
             // ip: '192.168.206.123',
             // ip: '192.168.205.229',
             // ip: '192.168.18.68', // Laptop Jaringan 5G
-            ip: '203.194.113.166', // VPS Mr. Indra IP
-            // ip: '203.175.10.29' // My VPS
+            // ip: '203.194.113.166', // VPS Mr. Indra IP
+            ip: '203.175.10.29' // My VPS
             // ip: '192.168.3.135' // IP Kost
             // announcedIp: "88.12.10.41"
         }
@@ -78,11 +78,12 @@ let allWorkers = {
     worker3: null,
     worker4: null,
 }
+let blobRecorder = {}
 
 const createWorker = async () => {
     worker = await mediasoup.createWorker({
-        rtcMinPort: 2000,
-        rtcMaxPort: 10000,
+        // rtcMinPort: 2000,
+        // rtcMaxPort: 10000,
     })
 
     worker.on('died', error => {
@@ -145,6 +146,7 @@ io.on('connection', async socket => {
         roomsSocketCollection[room].map((data) => {
             if (data.socketId == socketId){
                 data.screenSharingProducerId = null
+                data.audioScreenSharingProducerId = null
             }
             return data
         })
@@ -172,10 +174,51 @@ io.on('connection', async socket => {
         //     console.log(e)
         // }
 
+        console.log('- Errrr Server : ', data)
 
         // callback({worker})
         // console.log('- Room Collection : ', roomsSocketCollection)
     })
+
+    socket.on('message', function (data) {
+        try {
+            if (data.type == 'collecting'){
+                if (!blobRecorder[socket.id]){
+                    blobRecorder[socket.id] = [data.data]
+                } else {
+                    blobRecorder[socket.id].push(data.data)
+                }
+            } else if (data.type == 'uploading'){
+                // Check if there are chunks to save
+                if (blobRecorder[socket.id] && blobRecorder[socket.id].length > 0) {
+                    const mergedBuffer = Buffer.concat(blobRecorder[socket.id]);
+
+                    // Generate a unique filename (or use any naming convention you prefer)
+                    const filename = `recorded-video-${socket.id}.webm`;
+    
+                    // Define the file path where the video will be saved
+                    const filePath = path.join(__dirname, 'file', filename);
+    
+                    // Write the mergedBuffer to the file
+                    fs.writeFile(filePath, mergedBuffer, function(err) {
+                        if (err) {
+                            // Handle error while saving the file
+                            console.error('Error saving video:', err);
+                        } else {
+                            // Handle the successful save operation
+                            console.log(`Video saved as ${filename}`);
+                        }
+                    });
+                } else {
+                    // Handle the case where there are no chunks to save
+                    console.log('No chunks to save');
+                }
+                delete blobRecorder[socket.id]
+            }
+        } catch (error) {
+            console.log('- Error Uploading File : ', error)
+        }
+    });
 
     socket.on('screen-sharing', ({ videoProducerId, audioProducerId, socketId, isSharing, producerId }) => {
         socket.to(socketId).emit('screen-sharing', ({ videoProducerId, audioProducerId, isSharing, remoteProducerId: producerId }))
@@ -186,6 +229,9 @@ io.on('connection', async socket => {
     })
 
     socket.on('disconnect', () => {
+        if (blobRecorder[socket.id]){
+            delete blobRecorder[socket.id]
+        }
         console.log('peer disconnected')
         consumers = removeItems(consumers, socket.id, 'consumer')
         producers = removeItems(producers, socket.id, 'producer')
@@ -441,6 +487,7 @@ io.on('connection', async socket => {
     const getTransport = (socketId) => {
         const [producerTransport] = transports.filter(transport => transport.socketId === socketId && !transport.consumer)
         // console.log("- Get Transport : ", producerTransport.socketId, " - My Socket : ", socket.id, " - Is Consumer : ", producerTransport.consumer)
+        // console.log('- Producer : ', producerTransport)
         return producerTransport.transport
     }
 
@@ -454,7 +501,9 @@ io.on('connection', async socket => {
             rtpParameters,
             appData
         })
-        console.log('- App Data : ', appData)
+        if (appData?.label === 'Screen Share'){
+            console.log('- App Data : ', appData)
+        }
         const { roomName } = peers[socket.id]
 
         roomsSocketCollection[roomName].map(data => {
@@ -470,6 +519,11 @@ io.on('connection', async socket => {
                 }
                 if (!data.screenSharingProducerId) {
                     data.screenSharingProducerId = null
+                }
+            }
+            if (data.socketId == socket.id && kind == 'audio' && appData?.label == 'Screen Share Audio'){
+                if (!data.audioScreenSharingProducer){
+                    data.audioScreenSharingProducerId = producer.id
                 }
             }
             return data
@@ -533,7 +587,12 @@ io.on('connection', async socket => {
                     rtpParameters: consumer.rtpParameters,
                     serverConsumerId: consumer.id,
                 }
-                
+
+                let isAudioScreenShareExist = roomsSocketCollection[roomName].find((data) => data.audioScreenSharingProducerId == remoteProducerId)
+                if (isAudioScreenShareExist){
+                    params.label = 'Screen Share Audio'
+                }
+
                 if (consumer.kind == 'video') {
                     const { roomName } = peers[socket.id]
                     let getUserData = roomsSocketCollection[roomName].find((data) => data.producerId == remoteProducerId)
